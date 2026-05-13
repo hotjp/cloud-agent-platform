@@ -1,0 +1,61 @@
+# Cloud Agent Platform Configuration Example
+# Copy this file to config.yaml and update values for your environment.
+# Environment variables with APP_ prefix override these values.
+
+server:
+  port: 8080
+  metricsport: 9090
+  pprofport: 6060
+  readtimeout: 10s
+  writetimeout: 30s
+
+database:
+  dsn: "postgres://user:password@localhost:5432/cloud_agent_platform?sslmode=disable"
+  maxopen: 25
+  maxidle: 10
+  maxlifetime: 5m
+
+redis:
+  addr: "localhost:6379"
+  password: ""
+  db: 0
+
+authz:
+  jwtsecret: "change-me-in-production"
+  apikeyheader: "X-API-Key"
+  cachettl: 5m
+
+telemetry:
+  servicename: "cloud-agent-platform"
+  endpoint: "http://localhost:4317"
+  samplerate: 0.1
+
+llm:
+  anthropicapikey: ""
+  zhipuapikey: ""
+
+sandbox:
+  backend: "docker"
+  fallbacktodocker: true
+
+minio:
+  endpoint: "localhost:9000"
+  accesskey: ""
+  secretkey: ""
+  bucket: "cap-artifacts"
+  usessl: false
+
+git:
+  httpsuser: ""
+  httpstoken: ""
+
+rate_limit:
+  enabled: true
+  qps: 100
+  burst: 200
+
+plugins:
+  search:
+    enabled: false
+    host: "http://localhost:7700"
+    apikey: ""
