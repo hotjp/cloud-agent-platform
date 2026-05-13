@@ -1,0 +1,72 @@
+# =============================================================================
+# Docker Ignore - Cloud Agent Platform
+# =============================================================================
+
+# Version Control
+.git
+.gitignore
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.html
+coverage.out
+server
+mcp
+
+# Go
+*.log
+vendor/
+tmp_*/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Test files
+*e2e.test
+integration.test
+**/*_test.go
+
+# Ent generated code
+ent/
+
+# Protobuf generated
+gen/
+
+# Docker files (avoid recursion)
+Dockerfile
+docker-compose*.yml
+.docker/
+
+# Scripts (not needed in image)
+scripts/
+deploy/
+
+# Task files
+Taskfile.yml
+lra.md
+CLAUDE.md
