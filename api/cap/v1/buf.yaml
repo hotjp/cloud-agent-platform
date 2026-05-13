@@ -1,0 +1,9 @@
+version: v2
+lint:
+  use:
+    - DEFAULT
+  except:
+    - UNUSED_SERVICE
+breaking:
+  use:
+    - FILE

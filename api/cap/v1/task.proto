@@ -1,7 +1,341 @@
-// Package v1 contains the Cloud Agent Platform API v1 definitions.
-package v1
+// Cloud Agent Platform — TaskService API
+//
+// This service defines the core task management operations for the Cloud Agent Platform.
+// All capabilities are exposed via MCP Tools; REST API is an equivalent HTTP translation layer.
+syntax = "proto3";
 
-// TaskService represents the main Task service interface.
-type TaskService interface {
-	// TODO: Add methods
+package cap.v1;
+
+option go_package = "github.com/cloud-agent-platform/cap/api/cap/v1;capv1";
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+// TaskStatus represents the lifecycle state of a task.
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;       // Queued, not yet started
+  TASK_STATUS_DECOMPOSING = 2;   // Task is being decomposed into subtasks
+  TASK_STATUS_DISPATCHED = 3;    // Dispatched to an Agent
+  TASK_STATUS_RUNNING = 4;       // Actively executing
+  TASK_STATUS_REVIEWING = 5;      // Agent output is under review
+  TASK_STATUS_CONFIRMING = 6;     // Waiting for user confirmation
+  TASK_STATUS_COMPLETED = 7;      // Finished successfully
+  TASK_STATUS_FAILED = 8;         // Failed
+  TASK_STATUS_CANCELLED = 9;     // Cancelled by user
+}
+
+// SubtaskType represents the type/capability of a subtask.
+enum SubtaskType {
+  SUBTASK_TYPE_UNSPECIFIED = 0;
+  SUBTASK_TYPE_ANALYSIS = 1;
+  SUBTASK_TYPE_CODING = 2;
+  SUBTASK_TYPE_REVIEW = 3;
+  SUBTASK_TYPE_TESTING = 4;
+  SUBTASK_TYPE_RESEARCH = 5;
+}
+
+// ArtifactType represents the type of an artifact.
+enum ArtifactType {
+  ARTIFACT_TYPE_UNSPECIFIED = 0;
+  ARTIFACT_TYPE_ANALYSIS = 1;
+  ARTIFACT_TYPE_DIFF = 2;
+  ARTIFACT_TYPE_TEST_RESULT = 3;
+  ARTIFACT_TYPE_REPORT = 4;
+  ARTIFACT_TYPE_LOG = 5;
+}
+
+// UserDecision represents a user's decision on a confirmation request.
+enum UserDecision {
+  USER_DECISION_UNSPECIFIED = 0;
+  USER_DECISION_APPROVE = 1;
+  USER_DECISION_REJECT = 2;
+  USER_DECISION_MODIFY = 3;
+}
+
+// =============================================================================
+// Messages
+// =============================================================================
+
+// Repository describes a Git repository for task context.
+message Repository {
+  string url = 1;                       // Git repository HTTPS address
+  string branch = 2;                    // Base branch
+  string result_branch = 3;             // Result branch (default: auto-generated)
+  Credentials credentials = 4;          // Optional Git credentials
+}
+
+message Credentials {
+  CredentialsType type = 1;
+  string value = 2;                     // Encrypted value
+}
+
+enum CredentialsType {
+  CREDENTIALS_TYPE_UNSPECIFIED = 0;
+  CREDENTIALS_TYPE_SSH_KEY = 1;
+  CREDENTIALS_TYPE_TOKEN = 2;
+}
+
+// AgentHint suggests Agent configuration for a task.
+message AgentHint {
+  repeated string templates = 1;         // Suggested Agent template IDs
+  string model = 2;                     // Suggested model
+  int32 max_agents = 3;                 // Max concurrent Agents
+}
+
+// SubmitTaskRequest is the request for the Submit RPC.
+message SubmitTaskRequest {
+  // Required
+  string goal = 1;                      // Task goal (one sentence)
+
+  // Code context
+  Repository repository = 2;
+
+  // Constraints
+  repeated string constraints = 3;              // Constraint conditions
+  repeated string verification_criteria = 4;   // Acceptance criteria
+
+  // Optional
+  int32 priority = 5;                  // 0-9, default 5
+  int32 timeout = 6;                   // Seconds, default 1800 (30min)
+  AgentHint agent_hint = 7;
+  string local_context = 8;            // Client-supplied context
+  repeated string tags = 9;            // Task tags
+  string callback_url = 10;            // Completion callback URL
+  string idem_key = 11;                // Idempotency key (X-Request-ID)
+}
+
+// SubmitTaskResponse is the response for the Submit RPC.
+message SubmitTaskResponse {
+  string task_id = 1;
+  TaskStatus status = 2;
+  string result_branch = 3;
+  string created_at = 4;                // ISO 8601
+  int32 estimated_duration = 5;         // Estimated completion time in seconds
+}
+
+// GetTaskRequest is the request for the Get RPC.
+message GetTaskRequest {
+  string task_id = 1;
+  bool include_log = 2;                // Include latest 20 Agent log entries
+  bool include_diff = 3;               // Include diff summary (completed tasks only)
+}
+
+// GetTaskResponse is the response for the Get RPC.
+message GetTaskResponse {
+  Task task = 1;
+}
+
+// Task represents the full task state.
+message Task {
+  string task_id = 1;
+  TaskStatus status = 2;
+  string goal = 3;
+  int32 priority = 4;
+  string result_branch = 5;
+
+  // Progress
+  int32 progress = 6;                  // 0-100
+  string current_phase = 7;             // Current phase description
+
+  // Subtasks
+  repeated Subtask subtasks = 8;
+
+  // Timing
+  string created_at = 9;               // ISO 8601
+  string started_at = 10;               // ISO 8601
+  string completed_at = 11;            // ISO 8601
+
+  // Result (available after completion)
+  TaskResult result = 12;
+
+  // Stats
+  TaskStats stats = 13;
+}
+
+// Subtask represents a sub-task within a parent task.
+message Subtask {
+  string subtask_id = 1;
+  SubtaskType type = 2;
+  string agent_template = 3;
+  TaskStatus status = 4;
+  string summary = 5;                  // Agent output summary
+  repeated Artifact artifacts = 6;
+  string started_at = 7;               // ISO 8601
+  string completed_at = 8;             // ISO 8601
+}
+
+// Artifact represents a produced artifact from a subtask.
+message Artifact {
+  string artifact_id = 1;
+  ArtifactType type = 2;
+  string summary = 3;
+  string url = 4;                      // Download URL (signed, 1h validity)
+  int64 size = 5;                     // Bytes
+}
+
+// TaskResult represents the final result of a completed task.
+message TaskResult {
+  string git_commit = 1;
+  string git_branch = 2;
+  string summary = 3;                  // Task summary
+  repeated FileChange changes = 4;
+  TestResult test_result = 5;
+  int32 quality_score = 6;             // 0-100
+}
+
+// FileChange represents a single file change in the result.
+message FileChange {
+  string path = 1;
+  FileChangeAction action = 2;
+  int32 additions = 3;
+  int32 deletions = 4;
+}
+
+enum FileChangeAction {
+  FILE_CHANGE_ACTION_UNSPECIFIED = 0;
+  FILE_CHANGE_ACTION_ADDED = 1;
+  FILE_CHANGE_ACTION_MODIFIED = 2;
+  FILE_CHANGE_ACTION_DELETED = 3;
+}
+
+// TestResult represents test execution results.
+message TestResult {
+  int32 total = 1;
+  int32 passed = 2;
+  int32 failed = 3;
+  int32 coverage = 4;                  // 0-100
+}
+
+// TaskStats represents task execution statistics.
+message TaskStats {
+  int32 agents_used = 1;
+  int64 tokens_used = 2;
+  double estimated_cost = 3;            // CNY
+}
+
+// ListTasksRequest is the request for the List RPC.
+message ListTasksRequest {
+  TaskStatus status = 1;               // Filter by status
+  repeated string tags = 2;            // Filter by tags
+  int32 page = 3;                     // Page number (default 1)
+  int32 page_size = 4;                 // Page size (default 20, max 100)
+}
+
+// ListTasksResponse is the response for the List RPC.
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// CancelTaskRequest is the request for the Cancel RPC.
+message CancelTaskRequest {
+  string task_id = 1;
+  string reason = 2;
+  bool terminate_agents = 3;           // Terminate running Agents (default true)
+}
+
+// CancelTaskResponse is the response for the Cancel RPC.
+message CancelTaskResponse {
+  string task_id = 1;
+  TaskStatus status = 2;
+  repeated string terminated_agents = 3;
+  Artifact partial_result = 4;         // Partial output if any
+}
+
+// DecideRequest is the request for the Decide RPC.
+message DecideRequest {
+  string task_id = 1;
+  string subtask_id = 2;
+  UserDecision decision = 3;
+  string feedback = 4;                 // Required when decision is reject or modify
+  string modifications = 5;           // Modification suggestions (when decision=modify)
+}
+
+// DecideResponse is the response for the Decide RPC.
+message DecideResponse {
+  string task_id = 1;
+  string subtask_id = 2;
+  TaskStatus status = 3;
+}
+
+// GetArtifactRequest is the request for the GetArtifact RPC.
+message GetArtifactRequest {
+  string task_id = 1;
+  string artifact_id = 2;
+}
+
+// GetArtifactResponse is the response for the GetArtifact RPC.
+message GetArtifactResponse {
+  Artifact artifact = 1;
+  bytes content = 2;                   // File content bytes
+  string content_type = 3;             // MIME type
+}
+
+// GetDiffRequest is the request for the GetDiff RPC.
+message GetDiffRequest {
+  string task_id = 1;
+  int32 max_lines = 2;                 // Max diff lines (default 500)
+}
+
+// GetDiffResponse is the response for the GetDiff RPC.
+message GetDiffResponse {
+  string diff = 1;                     // Unified diff format
+  DiffStats stats = 2;
+}
+
+// DiffStats summarizes diff statistics.
+message DiffStats {
+  int32 files = 1;
+  int32 additions = 2;
+  int32 deletions = 3;
+}
+
+// WaitTaskRequest is the request for the Wait RPC.
+message WaitTaskRequest {
+  string task_id = 1;
+  int32 timeout = 2;                   // Wait timeout in seconds (default 600)
+  int32 poll_interval = 3;             // Poll interval in seconds (default 5)
+}
+
+// WaitTaskResponse is the response for the Wait RPC.
+message WaitTaskResponse {
+  Task task = 1;
+  bool timed_out = 2;
+  bool confirmation_required = 3;      // True if task needs user confirmation
+  string confirm_subtask_id = 4;       // Subtask needing confirmation
+}
+
+// =============================================================================
+// TaskService
+// =============================================================================
+
+// TaskService defines the core task management operations.
+service TaskService {
+  // Submit a new task for execution.
+  rpc Submit(SubmitTaskRequest) returns (SubmitTaskResponse) {}
+
+  // Get returns the current state of a task.
+  rpc Get(GetTaskRequest) returns (GetTaskResponse) {}
+
+  // List returns a paginated list of tasks.
+  rpc List(ListTasksRequest) returns (ListTasksResponse) {}
+
+  // Cancel cancels a running or pending task.
+  rpc Cancel(CancelTaskRequest) returns (CancelTaskResponse) {}
+
+  // Decide submits a user decision for a confirmation request.
+  rpc Decide(DecideRequest) returns (DecideResponse) {}
+
+  // GetArtifact retrieves a task artifact by ID.
+  rpc GetArtifact(GetArtifactRequest) returns (GetArtifactResponse) {}
+
+  // GetDiff returns the code diff for a task.
+  rpc GetDiff(GetDiffRequest) returns (GetDiffResponse) {}
+
+  // Wait blocks until the task is complete or confirmation is required.
+  rpc Wait(WaitTaskRequest) returns (WaitTaskResponse) {}
 }

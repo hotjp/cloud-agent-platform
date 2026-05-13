@@ -1,8 +1,9 @@
 module github.com/cloud-agent-platform/cap
 
-go 1.23.0
+go 1.24.0
 
 require (
+	connectrpc.com/connect v1.19.2
 	github.com/knadh/koanf/parsers/yaml v1.1.0
 	github.com/knadh/koanf/providers/env v1.1.0
 	github.com/knadh/koanf/providers/file v1.2.1
@@ -11,6 +12,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.28.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
