@@ -23,12 +23,12 @@ func TestAggregateRootRecordEvent(t *testing.T) {
 	ar.Entity.ID = "test_aggregate"
 	ar.Entity.Version = 1
 
-	event := DomainEvent{
+	event := &DomainEvent{
 		EventID:       "event_001",
 		AggregateType: "Task",
 		AggregateID:   "test_aggregate",
 		EventType:     "TaskCreatedV1",
-		Payload:       map[string]interface{}{"name": "test"},
+		Payload:       []byte(`{"name":"test"}`),
 		Version:       1,
 	}
 
