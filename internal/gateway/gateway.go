@@ -1,5 +1,6 @@
 // Package gateway implements L5-Gateway layer: TLS termination, protocol adaptation,
 // middleware (Recover/Metrics/CORS), and request routing.
+// Gateway is the entry point that exposes TaskService via connect-go (HTTP/JSON + gRPC).
 package gateway
 
 import (

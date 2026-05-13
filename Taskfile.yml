@@ -1,0 +1,135 @@
+# Cloud Agent Platform - Taskfile
+# Alternative to Makefile, YAML-based build automation
+# Usage: task <task-name>
+
+version: '3'
+
+vars:
+  BIN_NAME: server
+  BIN_PATH: ./bin/{{.BIN_NAME}}
+  COVERAGE_OUT: coverage.out
+  COVERAGE_HTML: coverage.html
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the server binary
+    dir: "{{.ROOT}}"
+    vars:
+      LDFLAGS: '-s -w'
+    cmds:
+      - mkdir -p ./bin
+      - go build {{.LDFLAGS}} -o {{.BIN_PATH}} ./cmd/server
+
+  test:
+    desc: Run all tests with race detection
+    cmds:
+      - go test -v -race -cover ./...
+
+  test-coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - go test -v -race -coverprofile={{.COVERAGE_OUT}} ./...
+      - go tool cover -html={{.COVERAGE_OUT}} -o {{.COVERAGE_HTML}}
+
+  lint:
+    desc: Run linter (requires golangci-lint)
+    cmds:
+      - |
+        if command -v golangci-lint > /dev/null 2>&1; then
+          golangci-lint run ./...
+        else
+          echo "golangci-lint not installed, skipping..."
+        fi
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+
+  tidy:
+    desc: Tidy dependencies
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -rf ./bin
+      - rm -f {{.COVERAGE_OUT}} {{.COVERAGE_HTML}}
+
+  generate:
+    desc: Run code generation (buf, ent, etc.)
+    cmds:
+      - |
+        echo "Running ent generate..."
+        cd ent && go generate ./... || true
+        echo "Running buf generate..."
+        buf generate || true
+
+  build-docker:
+    desc: Build Docker image
+    cmds:
+      - docker build -t cloud-agent-platform/cap:latest .
+
+  run:
+    desc: Run the server
+    dir: "{{.ROOT}}"
+    cmds:
+      - go run ./cmd/server
+
+  # Database tasks
+  migrate-create:
+    desc: Create a new migration
+    cmds:
+      - read -p "Migration name: " NAME && migrate create -ext sql -dir internal/storage/ent/migrate -seq $NAME
+
+  migrate-up:
+    desc: Run database migrations
+    cmds:
+      - migrate -path internal/storage/ent/migrate -database "${APP_DATABASE_URL}" up
+
+  migrate-down:
+    desc: Rollback database migrations
+    cmds:
+      - migrate -path internal/storage/ent/migrate -database "${APP_DATABASE_URL}" down 1
+
+  # Architecture check
+  check-arch:
+    desc: Verify layer dependencies
+    cmds:
+      - ./scripts/check_architecture.sh
+
+  # Full verification
+  verify:
+    desc: Run full verification (arch, vet, lint, test)
+    cmds:
+      - task check-arch
+      - task vet
+      - task lint
+      - task test
+
+  # Proto generation
+  proto-gen:
+    desc: Generate protobuf code
+    cmds:
+      - buf generate
+
+  proto-lint:
+    desc: Lint protobuf files
+    cmds:
+      - buf lint
+
+  help:
+    desc: Show this help message
+    cmds:
+      - task --list

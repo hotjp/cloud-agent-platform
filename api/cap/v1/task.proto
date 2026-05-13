@@ -1,0 +1,7 @@
+// Package v1 contains the Cloud Agent Platform API v1 definitions.
+package v1
+
+// TaskService represents the main Task service interface.
+type TaskService interface {
+	// TODO: Add methods
+}

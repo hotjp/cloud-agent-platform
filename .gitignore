@@ -1,0 +1,51 @@
+# Binaries
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build artifacts
+coverage.html
+coverage.out
+
+# Docker
+.docker/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+*.log
+vendor/
+tmp_*/
+
+# Test
+*e2e.test
+integration.test
+
+# Ent
+ent/
+
+# Protobuf generated
+gen/
+
+# Task
+Taskfile.yml.bak

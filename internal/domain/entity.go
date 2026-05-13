@@ -17,14 +17,14 @@ type AggregateRoot struct {
 
 // DomainEvent represents a domain event for Outbox pattern.
 type DomainEvent struct {
-	EventID          string                 `json:"event_id"`
-	AggregateType    string                 `json:"aggregate_type"`
-	AggregateID      string                 `json:"aggregate_id"`
-	EventType        string                 `json:"event_type"`
-	Payload          map[string]interface{} `json:"payload"`
-	OccurredAt       string                 `json:"occurred_at"`
-	IdempotencyKey   string                 `json:"idempotency_key"`
-	Version          int64                  `json:"version"`
+	EventID        string                 `json:"event_id"`
+	AggregateType  string                 `json:"aggregate_type"`
+	AggregateID    string                 `json:"aggregate_id"`
+	EventType      string                 `json:"event_type"`
+	Payload        map[string]interface{} `json:"payload"`
+	OccurredAt     string                 `json:"occurred_at"`
+	IdempotencyKey string                 `json:"idempotency_key"`
+	Version        int64                  `json:"version"`
 }
 
 // RecordEvent records a domain event for later publishing via Outbox.

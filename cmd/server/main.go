@@ -1,18 +1,25 @@
+// Package main is the entry point for Cloud Agent Platform server.
 package main
 
 import (
 	"context"
-	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"go.uber.org/zap"
+
+	"github.com/cloud-agent-platform/cap/internal/config"
+	"github.com/cloud-agent-platform/cap/internal/gateway"
+	"github.com/cloud-agent-platform/cap/internal/service"
+	"github.com/cloud-agent-platform/cap/internal/storage"
 )
 
 func main() {
-	// Setup logger
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelInfo,
-	}))
+	// Initialize logger (zap)
+	logger, _ := zap.NewProduction()
+	defer logger.Sync()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -23,18 +30,55 @@ func main() {
 
 	go func() {
 		sig := <-sigCh
-		logger.Info("Received signal, shutting down", "signal", sig.String())
+		logger.Info("Received signal, shutting down", zap.String("signal", sig.String()))
 		cancel()
 	}()
 
-	logger.Info("Server starting", "version", "0.1.0")
+	// Load configuration
+	cfg := config.MustLoad("config.yaml")
+	logger.Info("Configuration loaded",
+		zap.Int("port", cfg.Server.Port),
+		zap.String("service_name", cfg.Telemetry.ServiceName),
+	)
 
-	// TODO: Initialize and start server
-	// - Load configuration (koanf)
-	// - Setup database connections (PostgreSQL + Redis)
-	// - Initialize layers: Storage → Domain → Service → Authz → Gateway
-	// - Start HTTP/gRPC server
+	// Initialize layers: Storage → Service → Gateway
+	store := storage.New()
+	if err := store.Connect(ctx); err != nil {
+		logger.Error("Failed to connect to storage", zap.Error(err))
+		os.Exit(1)
+	}
+	defer store.Close(ctx)
 
+	serviceSvc := service.New()
+
+	// Initialize service layer
+	if err := serviceSvc.Initialize(ctx); err != nil {
+		logger.Error("Failed to initialize service", zap.Error(err))
+		os.Exit(1)
+	}
+	defer serviceSvc.Shutdown(ctx)
+
+	logger.Info("Server starting",
+		zap.String("version", "0.1.0"),
+		zap.Int("port", cfg.Server.Port),
+	)
+
+	// Initialize and start gateway
+	gatewaySvc := gateway.New()
+	if err := gatewaySvc.Start(ctx); err != nil {
+		logger.Error("Failed to start gateway", zap.Error(err))
+		os.Exit(1)
+	}
+
+	// Wait for shutdown
 	<-ctx.Done()
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+
+	if err := gatewaySvc.Stop(shutdownCtx); err != nil {
+		logger.Error("Failed to stop gateway", zap.Error(err))
+	}
+
 	logger.Info("Server stopped")
 }

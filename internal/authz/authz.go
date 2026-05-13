@@ -1,5 +1,5 @@
-// Package authz implements L3-Authz layer: permission checks (RBAC/OpenFGA),
-// rate limiting, and identity verification.
+// Package authz implements L3-Authz layer: permission checks (RBAC),
+// rate limiting (sentinel-go), and identity verification.
 package authz
 
 import (
