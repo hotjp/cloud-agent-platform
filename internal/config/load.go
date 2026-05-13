@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/knadh/koanf/v2"
 	"github.com/knadh/koanf/parsers/yaml"
@@ -20,13 +21,13 @@ func DefaultConfig() *Config {
 			Port:         8080,
 			MetricsPort:  9090,
 			PprofPort:    6060,
-			ReadTimeout:  10 * 1e9, // nanoseconds, converted from duration
-			WriteTimeout: 30 * 1e9,
+			ReadTimeout:  10 * time.Second,
+			WriteTimeout: 30 * time.Second,
 		},
 		Database: DatabaseConfig{
 			MaxOpen:     25,
 			MaxIdle:     10,
-			MaxLifetime: 5 * 60 * 1e9, // nanoseconds
+			MaxLifetime: 5 * time.Minute,
 		},
 		Redis: RedisConfig{
 			Addr: "localhost:6379",
@@ -35,7 +36,7 @@ func DefaultConfig() *Config {
 		Authz: AuthzConfig{
 			JWTSecret:    "",
 			APIKeyHeader: "X-API-Key",
-			CacheTTL:     5 * 60 * 1e9, // nanoseconds
+			CacheTTL:     5 * time.Minute,
 		},
 		Telemetry: TelemetryConfig{
 			ServiceName: "cloud-agent-platform",
@@ -71,6 +72,7 @@ func DefaultConfig() *Config {
 				Enabled: false,
 			},
 		},
+		Approval: DefaultApprovalConfig(),
 	}
 }
 

@@ -2,7 +2,10 @@
 // Supports YAML files + environment variable overrides (APP_ prefix).
 package config
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Config holds all configuration for the application.
 type Config struct {
@@ -16,6 +19,7 @@ type Config struct {
 	MinIO     MinIOConfig     `koanf:"minio"`
 	Git       GitConfig       `koanf:"git"`
 	RateLimit RateLimitConfig `koanf:"rate_limit"`
+	Approval  ApprovalConfig   `koanf:"approval"`
 	Plugins   PluginsConfig   `koanf:"plugins"`
 }
 
@@ -101,4 +105,44 @@ type SearchPluginConfig struct {
 	Enabled bool   `koanf:"enabled"`
 	Host    string `koanf:"host"`
 	APIKey  string `koanf:"apikey"`
+}
+
+// ApprovalConfig holds approval/guardian settings.
+type ApprovalConfig struct {
+	// DefaultTimeout is the default timeout for approval requests (default: 5 minutes).
+	DefaultTimeout time.Duration `koanf:"default_timeout"`
+	// MaxTimeout is the maximum allowed timeout for approval requests.
+	MaxTimeout time.Duration `koanf:"max_timeout"`
+	// HighRiskCostThreshold is the estimated cost threshold (in yuan) above which
+	// an operation is considered high-risk and requires approval.
+	HighRiskCostThreshold float64 `koanf:"high_risk_cost_threshold"`
+}
+
+// DefaultApprovalConfig returns the default approval configuration.
+func DefaultApprovalConfig() ApprovalConfig {
+	return ApprovalConfig{
+		DefaultTimeout:       5 * time.Minute,
+		MaxTimeout:           30 * time.Minute,
+		HighRiskCostThreshold: 1.0, // 1 yuan
+	}
+}
+
+// Validate checks that required configuration fields are set.
+func (c *Config) Validate() error {
+	if c.Database.DSN == "" {
+		return fmt.Errorf("database.dsn is required")
+	}
+	if c.Authz.JWTSecret == "" {
+		return fmt.Errorf("authz.jwtsecret is required")
+	}
+	if c.Approval.DefaultTimeout <= 0 {
+		return fmt.Errorf("approval.default_timeout must be positive")
+	}
+	if c.Approval.MaxTimeout <= 0 {
+		return fmt.Errorf("approval.max_timeout must be positive")
+	}
+	if c.Approval.DefaultTimeout > c.Approval.MaxTimeout {
+		return fmt.Errorf("approval.default_timeout must not exceed approval.max_timeout")
+	}
+	return nil
 }

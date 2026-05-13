@@ -42,21 +42,16 @@ func main() {
 	)
 
 	// Initialize layers: Storage → Service → Gateway
-	store := storage.New()
-	if err := store.Connect(ctx); err != nil {
-		logger.Error("Failed to connect to storage", zap.Error(err))
+	store, err := storage.New(cfg, logger)
+	if err != nil {
+		logger.Error("Failed to create storage", zap.Error(err))
 		os.Exit(1)
 	}
 	defer store.Close(ctx)
 
-	serviceSvc := service.New()
-
-	// Initialize service layer
-	if err := serviceSvc.Initialize(ctx); err != nil {
-		logger.Error("Failed to initialize service", zap.Error(err))
-		os.Exit(1)
-	}
-	defer serviceSvc.Shutdown(ctx)
+	serviceSvc := service.NewTaskService(service.TaskServiceInput{
+		Logger: logger,
+	})
 
 	logger.Info("Server starting",
 		zap.String("version", "0.1.0"),
@@ -64,7 +59,13 @@ func main() {
 	)
 
 	// Initialize and start gateway
-	gatewaySvc := gateway.New()
+	gwCfg := gateway.Config{
+		Port:        cfg.Server.Port,
+		ReadTimeout: cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+		JWTSecret:   cfg.Authz.JWTSecret,
+	}
+	gatewaySvc := gateway.New(gwCfg, serviceSvc, logger)
 	if err := gatewaySvc.Start(ctx); err != nil {
 		logger.Error("Failed to start gateway", zap.Error(err))
 		os.Exit(1)

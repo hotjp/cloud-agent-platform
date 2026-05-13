@@ -59,3 +59,8 @@ plugins:
     enabled: false
     host: "http://localhost:7700"
     apikey: ""
+
+approval:
+  default_timeout: 5m
+  max_timeout: 30m
+  high_risk_cost_threshold: 1.0

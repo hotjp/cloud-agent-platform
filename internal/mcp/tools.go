@@ -174,7 +174,20 @@ func GetToolDefinitions() []Tool {
 			InputSchema: schema,
 		})
 	}
+	// Also include any dynamically registered tools
+	if reg := GetRegistry(); reg != nil {
+		tools = append(tools, reg.ListTools()...)
+	}
 	return tools
+}
+
+// GetResourceDefinitions returns all MCP resource definitions.
+func GetResourceDefinitions() []Resource {
+	resources := make([]Resource, 0)
+	if reg := GetRegistry(); reg != nil {
+		resources = reg.ListResources()
+	}
+	return resources
 }
 
 // ValidateToolParams validates the parameters for a tool call.

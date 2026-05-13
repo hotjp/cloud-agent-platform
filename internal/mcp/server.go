@@ -96,6 +96,12 @@ func (s *Server) handleMessage(data []byte) error {
 	case "tools/call":
 		return s.handleToolsCall(id, req.Params)
 
+	case "resources/list":
+		return s.handleResourcesList(id)
+
+	case "resources/read":
+		return s.handleResourcesRead(id, req.Params)
+
 	case "notifications/initialized":
 		// Client has finished initialization, acknowledge silently
 		s.initialized = true
@@ -131,6 +137,10 @@ func (s *Server) handleInitialize(id json.RawMessage, params json.RawMessage) er
 		ProtocolVersion: s.protocolVer,
 		Capabilities: ServerCapabilities{
 			Tools: &struct{}{},
+			Resources: &ResourcesCapability{
+				Subscribe: true,
+				ListHint:  true,
+			},
 		},
 		ServerInfo: ServerInfo{
 			Name:    "cloud-agent-platform",
@@ -168,6 +178,39 @@ func (s *Server) handleToolsCall(id json.RawMessage, params json.RawMessage) err
 	}
 
 	return s.sendResult(id, result)
+}
+
+// handleResourcesList handles the resources/list method.
+func (s *Server) handleResourcesList(id json.RawMessage) error {
+	resources := GetResourceDefinitions()
+	result := ResourcesListResult{Resources: resources}
+	return s.sendResult(id, result)
+}
+
+// handleResourcesRead handles the resources/read method.
+func (s *Server) handleResourcesRead(id json.RawMessage, params json.RawMessage) error {
+	var input ResourceReadParams
+	if params != nil {
+		if err := json.Unmarshal(params, &input); err != nil {
+			return s.sendError(id, CodeInvalidParams, "Invalid params", nil)
+		}
+	}
+
+	if input.URI == "" {
+		return s.sendError(id, CodeInvalidParams, "URI is required", nil)
+	}
+
+	// Read resource through registry
+	if reg := GetRegistry(); reg != nil {
+		content, err := reg.ReadResource(context.Background(), input.URI)
+		if err != nil {
+			return s.sendError(id, CodeInternalError, fmt.Sprintf("Failed to read resource: %v", err), nil)
+		}
+		result := ResourceReadResult{Contents: []ResourceContent{*content}}
+		return s.sendResult(id, result)
+	}
+
+	return s.sendError(id, CodeInternalError, "Resource registry not initialized", nil)
 }
 
 // sendResult sends a JSON-RPC success response.

@@ -247,6 +247,20 @@ type DecomposeTaskResponse struct {
 	Subtasks   []string `json:"subtasks"`
 }
 
+// DiffStats summarizes diff statistics.
+type DiffStats struct {
+	Files     int `json:"files"`
+	Additions int `json:"additions"`
+	Deletions int `json:"deletions"`
+}
+
+// DiffResponse represents the result of getting task diff.
+type DiffResponse struct {
+	TaskID string     `json:"taskId"`
+	Diff   string     `json:"diff"`
+	Stats  *DiffStats `json:"stats,omitempty"`
+}
+
 // do performs an HTTP request to the platform API.
 func (c *PlatformClient) do(ctx context.Context, method, path string, body any) (*APIResponse, error) {
 	var reqBody []byte
@@ -474,6 +488,26 @@ func (c *PlatformClient) DecomposeTask(ctx context.Context, taskID string) (*Dec
 	}
 
 	var result DecomposeTaskResponse
+	if err := json.Unmarshal(apiResp.Data, &result); err != nil {
+		return nil, fmt.Errorf("unmarshal response: %w", err)
+	}
+
+	return &result, nil
+}
+
+// GetDiff calls GET /tasks/:taskId/diff.
+func (c *PlatformClient) GetDiff(ctx context.Context, taskID string) (*DiffResponse, error) {
+	path := "/api/v1/tasks/" + taskID + "/diff"
+	apiResp, err := c.do(ctx, http.MethodGet, path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if !apiResp.OK {
+		return nil, fmt.Errorf("API error: %s - %s", apiResp.Error.Code, apiResp.Error.Message)
+	}
+
+	var result DiffResponse
 	if err := json.Unmarshal(apiResp.Data, &result); err != nil {
 		return nil, fmt.Errorf("unmarshal response: %w", err)
 	}

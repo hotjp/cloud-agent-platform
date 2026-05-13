@@ -184,3 +184,41 @@ test(api): 添加任务提交 API 的集成测试
 - ❌ 空 catch 块
 - ❌ 未处理的 Promise rejection
 - ❌ 跳过测试说"以后再补"
+
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+**Project**: {project_name}
+**Description**: {project_description}
+
+## Architecture
+
+{project_architecture}
+
+## Task Management
+
+This project uses **LRA** for task tracking.
+See [lra.md](lra.md) for command reference.
+
+## Quick Start
+
+```bash
+lra ready              # Find available work
+lra show <id>          # View task details
+```
+
+<!-- BEGIN LRA CLAUDE SECTION -->
+
+## LRA Task Management
+
+This project uses **LRA** profile: **{profile}**
+
+- Detailed guide: [lra.md](lra.md)
+- Use `lra` for all task management
+- Run `lra ready` before starting work
+- ❌ Do not use markdown TODO lists
+
+<!-- END LRA CLAUDE SECTION -->

@@ -101,7 +101,14 @@ type InitializeResult struct {
 
 // ServerCapabilities represents server capabilities.
 type ServerCapabilities struct {
-	Tools *struct{} `json:"tools"`
+	Tools     *struct{}          `json:"tools,omitempty"`
+	Resources *ResourcesCapability `json:"resources,omitempty"`
+}
+
+// ResourcesCapability indicates resource capabilities.
+type ResourcesCapability struct {
+	Subscribe bool `json:"subscribe,omitempty"`
+	ListHint  bool `json:"listHint,omitempty"`
 }
 
 // ServerInfo contains server information.
@@ -109,3 +116,43 @@ type ServerInfo struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
 }
+
+// Resource represents an MCP resource definition.
+type Resource struct {
+	URI         string `json:"uri"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	MimeType    string `json:"mimeType,omitempty"`
+}
+
+// ResourcesListResult is the result of resources/list.
+type ResourcesListResult struct {
+	Resources []Resource `json:"resources"`
+}
+
+// ResourceContent represents content of a resource.
+type ResourceContent struct {
+	URI      string `json:"uri"`
+	MimeType string `json:"mimeType,omitempty"`
+	Text     string `json:"text,omitempty"`
+	Blob     string `json:"blob,omitempty"` // base64 encoded binary content
+}
+
+// ResourceReadResult is the result of resources/read.
+type ResourceReadResult struct {
+	Contents []ResourceContent `json:"contents"`
+}
+
+// ResourceReadParams are the parameters for resources/read.
+type ResourceReadParams struct {
+	URI    string `json:"uri"`
+	Cursor string `json:"cursor,omitempty"`
+}
+
+// Resource template URIs
+const (
+	TaskLogURI         = "cap://tasks/%s/log"
+	TaskTimelineURI    = "cap://tasks/%s/timeline"
+	TaskArtifactURI    = "cap://tasks/%s/artifact/%s"
+	TemplatePromptURI   = "cap://templates/%s/prompt"
+)
