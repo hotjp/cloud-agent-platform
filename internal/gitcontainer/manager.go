@@ -73,22 +73,42 @@ func NewManager(cfg Config) *Manager {
 func (m *Manager) Ensure(ctx context.Context, repoURL, branch string) (*GitContainer, error) {
 	pid := ProjectID(repoURL)
 
-	m.mu.Lock()
-	if gc, ok := m.containers[pid]; ok {
-		m.mu.Unlock()
-		// Verify it's still running
-		if m.isRunning(gc.ID) {
-			return gc, nil
-		}
-		// Dead, recreate
+	// Retry loop for concurrent access safety
+	for i := 0; i < 60; i++ {
 		m.mu.Lock()
-		delete(m.containers, pid)
-		m.mu.Unlock()
-		return m.create(ctx, pid, repoURL, branch)
-	}
-	m.mu.Unlock()
+		gc, exists := m.containers[pid]
+		if exists && gc != nil {
+			m.mu.Unlock()
+			if m.isRunning(gc.ID) {
+				return gc, nil
+			}
+			// Dead, clean up
+			m.mu.Lock()
+			delete(m.containers, pid)
+			m.mu.Unlock()
+			continue
+		}
+		if exists && gc == nil {
+			// Someone else is creating, wait
+			m.mu.Unlock()
+			time.Sleep(300 * time.Millisecond)
+			continue
+		}
 
-	return m.create(ctx, pid, repoURL, branch)
+		// Reserve slot with nil placeholder
+		m.containers[pid] = nil
+		m.mu.Unlock()
+
+		newGC, err := m.create(ctx, pid, repoURL, branch)
+		if err != nil {
+			m.mu.Lock()
+			delete(m.containers, pid)
+			m.mu.Unlock()
+			return nil, err
+		}
+		return newGC, nil
+	}
+	return nil, fmt.Errorf("gitcontainer: timeout waiting for container (project %s)", pid)
 }
 
 func (m *Manager) create(ctx context.Context, pid, repoURL, branch string) (*GitContainer, error) {
