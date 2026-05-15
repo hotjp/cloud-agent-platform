@@ -33,9 +33,9 @@ type AdapterConfig struct {
 func DefaultAdapterConfig() AdapterConfig {
 	return AdapterConfig{
 		WorkerImage: "cap-worker:latest",
-		LLMAPIURL:   "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+		LLMAPIURL:   "https://api.minimaxi.com/v1/chat/completions",
 		LLMAPIKey:   "", // Must be configured
-		LLMModel:    "glm-4-flash",
+		LLMModel:    "MiniMax-M2.7-highspeed",
 		CAPAPIURL:   "http://host.docker.internal:18080",
 	}
 }

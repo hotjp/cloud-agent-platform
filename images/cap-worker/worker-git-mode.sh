@@ -1,6 +1,5 @@
 #!/bin/bash
 # worker-git-mode.sh — Worker runs with files pre-mounted from Git container
-# Only does: read file list → LLM call → write files → notify Git API to commit
 set -uo pipefail
 
 GIT_API="${GIT_CONTAINER_API:?GIT_CONTAINER_API is required}"
@@ -9,6 +8,7 @@ TASK_ID="${TASK_ID:?}"
 TASK_GOAL="${TASK_GOAL:?}"
 RESULT_BRANCH="${RESULT_BRANCH:-cap-agent/$TASK_ID}"
 WORK_DIR="/workspace"
+LLM_MODEL="${LLM_MODEL:-glm-4-flash}"
 
 cd "$WORK_DIR"
 
@@ -16,11 +16,8 @@ cd "$WORK_DIR"
 echo ""
 echo "=== Step 1: Reading project files ==="
 FILE_LIST=$(curl -sL --noproxy "*" "$GIT_API/files" --max-time 10 2>/dev/null || echo '{"files":[]}')
-
 FILE_COUNT=$(echo "$FILE_LIST" | jq '.files | length' 2>/dev/null || echo 0)
 echo "Project has $FILE_COUNT files"
-
-# Build file tree for LLM context
 FILE_TREE=$(echo "$FILE_LIST" | jq -r '.files[:200][]' 2>/dev/null | head -200 | tr '\n' ',' | sed 's/,$//')
 
 # ─── Step 2: Call LLM ────────────────────────────────────────────────────────
@@ -28,16 +25,15 @@ echo ""
 echo "=== Step 2: Calling LLM ($LLM_MODEL) ==="
 
 SYSTEM_PROMPT='You are a coding agent. You receive a task and a list of existing project files.
-You MUST respond with ONLY a JSON object. No explanation, no markdown, no code fences.
+You MUST respond with ONLY a JSON object. No explanation, no thinking, no markdown, no code fences.
 JSON format:
-{"summary": "brief description of what you did", "files": [{"path": "filename.ext", "content": "full file content here"}]}
+{"summary": "brief description", "files": [{"path": "filename.ext", "content": "full file content"}]}
 
 Rules:
 - Output ONLY the JSON object, nothing else
 - Paths must be relative (e.g. "app.py", "src/main.go")
 - Include ALL files you create or modify
-- content must be the COMPLETE file content, not a snippet
-- For multi-file tasks, include ALL files in the files array'
+- content must be the COMPLETE file content'
 
 USER_PROMPT="Task: $TASK_GOAL
 
@@ -73,7 +69,6 @@ fi
 RESPONSE_CONTENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null)
 if [ -z "$RESPONSE_CONTENT" ]; then
     echo "FATAL: Could not extract LLM response content"
-    echo "Raw response: $RESPONSE" | head -5
     exit 1
 fi
 
@@ -81,54 +76,68 @@ RESPONSE_LEN=${#RESPONSE_CONTENT}
 echo "LLM response received ($RESPONSE_LEN chars)"
 
 # ─── Step 2.5: Robust JSON extraction ─────────────────────────────────────────
-# Try multiple strategies to extract valid JSON from LLM output
 
+# extract_json tries multiple strategies to find valid JSON with "files" key
 extract_json() {
     local input="$1"
-    
-    # Strategy 1: Direct parse (already valid JSON)
+
+    # Strategy 1: Direct parse
     if echo "$input" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
         echo "$input"
         return 0
     fi
-    
+
     # Strategy 2: Strip markdown fences
     local stripped
-    stripped=$(echo "$input" | sed 's/^```json[[:space:]]*//;s/^```[[:space:]]*//;s/```[[:space:]]*$//' | tr -d '\r' | xargs)
+    stripped=$(echo "$input" | sed 's/^```json[[:space:]]*//;s/^```[[:space:]]*//;s/```[[:space:]]*$//' | tr -d '\r')
+    stripped=$(echo "$stripped" | xargs 2>/dev/null)
     if echo "$stripped" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
         echo "$stripped"
         return 0
     fi
-    
-    # Strategy 3: Find JSON object between first { and last }
-    local json_candidate
-    local first_brace=$(echo "$input" | grep -bo '{' | head -1 | cut -d: -f1)
-    local last_brace=$(echo "$input" | grep -bo '}' | tail -1 | cut -d: -f1)
-    
-    if [ -n "$first_brace" ] && [ -n "$last_brace" ] && [ "$last_brace" -gt "$first_brace" ]; then
-        json_candidate=$(echo "$input" | cut -c$((first_brace+1))-$((last_brace+1)))
-        if echo "$json_candidate" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
-            echo "$json_candidate"
+
+    # Strategy 3: Extract JSON between first { and last }
+    local first last candidate
+    first=$(echo "$input" | grep -bo '{' | head -1 | cut -d: -f1)
+    last=$(echo "$input" | grep -bo '}' | tail -1 | cut -d: -f1)
+    if [ -n "$first" ] && [ -n "$last" ] && [ "$last" -gt "$first" ]; then
+        candidate=$(echo "$input" | cut -c$((first+1))-$((last+1)))
+        if echo "$candidate" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
+            echo "$candidate"
             return 0
         fi
     fi
-    
-    # Strategy 4: Find by "files" key pattern
-    json_candidate=$(echo "$input" | grep -o '{.*"files".*}' | head -1)
-    if [ -n "$json_candidate" ] && echo "$json_candidate" | jq -e 'has("files")' >/dev/null 2>&1; then
-        echo "$json_candidate"
+
+    # Strategy 4: grep for files key
+    candidate=$(echo "$input" | grep -o '{.*"files".*' | head -1)
+    if [ -n "$candidate" ] && echo "$candidate" | jq -e 'has("files")' >/dev/null 2>&1; then
+        echo "$candidate"
         return 0
     fi
-    
+
     return 1
 }
 
-CLEAN_RESPONSE=$(extract_json "$RESPONSE_CONTENT")
+# For reasoning models (MiniMax, DeepSeek): strip thinking section
+# These models output: <think\n...\n</think\n\nACTUAL_JSON
+# Find the LAST occurrence of a blank line followed by { — that's where JSON starts
+STRIPPED=$(echo "$RESPONSE_CONTENT" | awk '
+BEGIN { buf=""; found_json=0 }
+/^{/ { found_json=NR }
+{ lines[NR]=$0 }
+END {
+    for (i=found_json; i<=NR; i++) printf "%s\n", lines[i]
+}')
+
+# Try stripped first (removes thinking), then full content
+CLEAN_RESPONSE=$(extract_json "$STRIPPED")
+if [ -z "$CLEAN_RESPONSE" ]; then
+    CLEAN_RESPONSE=$(extract_json "$RESPONSE_CONTENT")
+fi
 
 if [ -z "$CLEAN_RESPONSE" ]; then
     echo "WARNING: Could not extract valid JSON from LLM response"
-    echo "Response preview: $(echo "$RESPONSE_CONTENT" | head -5)"
-    # Try to save whatever we got as a debug artifact
+    echo "Response first 200 chars: $(echo "$RESPONSE_CONTENT" | head -3 | cut -c1-200)"
     SUMMARY="LLM response was not valid JSON (len=$RESPONSE_LEN)"
     FILES_JSON=""
 else
@@ -156,9 +165,7 @@ else
             continue
         fi
 
-        # Strip leading ./ if present
         FILE_PATH=$(echo "$FILE_PATH" | sed 's|^\./||')
-
         FULL_PATH="$WORK_DIR/$FILE_PATH"
         mkdir -p "$(dirname "$FULL_PATH")"
         printf '%s' "$CONTENT" > "$FULL_PATH"
@@ -168,32 +175,26 @@ fi
 
 echo "Summary: $SUMMARY"
 
-# ─── Step 4: Notify Git API to commit ────────────────────────────────────────
+# ─── Step 4: Commit via Git API ───────────────────────────────────────────────
 echo ""
 echo "=== Step 4: Commit via Git API ==="
-
 COMMIT_RESULT=$(curl -sL --noproxy "*" -X POST "$GIT_API/commit" \
     -H "Content-Type: application/json" \
     -d "{\"message\": \"agent($TASK_ID): $TASK_GOAL\", \"branch\": \"$RESULT_BRANCH\"}" \
     --max-time 10 2>/dev/null || echo '{"ok":false}')
-
 COMMIT_SHA=$(echo "$COMMIT_RESULT" | jq -r '.sha // "unknown"' 2>/dev/null)
 echo "Committed: $COMMIT_SHA"
 
-# ─── Step 5: Get diff from Git API ───────────────────────────────────────────
+# ─── Step 5: Diff ─────────────────────────────────────────────────────────────
 echo ""
 echo "=== Step 5: Collecting diff ==="
-
 DIFF_RESULT=$(curl -sL --noproxy "*" "$GIT_API/diff" --max-time 10 2>/dev/null || echo '{"diff":"","diff_size":0}')
 DIFF_SIZE=$(echo "$DIFF_RESULT" | jq -r '.diff_size // 0' 2>/dev/null)
-
 echo "Diff size: $DIFF_SIZE bytes"
 
-# ─── Step 6: Report artifacts to platform ────────────────────────────────────
+# ─── Step 6: Report artifacts ─────────────────────────────────────────────────
 echo ""
 echo "=== Step 6: Reporting artifacts ==="
-
-# Get changed files from git diff in the workspace
 CHANGED_FILES="[]"
 if [ -d ".git" ]; then
     CHANGED_FILES=$(git diff --name-only 2>/dev/null | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
@@ -221,13 +222,11 @@ curl -sL --noproxy "*" -X POST "$CAP_API_URL/api/v1/tasks/$TASK_ID/artifacts" \
     -H "Content-Type: application/json" \
     -d "$RESULT_PAYLOAD" \
     --max-time 10 2>/dev/null || echo "WARNING: artifact report failed"
-
 echo "Artifact reported"
 
-# ─── Step 7: Push (best effort, requires GIT_TOKEN) ──────────────────────────
+# ─── Step 7: Push ─────────────────────────────────────────────────────────────
 echo ""
 echo "=== Step 7: Push (if configured) ==="
-
 if [ -n "${GIT_TOKEN:-}" ]; then
     PUSH_RESULT=$(curl -sL --noproxy "*" -X POST "$GIT_API/push" \
         -H "Content-Type: application/json" \

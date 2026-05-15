@@ -146,10 +146,27 @@ func main() {
 			} else {
 				logger.Info("Scheduler started (Docker backend)")
 				adapterCfg := scheduler.DefaultAdapterConfig()
-				adapterCfg.LLMAPIKey = cfg.LLM.ZhipuAPIKey
+
+				// Select LLM provider based on worker_model config
+				switch cfg.LLM.WorkerModel {
+				case "minimax":
+					adapterCfg.LLMAPIURL = "https://api.minimaxi.com/v1/chat/completions"
+					adapterCfg.LLMAPIKey = cfg.LLM.MinimaxAPIKey
+					adapterCfg.LLMModel = cfg.LLM.MinimaxModel
+					if adapterCfg.LLMModel == "" {
+						adapterCfg.LLMModel = "MiniMax-M2.7-highspeed"
+					}
+				default:
+					// Fallback to Zhipu
+					adapterCfg.LLMAPIURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+					adapterCfg.LLMAPIKey = cfg.LLM.ZhipuAPIKey
+					adapterCfg.LLMModel = "glm-4-flash"
+				}
+
 				if adapterCfg.LLMAPIKey == "" {
 					logger.Warn("LLM API key not configured, cap-worker will fail on LLM calls")
 				}
+				logger.Info("Worker LLM configured", zap.String("provider", cfg.LLM.WorkerModel), zap.String("model", adapterCfg.LLMModel))
 				// Git Container Manager — per-project Git containers
 				gitMgr := gitcontainer.NewManager(gitcontainer.DefaultConfig())
 				workerExecutor = scheduler.NewOrchestratorAdapter(sched, adapterCfg, gitMgr)

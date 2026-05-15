@@ -63,8 +63,12 @@ type TelemetryConfig struct {
 
 // LLMConfig holds LLM provider API keys and settings.
 type LLMConfig struct {
-	AnthropicAPIKey string `koanf:"anthropicapikey"`
-	ZhipuAPIKey     string `koanf:"zhipuapikey"`
+	AnthropicAPIKey  string `koanf:"anthropicapikey"`
+	ZhipuAPIKey      string `koanf:"zhipuapikey"`
+	MinimaxAPIKey    string `koanf:"minimax_apikey"`
+	MinimaxEndpoint  string `koanf:"minimax_endpoint"`
+	MinimaxModel     string `koanf:"minimax_model"`
+	WorkerModel      string `koanf:"worker_model"` // "minimax" or "zhipu"
 }
 
 // SandboxConfig holds Worker sandbox configuration.
