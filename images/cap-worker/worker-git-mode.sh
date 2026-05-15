@@ -20,29 +20,31 @@ FILE_LIST=$(curl -sL --noproxy "*" "$GIT_API/files" --max-time 10 2>/dev/null ||
 FILE_COUNT=$(echo "$FILE_LIST" | jq '.files | length' 2>/dev/null || echo 0)
 echo "Project has $FILE_COUNT files"
 
-# Build file tree for LLM context (first 200 files, truncated)
+# Build file tree for LLM context
 FILE_TREE=$(echo "$FILE_LIST" | jq -r '.files[:200][]' 2>/dev/null | head -200 | tr '\n' ',' | sed 's/,$//')
 
-# ─── Step 2: Read key files for context ──────────────────────────────────────
+# ─── Step 2: Call LLM ────────────────────────────────────────────────────────
 echo ""
 echo "=== Step 2: Calling LLM ($LLM_MODEL) ==="
 
-# Build system prompt with file list
-SYSTEM_PROMPT="You are a coding agent. You receive a task and a list of existing project files.
-Respond with a JSON object containing your changes. Format:
-{\"summary\": \"what you did\", \"files\": [{\"path\": \"filename\", \"content\": \"file content\"}]}
+SYSTEM_PROMPT='You are a coding agent. You receive a task and a list of existing project files.
+You MUST respond with ONLY a JSON object. No explanation, no markdown, no code fences.
+JSON format:
+{"summary": "brief description of what you did", "files": [{"path": "filename.ext", "content": "full file content here"}]}
+
 Rules:
-- Paths must be relative, no leading ./
-- Only include files you create or modify
-- Return valid JSON only, no markdown fences"
+- Output ONLY the JSON object, nothing else
+- Paths must be relative (e.g. "app.py", "src/main.go")
+- Include ALL files you create or modify
+- content must be the COMPLETE file content, not a snippet
+- For multi-file tasks, include ALL files in the files array'
 
 USER_PROMPT="Task: $TASK_GOAL
 
-Existing files in project: $FILE_TREE
+Existing files: ${FILE_TREE:-none}
 
-Produce the file changes needed to complete this task."
+Output the JSON now:"
 
-# Build LLM request
 LLM_BODY=$(jq -n \
     --arg sys "$SYSTEM_PROMPT" \
     --arg user "$USER_PROMPT" \
@@ -53,15 +55,15 @@ LLM_BODY=$(jq -n \
             {role: "system", content: $sys},
             {role: "user", content: $user}
         ],
-        temperature: 0.3,
-        max_tokens: 4096
+        temperature: 0.2,
+        max_tokens: 8192
     }')
 
 RESPONSE=$(curl -sL "$LLM_API_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $LLM_API_KEY" \
     -d "$LLM_BODY" \
-    --max-time 60 2>/dev/null)
+    --max-time 120 2>/dev/null)
 
 if [ -z "$RESPONSE" ]; then
     echo "FATAL: LLM call returned empty response"
@@ -75,18 +77,68 @@ if [ -z "$RESPONSE_CONTENT" ]; then
     exit 1
 fi
 
-# Strip markdown fences
-CLEAN_RESPONSE=$(echo "$RESPONSE_CONTENT" | sed 's/^```json[[:space:]]*//;s/^```[[:space:]]*//;s/```$//' | tr -d '\r')
-
 RESPONSE_LEN=${#RESPONSE_CONTENT}
 echo "LLM response received ($RESPONSE_LEN chars)"
+
+# ─── Step 2.5: Robust JSON extraction ─────────────────────────────────────────
+# Try multiple strategies to extract valid JSON from LLM output
+
+extract_json() {
+    local input="$1"
+    
+    # Strategy 1: Direct parse (already valid JSON)
+    if echo "$input" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
+        echo "$input"
+        return 0
+    fi
+    
+    # Strategy 2: Strip markdown fences
+    local stripped
+    stripped=$(echo "$input" | sed 's/^```json[[:space:]]*//;s/^```[[:space:]]*//;s/```[[:space:]]*$//' | tr -d '\r' | xargs)
+    if echo "$stripped" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
+        echo "$stripped"
+        return 0
+    fi
+    
+    # Strategy 3: Find JSON object between first { and last }
+    local json_candidate
+    local first_brace=$(echo "$input" | grep -bo '{' | head -1 | cut -d: -f1)
+    local last_brace=$(echo "$input" | grep -bo '}' | tail -1 | cut -d: -f1)
+    
+    if [ -n "$first_brace" ] && [ -n "$last_brace" ] && [ "$last_brace" -gt "$first_brace" ]; then
+        json_candidate=$(echo "$input" | cut -c$((first_brace+1))-$((last_brace+1)))
+        if echo "$json_candidate" | jq -e 'type == "object" and has("files")' >/dev/null 2>&1; then
+            echo "$json_candidate"
+            return 0
+        fi
+    fi
+    
+    # Strategy 4: Find by "files" key pattern
+    json_candidate=$(echo "$input" | grep -o '{.*"files".*}' | head -1)
+    if [ -n "$json_candidate" ] && echo "$json_candidate" | jq -e 'has("files")' >/dev/null 2>&1; then
+        echo "$json_candidate"
+        return 0
+    fi
+    
+    return 1
+}
+
+CLEAN_RESPONSE=$(extract_json "$RESPONSE_CONTENT")
+
+if [ -z "$CLEAN_RESPONSE" ]; then
+    echo "WARNING: Could not extract valid JSON from LLM response"
+    echo "Response preview: $(echo "$RESPONSE_CONTENT" | head -5)"
+    # Try to save whatever we got as a debug artifact
+    SUMMARY="LLM response was not valid JSON (len=$RESPONSE_LEN)"
+    FILES_JSON=""
+else
+    SUMMARY=$(echo "$CLEAN_RESPONSE" | jq -r '.summary // "Completed"' 2>/dev/null)
+    FILES_JSON=$(echo "$CLEAN_RESPONSE" | jq -r '.files // empty' 2>/dev/null)
+fi
 
 # ─── Step 3: Apply changes ───────────────────────────────────────────────────
 echo ""
 echo "=== Step 3: Applying changes ==="
-
-SUMMARY=$(echo "$CLEAN_RESPONSE" | jq -r '.summary // "No summary"' 2>/dev/null)
-FILES_JSON=$(echo "$CLEAN_RESPONSE" | jq -r '.files // empty' 2>/dev/null)
 
 if [ -z "$FILES_JSON" ]; then
     echo "No file operations in response"
@@ -109,8 +161,8 @@ else
 
         FULL_PATH="$WORK_DIR/$FILE_PATH"
         mkdir -p "$(dirname "$FULL_PATH")"
-        echo "$CONTENT" > "$FULL_PATH"
-        echo "  [write] $FILE_PATH ($(echo "$CONTENT" | wc -c | tr -d ' ') bytes)"
+        printf '%s' "$CONTENT" > "$FULL_PATH"
+        echo "  [write] $FILE_PATH ($(wc -c < "$FULL_PATH") bytes)"
     done
 fi
 
@@ -141,12 +193,16 @@ echo "Diff size: $DIFF_SIZE bytes"
 echo ""
 echo "=== Step 6: Reporting artifacts ==="
 
-CHANGED_FILES=$(git diff --name-only 2>/dev/null | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
+# Get changed files from git diff in the workspace
+CHANGED_FILES="[]"
+if [ -d ".git" ]; then
+    CHANGED_FILES=$(git diff --name-only 2>/dev/null | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
+fi
 
 RESULT_PAYLOAD=$(jq -n \
     --arg task_id "$TASK_ID" \
     --arg summary "$SUMMARY" \
-    --argjson changed_files "${CHANGED_FILES:-[]}" \
+    --argjson changed_files "$CHANGED_FILES" \
     --arg diff "$DIFF_RESULT" \
     --arg llm_response "$RESPONSE_CONTENT" \
     --arg commit_sha "$COMMIT_SHA" \
