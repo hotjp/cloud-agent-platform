@@ -1,5 +1,5 @@
 {
-  "task_id": "task_122",
+  "task_id": "task_124",
   "template": "task",
   "score": 75,
   "max_score": 100,
@@ -21,7 +21,7 @@
       "passed": false
     },
     {
-      "score": 60,
+      "score": 70,
       "issues": [
         {
           "type": "long_file",
@@ -40,19 +40,13 @@
           "severity": "medium",
           "file": "ent/agentexperience_query.go",
           "message": "文件过长 (638 行)"
-        },
-        {
-          "type": "long_file",
-          "severity": "medium",
-          "file": "ent/task_query.go",
-          "message": "文件过长 (712 行)"
         }
       ],
       "suggestions": [
         "建议拆分超长文件，每个文件保持500行以内"
       ],
       "stats": {
-        "total_lines": 3955,
+        "total_lines": 3718,
         "files_checked": 10
       },
       "passed": true
@@ -81,9 +75,9 @@
       "issues": [],
       "suggestions": [],
       "stats": {
-        "test_files": 46,
-        "code_files": 199,
-        "test_ratio": "23.1%"
+        "test_files": 59,
+        "code_files": 251,
+        "test_ratio": "23.5%"
       },
       "passed": true
     }
@@ -107,17 +101,11 @@
       "severity": "medium",
       "file": "ent/agentexperience_query.go",
       "message": "文件过长 (638 行)"
-    },
-    {
-      "type": "long_file",
-      "severity": "medium",
-      "file": "ent/task_query.go",
-      "message": "文件过长 (712 行)"
     }
   ],
   "suggestions": [
     "文档覆盖率中等，建议补充关键函数的文档",
     "建议拆分超长文件，每个文件保持500行以内"
   ],
-  "timestamp": "2026-05-15T12:13:07.692009"
+  "timestamp": "2026-05-15T12:33:22.781530"
 }
