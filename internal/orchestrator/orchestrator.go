@@ -601,7 +601,7 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 	now := time.Now().UTC()
 	session.FinishedAt = &now
 
-	// Emit TaskCompletedV1 event
+	// Build completion payload
 	completedPayload := &TaskCompletedPayload{
 		TaskID:           task.ID,
 		SubtaskID:        session.SubtaskID,
@@ -621,14 +621,16 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 		return
 	}
 
-	// Transition task to reviewing state
-	if err := task.TransitionTo("CompleteExecution"); err != nil {
-		o.logger.Warn("task transition to reviewing failed",
+	// Auto-complete: skip reviewing, go directly to completed (post-review model).
+	// Humans audit results asynchronously via dashboard, not as a gate.
+	if err := task.TransitionTo("AutoComplete"); err != nil {
+		o.logger.Warn("task auto-complete transition failed",
 			zap.String("task_id", task.ID),
 			zap.Error(err),
 		)
 	}
 
+	// Write outbox event + update status to completed in a single transaction
 	event, err := domain.NewDomainEvent("Task", task.ID, EventTypeTaskCompleted, payloadBytes, int(task.Version))
 	if err != nil {
 		o.logger.Error("failed to create TaskCompletedV1 event",
@@ -638,10 +640,9 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 		return
 	}
 
-	// Write to outbox
 	tx, err := o.txManager.BeginTx(ctx)
 	if err != nil {
-		o.logger.Error("failed to begin transaction for TaskCompletedV1",
+		o.logger.Error("failed to begin transaction for task completion",
 			zap.String("session_id", session.ID),
 			zap.Error(err),
 		)
@@ -657,43 +658,7 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 		return
 	}
 
-	// Update task status to reviewing
-	if _, err := o.taskRepo.UpdateStatus(ctx, task.ID, domain.TaskStatusReviewing, task.Version); err != nil {
-		tx.Rollback(ctx)
-		o.logger.Error("failed to update task status to reviewing",
-			zap.String("task_id", task.ID),
-			zap.Error(err),
-		)
-		return
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		o.logger.Error("failed to commit TaskCompletedV1",
-			zap.String("session_id", session.ID),
-			zap.Error(err),
-		)
-		return
-	}
-
-	// Auto-transition to completed after successful execution (review passed)
-	if err := task.TransitionTo("ReviewPassed"); err != nil {
-		o.logger.Warn("task transition to completed failed",
-			zap.String("task_id", task.ID),
-			zap.Error(err),
-		)
-	}
-
-	// Final commit for completed state
-	tx, err = o.txManager.BeginTx(ctx)
-	if err != nil {
-		o.logger.Error("failed to begin transaction for final state",
-			zap.String("session_id", session.ID),
-			zap.Error(err),
-		)
-		return
-	}
-
-	// Update task status to completed
+	// Update task status directly to completed (skip reviewing)
 	if _, err := o.taskRepo.UpdateStatus(ctx, task.ID, domain.TaskStatusCompleted, task.Version); err != nil {
 		tx.Rollback(ctx)
 		o.logger.Error("failed to update task status to completed",
@@ -704,7 +669,7 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		o.logger.Error("failed to commit final state",
+		o.logger.Error("failed to commit task completion",
 			zap.String("session_id", session.ID),
 			zap.Error(err),
 		)
@@ -717,8 +682,6 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 		zap.String("summary", result.Summary),
 	)
 }
-
-// handleAgentFailure handles a failed agent execution.
 func (o *OrchestratorImpl) handleAgentFailure(ctx context.Context, session *agentSession, task *domain.Task, err error) {
 	now := time.Now().UTC()
 	session.FinishedAt = &now

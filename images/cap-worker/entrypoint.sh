@@ -1,17 +1,14 @@
 #!/bin/bash
 # CAP Worker Entrypoint
-# Full chain: clone → LLM call → apply changes → commit → push
+# clone → LLM call → apply changes → generate diff → report artifacts via API
 set -uo pipefail
 
 # ─── Proxy setup ─────────────────────────────────────────────────────────────
-# Override Docker Desktop's broken proxy (127.0.0.1 → host.docker.internal)
 if [ -n "${HTTP_PROXY:-}" ] || [ -n "${HTTPS_PROXY:-}" ]; then
     echo "Proxy configured"
 fi
-# Ensure lowercase variants exist
 [ -n "${HTTP_PROXY:-}" ] && [ -z "${http_proxy:-}" ] && export http_proxy="$HTTP_PROXY"
 [ -n "${HTTPS_PROXY:-}" ] && [ -z "${https_proxy:-}" ] && export https_proxy="$HTTPS_PROXY"
-# Git needs explicit proxy config
 if [ -n "${https_proxy:-}${HTTPS_PROXY:-}" ]; then
     GIT_PROXY="${https_proxy:-${HTTPS_PROXY:-}}"
     git config --global http.proxy "$GIT_PROXY" 2>/dev/null || true
@@ -21,38 +18,68 @@ fi
 # ─── Validate required env vars ──────────────────────────────────────────────
 for var in TASK_ID TASK_GOAL REPO_URL BASE_BRANCH RESULT_BRANCH LLM_API_URL LLM_API_KEY LLM_MODEL; do
     if [ -z "${!var:-}" ]; then
-        echo "ERROR: required env var $var is not set"
+        echo "FATAL: required env var $var is not set"
         exit 1
     fi
 done
+
+# CAP_API_URL is the platform's own API (for artifact reporting)
+CAP_API_URL="${CAP_API_URL:-http://host.docker.internal:18080}"
 
 echo "=== CAP Worker Started ==="
 echo "Task: $TASK_ID"
 echo "Goal: $TASK_GOAL"
 echo "Repo: $REPO_URL ($BASE_BRANCH → $RESULT_BRANCH)"
 
-WORKING_DIR="${WORKING_DIR:-.}"
 CLONE_DIR="/workspace/repo"
+
+# ─── Helper: report artifact back to platform ────────────────────────────────
+report_artifact() {
+    local artifact_type="$1"  # "diff" or "files"
+    local content="$2"
+
+    if [ -z "$CAP_API_URL" ]; then
+        echo "Skip artifact report (no CAP_API_URL)"
+        return
+    fi
+
+    # Build artifact JSON
+    local payload
+    payload=$(jq -n \
+        --arg task_id "$TASK_ID" \
+        --arg type "$artifact_type" \
+        --arg content "$content" \
+        '{task_id: $task_id, type: $type, content: $content}')
+
+    curl -sL -X POST "$CAP_API_URL/api/v1/tasks/$TASK_ID/artifacts" \
+        -H "Content-Type: application/json" \
+        -d "$payload" \
+        --max-time 10 > /dev/null 2>&1 || {
+        echo "WARNING: failed to report artifact to platform"
+    }
+}
 
 # ─── Step 1: Clone ───────────────────────────────────────────────────────────
 echo ""
 echo "=== Step 1: Cloning repository ==="
 git clone --depth 1 --single-branch --branch "$BASE_BRANCH" "$REPO_URL" "$CLONE_DIR" 2>&1 || {
-    echo "Clone failed with exit code $?"
+    echo "Clone failed: $?"
     exit 1
 }
 cd "$CLONE_DIR"
 git checkout -b "$RESULT_BRANCH" 2>&1 || {
-    echo "Checkout branch failed: $?"
+    echo "Checkout failed: $?"
     exit 1
 }
 echo "Clone complete. HEAD: $(git rev-parse HEAD)"
+
+# Save the initial tree hash for diff later
+INITIAL_TREE=$(git write-tree 2>/dev/null || echo "")
 
 # ─── Step 2: Call LLM ────────────────────────────────────────────────────────
 echo ""
 echo "=== Step 2: Calling LLM ($LLM_MODEL) ==="
 
-# Collect file listing
 FILE_LIST=$(find . -type f \
     -not -path './.git/*' \
     -not -path './vendor/*' \
@@ -61,7 +88,6 @@ FILE_LIST=$(find . -type f \
     -not -name 'go.sum' \
     2>/dev/null | head -80)
 
-# Build JSON request body with jq (avoids all escaping issues)
 REQUEST_BODY=$(jq -n \
     --arg model "$LLM_MODEL" \
     --arg goal "$TASK_GOAL" \
@@ -78,10 +104,13 @@ REQUEST_BODY=$(jq -n \
                 "## Repository Files\n" + $files + "\n\n" +
                 (if $constraints != "" then "## Constraints\n" + $constraints + "\n\n" else "" end) +
                 (if $verification != "" then "## Verification\n" + $verification + "\n\n" else "" end) +
-                "## Output Format\n" +
-                "Respond with a JSON object:\n" +
-                "{\"files\":[{\"path\":\"relative/path\",\"content\":\"file content here\"}],\"summary\":\"what you changed\"}\n" +
-                "Create or modify files. Do NOT wrap in markdown fences."
+                "## Output Format (CRITICAL)\n" +
+                "You MUST respond with ONLY a JSON object, no markdown fences, no explanation before or after:\n" +
+                "{\"files\":[{\"path\":\"relative/path/to/file\",\"content\":\"complete file content here\"}],\"summary\":\"brief description of changes\"}\n" +
+                "- Each file MUST have the complete content, not diffs or patches.\n" +
+                "- path must be relative to repo root (e.g. src/main.go, NOT ./src/main.go).\n" +
+                "- Include ALL files that need to be created or modified.\n" +
+                "- Do NOT include unchanged files."
             )
         }],
         temperature: 0.3,
@@ -94,7 +123,6 @@ LLM_RESPONSE=$(curl -sL -X POST "$LLM_API_URL" \
     -d "$REQUEST_BODY" \
     --max-time 120)
 
-# Extract content from response
 RESPONSE_CONTENT=$(echo "$LLM_RESPONSE" | jq -r '.choices[0].message.content // empty' 2>/dev/null)
 
 if [ -z "$RESPONSE_CONTENT" ]; then
@@ -110,19 +138,17 @@ echo "LLM response received ($RESPONSE_LEN chars)"
 echo ""
 echo "=== Step 3: Applying changes ==="
 
-# Strip markdown code fences if present
-CLEAN_RESPONSE=$(echo "$RESPONSE_CONTENT" | sed 's/^```json//;s/^```//;s/```$//' | tr -d '\r')
+# Strip markdown fences
+CLEAN_RESPONSE=$(echo "$RESPONSE_CONTENT" | sed 's/^```json[[:space:]]*//;s/^```[[:space:]]*//;s/```$//' | tr -d '\r')
 
-# Try to parse as JSON
+# Parse JSON
 FILES_JSON=$(echo "$CLEAN_RESPONSE" | jq -r '.files // empty' 2>/dev/null)
-
 if [ -z "$FILES_JSON" ]; then
-    echo "No .files array found in LLM response. Attempting to extract JSON block..."
-    # Try to find any JSON object in the response
     FILES_JSON=$(echo "$CLEAN_RESPONSE" | grep -o '{.*}' | head -1 | jq -r '.files // empty' 2>/dev/null)
 fi
 
-SUMMARY=$(echo "$CLEAN_RESPONSE" | jq -r '.summary // "No summary provided"' 2>/dev/null)
+SUMMARY=$(echo "$CLEAN_RESPONSE" | jq -r '.summary // "No summary"' 2>/dev/null)
+CHANGED_FILES="[]"
 
 if [ -n "$FILES_JSON" ]; then
     FILE_COUNT=$(echo "$FILES_JSON" | jq 'length' 2>/dev/null)
@@ -137,40 +163,93 @@ if [ -n "$FILES_JSON" ]; then
             continue
         fi
 
+        # Strip leading ./ if present
+        FILE_PATH=$(echo "$FILE_PATH" | sed 's|^\./||')
+
         mkdir -p "$(dirname "$FILE_PATH")"
-        echo "$CONTENT" > "$FILE_PATH"
-        echo "  [write] $FILE_PATH ($(echo "$CONTENT" | wc -c) bytes)"
+        printf '%s' "$CONTENT" > "$FILE_PATH"
+        echo "  [write] $FILE_PATH ($(printf '%s' "$CONTENT" | wc -c) bytes)"
     done
 else
-    echo "WARNING: Could not parse file operations from LLM response"
-    echo "Saving raw response as result.txt"
-    echo "$RESPONSE_CONTENT" > /workspace/result.txt
+    echo "WARNING: Could not parse file operations"
+    exit 1
 fi
 
-echo ""
 echo "Summary: $SUMMARY"
 
-# ─── Step 4: Commit ──────────────────────────────────────────────────────────
+# ─── Step 4: Generate diff ───────────────────────────────────────────────────
 echo ""
-echo "=== Step 4: Committing ==="
+echo "=== Step 4: Generating diff ==="
+
+git add -A
+DIFF_OUTPUT=$(git diff --cached 2>/dev/null)
+DIFF_LEN=${#DIFF_OUTPUT}
+
+if [ "$DIFF_LEN" -eq 0 ]; then
+    echo "No changes detected"
+    DIFF_OUTPUT=""
+else
+    echo "Diff: $DIFF_LEN bytes"
+fi
+
+# Build changed files list
+CHANGED_FILES=$(git diff --cached --name-only 2>/dev/null | jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null || echo "[]")
+CHANGED_COUNT=$(echo "$CHANGED_FILES" | jq 'length' 2>/dev/null || echo 0)
+echo "Changed files: $CHANGED_COUNT"
+
+# ─── Step 5: Report artifacts ────────────────────────────────────────────────
+echo ""
+echo "=== Step 5: Reporting artifacts ==="
+
+# Report the full result as a single artifact payload
+RESULT_PAYLOAD=$(jq -n \
+    --arg task_id "$TASK_ID" \
+    --arg summary "$SUMMARY" \
+    --argjson changed_files "${CHANGED_FILES:-[]}" \
+    --arg diff "$DIFF_OUTPUT" \
+    --arg llm_response "$RESPONSE_CONTENT" \
+    '{
+        task_id: $task_id,
+        summary: $summary,
+        changed_files: $changed_files,
+        diff: $diff,
+        llm_response: $llm_response,
+        diff_size: ($diff | length),
+        file_count: ($changed_files | length)
+    }')
+
+curl -sL -X POST "$CAP_API_URL/api/v1/tasks/$TASK_ID/artifacts" \
+    -H "Content-Type: application/json" \
+    -d "$RESULT_PAYLOAD" \
+    --max-time 10 2>&1 || echo "WARNING: artifact report failed"
+
+echo "Artifact reported"
+
+# ─── Step 6: Git commit (best effort, for audit trail) ───────────────────────
+echo ""
+echo "=== Step 6: Commit (audit trail) ==="
 
 git config user.email "agent@cloud-agent-platform.dev"
 git config user.name "CAP Agent"
 
 git add -A
-
-if git diff --cached --quiet 2>/dev/null; then
-    echo "No changes to commit"
-else
+if ! git diff --cached --quiet 2>/dev/null; then
     COMMIT_MSG="agent($TASK_ID): $TASK_GOAL"
     git commit -m "${COMMIT_MSG:0:200}" 2>&1
-    echo "Changes committed"
+    echo "Committed"
 
-    # Push (may fail if no push access — that's OK for testing)
-    git push origin "$RESULT_BRANCH" 2>&1 && echo "Pushed to $RESULT_BRANCH" || echo "Push failed (expected for test repos)"
+    # Push if credentials available
+    if [ -n "${GIT_TOKEN:-}" ]; then
+        PUSH_URL=$(echo "$REPO_URL" | sed "s|https://|https://${GIT_TOKEN}@|")
+        git push "$PUSH_URL" "$RESULT_BRANCH" 2>&1 && echo "Pushed" || echo "Push failed"
+    else
+        echo "No GIT_TOKEN — skipping push"
+    fi
 fi
 
 echo ""
 echo "=== CAP Worker Complete ==="
 echo "Task: $TASK_ID"
+echo "Files changed: $CHANGED_COUNT"
+echo "Diff size: $DIFF_LEN bytes"
 echo "Summary: $SUMMARY"

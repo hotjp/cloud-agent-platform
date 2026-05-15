@@ -24,6 +24,7 @@ type AdapterConfig struct {
 	LLMAPIURL   string
 	LLMAPIKey   string
 	LLMModel    string
+	CAPAPIURL   string // Platform API URL for artifact reporting
 }
 
 // DefaultAdapterConfig returns sensible defaults.
@@ -33,6 +34,7 @@ func DefaultAdapterConfig() AdapterConfig {
 		LLMAPIURL:   "https://open.bigmodel.cn/api/paas/v4/chat/completions",
 		LLMAPIKey:   "", // Must be configured
 		LLMModel:    "glm-4-flash",
+		CAPAPIURL:   "http://host.docker.internal:18080",
 	}
 }
 
@@ -51,6 +53,9 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 	env["LLM_API_URL"] = a.config.LLMAPIURL
 	env["LLM_API_KEY"] = a.config.LLMAPIKey
 	env["LLM_MODEL"] = a.config.LLMModel
+
+	// CAP API URL for artifact reporting — worker calls back to the platform
+	env["CAP_API_URL"] = a.config.CAPAPIURL
 
 	// Proxy config for container (Docker Desktop uses host.docker.internal)
 	// Docker Desktop auto-injects HTTP_PROXY=http://127.0.0.1:7890 which doesn't work inside containers.

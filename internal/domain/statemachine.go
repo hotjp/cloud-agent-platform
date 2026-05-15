@@ -538,6 +538,8 @@ var TaskStateMachineDefinition = []Transition[TaskStatus, string]{
 
 	// running -> reviewing (agent completes)
 	{From: TaskStatusRunning, To: TaskStatusReviewing, Event: "CompleteExecution"},
+	// running -> completed (auto-complete, skip review — post-review model)
+	{From: TaskStatusRunning, To: TaskStatusCompleted, Event: "AutoComplete"},
 	// running -> failed (agent error)
 	{From: TaskStatusRunning, To: TaskStatusFailed, Event: "ExecutionFailed"},
 	// running -> confirming (needs user confirmation)
@@ -579,6 +581,8 @@ var SubtaskStateMachineDefinition = []Transition[TaskStatus, string]{
 
 	// running -> reviewing (execution complete)
 	{From: TaskStatusRunning, To: TaskStatusReviewing, Event: "CompleteExecution"},
+	// running -> completed (auto-complete, skip review)
+	{From: TaskStatusRunning, To: TaskStatusCompleted, Event: "AutoComplete"},
 	// running -> failed (execution error)
 	{From: TaskStatusRunning, To: TaskStatusFailed, Event: "ExecutionFailed"},
 	// running -> cancelled (user cancel)
