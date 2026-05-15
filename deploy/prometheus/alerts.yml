@@ -1,0 +1,149 @@
+# Prometheus Alerting Rules for Cloud Agent Platform
+# These rules use cap_ prefixed metrics exposed at :9090/metrics
+groups:
+  - name: cap_task_alerts
+    rules:
+      # TaskStuckAlert: Detects tasks running longer than 30 minutes
+      # Note: Requires cap_task_running gauge (increment on task start, decrement on complete)
+      #       which is not yet implemented. Until then, this alert uses task duration histogram.
+      # Recommended: Add cap_task_running gauge for accurate stuck task detection.
+      - alert: TaskStuckAlert
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(cap_task_duration_seconds_bucket{status="running"}[5m])) by (le)
+          ) > 1800
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Task has been running for more than 30 minutes"
+          description: "Task has been in running state for > 30 minutes. Task ID: {{ $labels.task_id }}"
+
+      # TaskQueueBacklogAlert: Pending tasks accumulating (alternative to stuck detection)
+      - alert: TaskQueueBacklogAlert
+        expr: |
+          sum(increase(cap_task_total{status="pending"}[30m])) > 50
+          and
+          sum(increase(cap_task_total{status="completed"}[30m])) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Task queue backlog detected"
+          description: "Many pending tasks ({{ $value }}) with no completions in 30 minutes"
+
+  - name: cap_worker_alerts
+    rules:
+      # WorkerPoolExhausted: No available workers in the pool
+      - alert: WorkerPoolExhausted
+        expr: cap_worker_pool_size{state="available"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Worker pool exhausted - no available workers"
+          description: "All {{ $labels.instance }} workers are busy. Available workers: {{ $value }}"
+
+      # WorkerPoolNearExhausted: Less than 20% workers available
+      - alert: WorkerPoolNearExhausted
+        expr: |
+          cap_worker_pool_size{state="available"}
+          /
+          cap_worker_pool_size{state="total"} < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Worker pool near exhaustion"
+          description: "Less than 20% workers available on {{ $labels.instance }}"
+
+  - name: cap_llm_alerts
+    rules:
+      # LLMLatencyHigh: P95 LLM request latency exceeds 30 seconds
+      - alert: LLMLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(cap_llm_request_duration_seconds_bucket[5m])) by (le, model)
+          ) > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM request latency is critically high"
+          description: "Model {{ $labels.model }} P95 latency is {{ $value | printf \"%.2f\" }}s (threshold: 30s)"
+
+      # LLMErrorRateHigh: LLM error rate exceeds 10%
+      - alert: LLMErrorRateHigh
+        expr: |
+          sum(rate(cap_llm_request_total{status="failure"}[5m])) by (model)
+          /
+          sum(rate(cap_llm_request_total[5m])) by (model) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM error rate is high"
+          description: "Model {{ $labels.model }} error rate is {{ $value | printf \"%.2f\" }}%"
+
+  - name: cap_outbox_alerts
+    rules:
+      # OutboxBacklog: Pending outbox events exceed 1000
+      - alert: OutboxBacklog
+        expr: cap_outbox_events_pending > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Outbox event backlog is large"
+          description: "{{ $value }} pending outbox events (threshold: 1000)"
+
+      # OutboxCriticalBacklog: Outbox events exceed 5000 (potential outage)
+      - alert: OutboxCriticalBacklog
+        expr: cap_outbox_events_pending > 5000
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Outbox event backlog is critically large"
+          description: "{{ $value }} pending outbox events - possible event processing outage"
+
+  - name: cap_http_alerts
+    rules:
+      # ErrorRateHigh: 5xx error rate exceeds 5%
+      - alert: ErrorRateHigh
+        expr: |
+          sum(rate(cap_http_request_total{status=~"5.."}[5m]))
+          /
+          sum(rate(cap_http_request_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP 5xx error rate is high"
+          description: "5xx error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)"
+
+      # ErrorRateCritical: 5xx error rate exceeds 20%
+      - alert: ErrorRateCritical
+        expr: |
+          sum(rate(cap_http_request_total{status=~"5.."}[5m]))
+          /
+          sum(rate(cap_http_request_total[5m])) > 0.20
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 5xx error rate is critically high"
+          description: "5xx error rate is {{ $value | printf \"%.2f\" }}% (threshold: 20%)"
+
+      # HighLatency: HTTP P95 latency exceeds 5 seconds
+      - alert: HTTPLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(cap_http_request_duration_seconds_bucket[5m])) by (le, method, path)
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTP request latency is high"
+          description: "{{ $labels.method }} {{ $labels.path }} P95 latency is {{ $value | printf \"%.2f\" }}s"

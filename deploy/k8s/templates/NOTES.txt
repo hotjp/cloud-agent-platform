@@ -1,0 +1,48 @@
+{{- $redisHost := include "cloud-agent-platform.redis.host" . -}}
+{{- $minioEndpoint := include "cloud-agent-platform.minio.endpoint" . -}}
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }} and deployed in namespace {{ .Release.Namespace }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }} -n {{ .Release.Namespace }}
+  $ helm get all {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+== Application URLs ==
+
+{{- if .Values.ingress.enabled }}
+Web UI:          https://{{ (index .Values.ingress.hosts 0).host }}
+{{- end }}
+
+Server API:      http://{{ include "cloud-agent-platform.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.server.service.port }}
+Metrics:         http://{{ include "cloud-agent-platform.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.server.service.metricsPort }}/metrics
+
+== External Dependencies ==
+
+PostgreSQL:      {{ if .Values.postgresql.enabled }}embedded{{ else }}{{ .Values.postgresql.external.host }}:{{ .Values.postgresql.external.port }}{{ end }}
+Redis:            {{ if .Values.redis.enabled }}embedded{{ else }}{{ $redisHost }}{{ end }}
+MinIO:            {{ if .Values.minio.enabled }}embedded{{ else }}{{ $minioEndpoint }}{{ end }}
+Telemetry:        {{ .Values.config.telemetry.endpoint }}
+
+== Next Steps ==
+
+1. Create the namespace (if not using default):
+   kubectl create namespace cap
+
+2. Install with custom values:
+   helm install cap ./deploy/k8s \
+     --namespace cap \
+     --set secrets.databaseDsn="postgres://user:password@postgres:5432/cap?sslmode=disable" \
+     --set secrets.jwtSecret="your-secure-jwt-secret" \
+     --set secrets.redisPassword="your-redis-password"
+
+3. Or use an existing values file:
+   helm install cap ./deploy/k8s -f your-values.yaml --namespace cap
+
+== Security Notes ==
+
+- JWT Secret is required and must be set via secrets.jwtSecret
+- Database DSN is required and must be set via secrets.databaseDsn
+- All sensitive values should be provided via Kubernetes Secrets
+- Update secrets regularly and use rotation strategies in production

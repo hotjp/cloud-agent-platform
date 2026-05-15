@@ -1,0 +1,30 @@
+# Patterns to ignore when building packages.
+# This is a subset of the default .helmignore from Helm.
+
+#.git
+#.gitignore
+
+# CVCS
+#.svn
+#.hg
+
+# Go
+*.md
+*.txt
+Dockerfile*
+*.dockerignore
+*.test
+*.go
+go.mod
+go.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Misc
+#*.log
+#*.tmp
+#*.bak

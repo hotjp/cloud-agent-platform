@@ -1,0 +1,123 @@
+{
+  "task_id": "task_122",
+  "template": "task",
+  "score": 75,
+  "max_score": 100,
+  "checks": [
+    {
+      "score": 50,
+      "issues": [],
+      "suggestions": [
+        "文档覆盖率中等，建议补充关键函数的文档"
+      ],
+      "stats": {
+        "total_functions": 1,
+        "documented_functions": 0,
+        "function_coverage": "0.0%",
+        "total_classes": 0,
+        "documented_classes": 0,
+        "class_coverage": "100.0%"
+      },
+      "passed": false
+    },
+    {
+      "score": 60,
+      "issues": [
+        {
+          "type": "long_file",
+          "severity": "medium",
+          "file": "ent/agentcapability_update.go",
+          "message": "文件过长 (929 行)"
+        },
+        {
+          "type": "long_file",
+          "severity": "medium",
+          "file": "ent/agentcapability_query.go",
+          "message": "文件过长 (638 行)"
+        },
+        {
+          "type": "long_file",
+          "severity": "medium",
+          "file": "ent/agentexperience_query.go",
+          "message": "文件过长 (638 行)"
+        },
+        {
+          "type": "long_file",
+          "severity": "medium",
+          "file": "ent/task_query.go",
+          "message": "文件过长 (712 行)"
+        }
+      ],
+      "suggestions": [
+        "建议拆分超长文件，每个文件保持500行以内"
+      ],
+      "stats": {
+        "total_lines": 3955,
+        "files_checked": 10
+      },
+      "passed": true
+    },
+    {
+      "score": 100,
+      "issues": [],
+      "suggestions": [],
+      "stats": {},
+      "passed": true
+    },
+    {
+      "score": 100,
+      "issues": [],
+      "suggestions": [],
+      "stats": {
+        "has_readme": true,
+        "has_gitignore": true,
+        "has_src": false,
+        "has_tests": true
+      },
+      "passed": true
+    },
+    {
+      "score": 100,
+      "issues": [],
+      "suggestions": [],
+      "stats": {
+        "test_files": 46,
+        "code_files": 199,
+        "test_ratio": "23.1%"
+      },
+      "passed": true
+    }
+  ],
+  "failed_required": [],
+  "issues": [
+    {
+      "type": "long_file",
+      "severity": "medium",
+      "file": "ent/agentcapability_update.go",
+      "message": "文件过长 (929 行)"
+    },
+    {
+      "type": "long_file",
+      "severity": "medium",
+      "file": "ent/agentcapability_query.go",
+      "message": "文件过长 (638 行)"
+    },
+    {
+      "type": "long_file",
+      "severity": "medium",
+      "file": "ent/agentexperience_query.go",
+      "message": "文件过长 (638 行)"
+    },
+    {
+      "type": "long_file",
+      "severity": "medium",
+      "file": "ent/task_query.go",
+      "message": "文件过长 (712 行)"
+    }
+  ],
+  "suggestions": [
+    "文档覆盖率中等，建议补充关键函数的文档",
+    "建议拆分超长文件，每个文件保持500行以内"
+  ],
+  "timestamp": "2026-05-15T12:13:07.692009"
+}

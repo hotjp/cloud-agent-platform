@@ -1,0 +1,246 @@
+acceptance:
+- 数据完整性校验通过
+- 处理完成
+description: 数据处理流程模板
+ralph:
+  enabled: true
+  max_iterations: 7
+  iteration_stages:
+    - iteration: 1
+      name: "数据可用"
+      focus:
+        - "数据成功加载"
+        - "基本流程跑通"
+      priority_checks:
+        - "data_loadable"
+        - "pipeline_runs"
+      ignore_checks:
+        - "data_quality"
+        - "performance"
+      suggestion: |
+        📊 **第1轮迭代：数据可用**
+        
+        **目标**: 让数据流动起来，基本流程跑通
+        
+        **重点关注**:
+        - 成功加载数据源
+        - 基本处理流程可以运行
+        - 能够输出初步结果
+        - 建立最小可用管道
+        
+        **可以忽略**:
+        - 数据质量问题
+        - 性能优化
+        
+        💡 提示：先让数据跑起来，不要在初期过度优化
+        
+    - iteration: 2
+      name: "数据质量"
+      focus:
+        - "处理缺失值"
+        - "异常值检测"
+      priority_checks:
+        - "missing_values"
+        - "outlier_detection"
+      ignore_checks:
+        - "performance"
+        - "visualization"
+      suggestion: |
+        🧹 **第2轮迭代：数据质量**
+        
+        **目标**: 清洗数据，提高数据质量
+        
+        **重点关注**:
+        - 处理缺失值
+        - 检测和处理异常值
+        - 数据类型转换
+        - 数据格式标准化
+        
+        **可以忽略**:
+        - 性能优化
+        - 可视化
+        
+        💡 提示：垃圾进垃圾出，数据质量是分析的基础
+        
+    - iteration: 3
+      name: "功能完整"
+      focus:
+        - "实现所有步骤"
+        - "完善处理逻辑"
+      priority_checks:
+        - "all_steps_implemented"
+        - "logic_complete"
+      ignore_checks:
+        - "optimization"
+      suggestion: |
+        🔧 **第3轮迭代：功能完整**
+        
+        **目标**: 实现所有规划的处理步骤
+        
+        **重点关注**:
+        - 实现所有数据处理步骤
+        - 完善处理逻辑
+        - 添加错误处理
+        - 补充数据验证
+        
+        **可以忽略**:
+        - 性能优化
+        
+        💡 提示：确保功能完整，处理逻辑健壮
+        
+    - iteration: 4
+      name: "性能优化"
+      focus:
+        - "优化处理速度"
+        - "减少内存占用"
+      priority_checks:
+        - "processing_speed"
+        - "memory_usage"
+      ignore_checks:
+        - "advanced_features"
+      suggestion: |
+        ⚡ **第4轮迭代：性能优化**
+        
+        **目标**: 提升处理效率，优化资源使用
+        
+        **重点关注**:
+        - 优化处理速度
+        - 减少内存占用
+        - 支持大数据处理
+        - 优化 I/O 操作
+        
+        **优化方向**:
+        - 向量化操作
+        - 批处理优化
+        - 缓存策略
+        - 并行处理
+        
+        💡 提示：使用性能分析工具定位瓶颈
+        
+    - iteration: 5
+      name: "可视化"
+      focus:
+        - "添加图表"
+        - "完善可视化"
+      priority_checks:
+        - "charts_added"
+        - "visualization_quality"
+      safety_checks:
+        - "可视化不应影响数据处理逻辑"
+        - "保存可视化前的数据状态"
+      suggestion: |
+        📈 **第5轮迭代：可视化**
+        
+        **目标**: 添加数据可视化，展示洞察
+        
+        **重点关注**:
+        - 添加数据图表
+        - 完善可视化效果
+        - 创建交互式可视化
+        - 生成分析报告
+        
+        ⚠️ **注意事项**:
+        - 可视化不应改变数据处理逻辑
+        - 保持数据处理和可视化分离
+        
+        💡 提示：好的可视化让数据会说话
+        
+    - iteration: 6
+      name: "文档编写"
+      focus:
+        - "编写文档"
+        - "添加注释"
+      priority_checks:
+        - "documentation"
+        - "code_comments"
+      suggestion: |
+        📝 **第6轮迭代：文档编写**
+        
+        **目标**: 完善文档，提高可维护性
+        
+        **重点关注**:
+        - 编写使用文档
+        - 添加代码注释
+        - 说明数据流程
+        - 记录关键决策
+        
+        **文档包含**:
+        - 数据源说明
+        - 处理步骤说明
+        - 输出格式说明
+        - 使用示例
+        
+        💡 提示：好的文档让他人能快速理解和使用
+        
+    - iteration: 7
+      name: "交付验证"
+      focus:
+        - "完整测试"
+        - "文档审核"
+      priority_checks:
+        - "full_test"
+        - "doc_review"
+      suggestion: |
+        ✅ **第7轮迭代：交付验证**
+        
+        **目标**: 全面验证，准备交付
+        
+        **重点关注**:
+        - 运行完整测试
+        - 审核文档完整性
+        - 验证输出正确性
+        - 检查可重现性
+        
+        **最终检查**:
+        - 所有测试通过
+        - 文档完整准确
+        - 输出结果正确
+        - 可重现执行
+        
+        💡 提示：充分的验证确保交付质量
+  quality_gates:
+    - type: data_integrity
+      check: "verify_data_integrity"
+      required: true
+      weight: 0.4
+    - type: pipeline_success
+      check: "check_pipeline_status"
+      required: true
+      weight: 0.3
+    - type: output_valid
+      check: "validate_output"
+      required: true
+      weight: 0.2
+  optimization_hints: true
+keywords:
+- 数据
+- 采集
+- 清洗
+- 分析
+- ETL
+- pipeline
+- data
+- 处理
+- 转换
+name: data-pipeline
+states:
+- pending
+- running
+- failed
+- success
+structure: "# {{ id }}\n\n## ⚠️ 重要提示（Agent 必读）\n\n**当前位置**: `.long-run-agent/tasks/{{id}}.md`（任务描述文件）\n\
+  \n**工作目录**: 项目根目录（`.long-run-agent` 的同级目录）\n\n**产出物位置**: 请在 `data/`、`notebooks/`、`src/`\
+  \ 或适当位置创建\n\n**这是配置文件**，不是最终产出！\n\n## 数据源\n\n{% if data_source %}\n{{ data_source\
+  \ }}\n{% else %}\n<!-- 数据来源说明 -->\n{% endif %}\n\n## 处理步骤\n1. \n2. \n3. \n\n## 输出格式\n\
+  \n<!-- 输出数据格式 -->\n\n## 异常处理\n\n<!-- 异常情况处理 -->\n"
+template_engine: jinja2
+transitions:
+  failed:
+  - running
+  pending:
+  - running
+  running:
+  - failed
+  - success
+  success: []
+version: '2.0'

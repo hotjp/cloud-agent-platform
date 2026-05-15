@@ -63,6 +63,16 @@ type ExecOptions struct {
 	Timeout time.Duration
 	// Stdin provides input to the command.
 	Stdin []byte
+	// GitOptions configures post-execution git commit/push.
+	GitOptions *GitOptions
+}
+
+// GitOptions configures git operations after execution.
+type GitOptions struct {
+	DoGitCommit bool
+	CommitMsg   string
+	Branch      string
+	Remote      string
 }
 
 // ExecResult contains the result of command execution.

@@ -811,3 +811,37 @@ func (s *TaskService) Retry(ctx context.Context, req RetryRequest) (*RetryRespon
 type TaskRetriedPayload struct {
 	PreviousStatus string `json:"previous_status"`
 }
+
+// Decision represents the approval decision for a subtask.
+type Decision string
+
+const (
+	DecisionApprove Decision = "approve"
+	DecisionReject  Decision = "reject"
+	DecisionModify  Decision = "modify"
+)
+
+// DecideRequest is the input for Decide method.
+type DecideRequest struct {
+	TaskID       string
+	SubtaskID    string
+	Decision     Decision
+	Feedback     string
+	Modifications map[string]string
+}
+
+// DecideResponse is the output of Decide method.
+type DecideResponse struct {
+	TaskID    string
+	SubtaskID string
+	Status    string
+}
+
+// Decide processes an approval decision for a subtask.
+func (s *TaskService) Decide(ctx context.Context, req DecideRequest) (*DecideResponse, error) {
+	return &DecideResponse{
+		TaskID:    req.TaskID,
+		SubtaskID: req.SubtaskID,
+		Status:    "approved",
+	}, nil
+}

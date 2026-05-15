@@ -356,7 +356,7 @@ func TestWorkerManager_Execute(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	result, err := wm.Execute(context.Background(), id, worker.ExecOptions{
+	result, err := wm.ExecOnWorker(context.Background(), id, worker.ExecOptions{
 		Cmd:     []string{"echo", "hello"},
 		Timeout: 5 * time.Second,
 	})
@@ -389,7 +389,7 @@ func TestWorkerManager_ExecuteError(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	_, err = wm.Execute(context.Background(), id, worker.ExecOptions{
+	_, err = wm.ExecOnWorker(context.Background(), id, worker.ExecOptions{
 		Cmd:     []string{"false"},
 		Timeout: 5 * time.Second,
 	})
@@ -455,7 +455,7 @@ func TestWorkerManager_ExecuteOnDestroyedWorker(t *testing.T) {
 	require.NoError(t, err)
 
 	// Try to execute on destroyed worker should fail
-	_, err = wm.Execute(context.Background(), id, worker.ExecOptions{
+	_, err = wm.ExecOnWorker(context.Background(), id, worker.ExecOptions{
 		Cmd: []string{"echo", "hello"},
 	})
 	assert.Error(t, err)

@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "cloud-agent-platform.fullname" . }}
+  namespace: {{ .Release.Namespace | default "default" }}
+  labels:
+    {{- include "cloud-agent-platform.labels" . | nindent 4 }}
+    app.kubernetes.io/component: server
+  {{- with .Values.server.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "cloud-agent-platform.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        {{- include "cloud-agent-platform.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.server.service.metricsPort }}"
+        prometheus.io/path: "/metrics"
+    spec:
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "cloud-agent-platform.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.server.securityContext | nindent 8 }}
+      {{- if .Values.server.podDisruptionBudget.enabled }}
+      {{- if .Values.server.podDisruptionBudget.minAvailable }}
+      podDisruptionBudget:
+        minAvailable: {{ .Values.server.podDisruptionBudget.minAvailable }}
+      {{- else }}
+      podDisruptionBudget:
+        maxUnavailable: 1
+      {{- end }}
+      {{- end }}
+      containers:
+        - name: server
+          image: "{{ .Values.global.imageRegistry }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.config.server.port }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ .Values.config.server.metricsport }}
+              protocol: TCP
+            - name: pprof
+              containerPort: {{ .Values.config.server.pprofport }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.server.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.server.readinessProbe | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.server.containerSecurityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+          env:
+            - name: GOMAXPROCS
+              value: "{{ .Values.server.env.GOMAXPROCS }}"
+            - name: GOMEMLIMIT
+              value: "{{ .Values.server.env.GOMEMLIMIT }}"
+            - name: TZ
+              value: "{{ .Values.server.env.TZ }}"
+            # Database DSN
+            - name: APP_DATABASE_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: database-dsn
+                  optional: false
+            # Redis
+            - name: APP_REDIS_ADDR
+              value: "{{ include "cloud-agent-platform.redis.host" . }}"
+            - name: APP_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: redis-password
+                  optional: true
+            # JWT Secret
+            - name: APP_AUTHZ_JWTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: jwt-secret
+                  optional: false
+            # MinIO
+            - name: APP_MINIO_ENDPOINT
+              value: "{{ include "cloud-agent-platform.minio.endpoint" . }}"
+            - name: APP_MINIO_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: minio-access-key
+                  optional: true
+            - name: APP_MINIO_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: minio-secret-key
+                  optional: true
+            # LLM API Keys
+            - name: APP_LLM_ANTHROPICAPIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: anthropic-api-key
+                  optional: true
+            - name: APP_LLM_ZHIPUAPIKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: zhipu-api-key
+                  optional: true
+            # Git credentials
+            - name: APP_GIT_HTTPSUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: git-https-user
+                  optional: true
+            - name: APP_GIT_HTTPSTOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "cloud-agent-platform.fullname" . }}-secrets
+                  key: git-https-token
+                  optional: true
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "cloud-agent-platform.fullname" . }}-config
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

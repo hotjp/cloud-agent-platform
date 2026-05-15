@@ -1,0 +1,3544 @@
+{
+  "project_name": "cloud-agent-platform",
+  "created_at": "2026-05-13T22:52:27.510959",
+  "tasks": [
+    {
+      "id": "task_001",
+      "description": "T00: 项目初始化 - 目录结构、go.mod、Taskfile构建脚本",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_001.md",
+      "created_at": "2026-05-13T22:52:42.994559",
+      "updated_at": "2026-05-13T23:05:39.655606",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "项目没有测试文件",
+            "timestamp": "2026-05-13T23:05:39.655603"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_002",
+      "description": "T01: 配置系统 - koanf多源配置加载，所有Config struct定义，环境变量注入",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_002.md",
+      "created_at": "2026-05-13T22:52:53.060734",
+      "updated_at": "2026-05-13T23:20:23.916013",
+      "dependencies": [
+        "task_001"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_003",
+      "description": "T02: Protobuf定义 - TaskService 8个RPC方法，buf generate代码生成",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_003.md",
+      "created_at": "2026-05-13T22:52:53.371970",
+      "updated_at": "2026-05-13T23:50:33.738290",
+      "dependencies": [
+        "task_001"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_004",
+      "description": "T03: 共享内核类型 - TaskStatus/SubtaskType/AgentRole枚举，ULID生成器，通用错误类型",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_004.md",
+      "created_at": "2026-05-13T22:52:53.674488",
+      "updated_at": "2026-05-13T23:12:42.928506",
+      "dependencies": [
+        "task_001"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_005",
+      "description": "T04: 错误码定义 - L1_001~L5_802错误码体系，所有业务错误类型定义",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_005.md",
+      "created_at": "2026-05-13T22:53:02.449793",
+      "updated_at": "2026-05-13T23:30:11.431522",
+      "dependencies": [
+        "task_004"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_006",
+      "description": "T05: 领域事件框架 - DomainEvent结构，OutboxWriter接口，状态机声明式框架，所有仓库接口定义",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_006.md",
+      "created_at": "2026-05-13T22:53:02.714608",
+      "updated_at": "2026-05-14T00:08:04.803238",
+      "dependencies": [
+        "task_005"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_007",
+      "description": "T10: PostgreSQL连接 - pgx/v5连接池，ent生成器配置，事务管理封装，migrate迁移框架",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_007.md",
+      "created_at": "2026-05-13T22:53:02.981236",
+      "updated_at": "2026-05-14T00:21:30.000634",
+      "dependencies": [
+        "task_002"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_008",
+      "description": "T11: 数据库迁移脚本 - tasks/subtasks/audit_logs/outbox_events四张表的ent schema和迁移文件",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_008.md",
+      "created_at": "2026-05-13T22:53:17.310359",
+      "updated_at": "2026-05-14T00:30:17.186684",
+      "dependencies": [
+        "task_007"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_009",
+      "description": "T12: Redis客户端 - go-redis/v9连接，缓存层封装，分布式锁基础接口",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_009.md",
+      "created_at": "2026-05-13T22:53:17.572695",
+      "updated_at": "2026-05-14T00:36:03.876440",
+      "dependencies": [
+        "task_002"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_010",
+      "description": "T13: Outbox系统 - OutboxWriter事务内写入，轮询器后台转发，Redis Stream发布",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_010.md",
+      "created_at": "2026-05-13T22:53:17.842301",
+      "updated_at": "2026-05-14T00:46:39.050684",
+      "dependencies": [
+        "task_006",
+        "task_007",
+        "task_009"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_011",
+      "description": "T20: Task领域模型 - Task+Subtask领域实体，9态状态机声明式定义，所有转换规则和守卫条件",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_011.md",
+      "created_at": "2026-05-13T22:53:25.490979",
+      "updated_at": "2026-05-14T00:55:17.316941",
+      "dependencies": [
+        "task_006"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_012",
+      "description": "T21: Task存储层 - ent Schema定义(Task/Subtask/AuditLog)，Repository接口实现，CRUD操作",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_012.md",
+      "created_at": "2026-05-13T22:53:25.757938",
+      "updated_at": "2026-05-14T01:09:38.270009",
+      "dependencies": [
+        "task_011"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_013",
+      "description": "T22: Task服务层 - TaskService的5个方法(Submit/Get/List/Cancel/Decide)，输入校验，事务边界",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_013.md",
+      "created_at": "2026-05-13T22:53:26.019333",
+      "updated_at": "2026-05-14T01:16:28.277363",
+      "dependencies": [
+        "task_012"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_014",
+      "description": "T23: Gateway层 - connect-go handler，JWT解密(不验证)，sentinel-go限流，中间件链路",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_014.md",
+      "created_at": "2026-05-13T22:53:38.158299",
+      "updated_at": "2026-05-14T01:29:26.120213",
+      "dependencies": [
+        "task_013"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_015",
+      "description": "T30: 最小编排 - 单Agent路径pending→running→completed，复杂度路由入口，Eino Graph最小图",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_015.md",
+      "created_at": "2026-05-13T22:53:38.426539",
+      "updated_at": "2026-05-14T01:35:46.060505",
+      "dependencies": [
+        "task_013",
+        "task_010"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_016",
+      "description": "T31: ReAct Agent - LLM调用循环(Thought→Action→Observation，最多15步)，read_file/write_file工具",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_016.md",
+      "created_at": "2026-05-13T22:53:38.694311",
+      "updated_at": "2026-05-14T01:49:36.780366",
+      "dependencies": [
+        "task_015"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_017",
+      "description": "T32: Worker沙箱双实现 - Docker和CubeSandbox同时实现SandboxBackend接口，config切换backend类型",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_017.md",
+      "created_at": "2026-05-13T22:53:47.850750",
+      "updated_at": "2026-05-14T01:59:42.202262",
+      "dependencies": [
+        "task_002"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_018",
+      "description": "T33: Git集成 - go-git实现clone/commit/push到result branch，禁止push到main/master约束",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_018.md",
+      "created_at": "2026-05-13T22:53:48.120023",
+      "updated_at": "2026-05-14T02:09:08.866119",
+      "dependencies": [
+        "task_002"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_019",
+      "description": "T40: WebSocket Hub - 房间管理，所有事件类型(task.status_changed/agent.log/platform.worker_pool等)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_019.md",
+      "created_at": "2026-05-13T22:53:48.383752",
+      "updated_at": "2026-05-14T02:28:27.916630",
+      "dependencies": [
+        "task_014"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_020",
+      "description": "T41: Eino全图编排 - 3路路由(简单/中等/复杂)，Graph定义，节点注册，边的连接",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_020.md",
+      "created_at": "2026-05-13T22:54:03.576779",
+      "updated_at": "2026-05-14T02:44:43.019816",
+      "dependencies": [
+        "task_015"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_021",
+      "description": "T42: 6个Agent角色 - observer/strategist/executor/guardian/tester/researcher的prompt模板和工具集分配",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_021.md",
+      "created_at": "2026-05-13T22:54:03.840670",
+      "updated_at": "2026-05-14T02:50:41.224769",
+      "dependencies": [
+        "task_020"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_022",
+      "description": "T43: Agent匹配算法 - 能力评分×0.5+历史成功率×0.3+成本效率×0.2，排序选择最优模板",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_022.md",
+      "created_at": "2026-05-13T22:54:04.104342",
+      "updated_at": "2026-05-14T02:54:57.419999",
+      "dependencies": [
+        "task_021"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_023",
+      "description": "T44: 上下文领域模型 - TaskContext/FileState/ConversationTurn领域实体，三层存储协议定义",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_023.md",
+      "created_at": "2026-05-13T22:54:15.253463",
+      "updated_at": "2026-05-14T03:03:04.633374",
+      "dependencies": [
+        "task_006"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_024",
+      "description": "T45: Redis热层 - 分布式锁(Redlock)，看门狗自动续期，热上下文读写接口",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_024.md",
+      "created_at": "2026-05-13T22:54:15.523465",
+      "updated_at": "2026-05-14T03:08:56.961222",
+      "dependencies": [
+        "task_023"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_025",
+      "description": "T46: 上下文传递服务 - full/summary/delta三种传递模式，Agent间上下文路由",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_025.md",
+      "created_at": "2026-05-13T22:54:15.784830",
+      "updated_at": "2026-05-14T03:17:00.741851",
+      "dependencies": [
+        "task_024"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_026",
+      "description": "T47: 全工具集 - 文件(5个)/Git(4个)/命令(1个)/LLM(1个)工具实现，角色权限表",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_026.md",
+      "created_at": "2026-05-13T22:54:25.925450",
+      "updated_at": "2026-05-14T03:26:40.061023",
+      "dependencies": [
+        "task_006"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_027",
+      "description": "T48: 人工审批 - Guardian触发confirming状态，超时机制(默认5分钟)，WebSocket推送approval_required",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_027.md",
+      "created_at": "2026-05-13T22:54:26.194986",
+      "updated_at": "2026-05-14T03:33:04.101569",
+      "dependencies": [
+        "task_021",
+        "task_026",
+        "task_024"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_028",
+      "description": "T49: MCP Server - 9 Tools(task_submit/status/list等) + 4 Resources(workspace/status/logs等)，SSE传输",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_028.md",
+      "created_at": "2026-05-13T22:54:26.456203",
+      "updated_at": "2026-05-14T03:38:18.833408",
+      "dependencies": [
+        "task_013"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_029",
+      "description": "T60: Worker池生产化 - 预热/扩缩容/健康检查，复用T32 SandboxBackend接口，Worker注册发现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_029.md",
+      "created_at": "2026-05-13T22:54:43.016547",
+      "updated_at": "2026-05-14T03:49:32.656495",
+      "dependencies": [
+        "task_017"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_030",
+      "description": "T61: LLM路由插件 - Claude/GLM多模型路由，自适应升降级(连续3次<80%降级/连续5次>95%升级)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_030.md",
+      "created_at": "2026-05-13T22:54:43.302338",
+      "updated_at": "2026-05-14T04:03:19.716464",
+      "dependencies": [
+        "task_016"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_031",
+      "description": "T62: 上下文压缩引擎 - L1规则压缩+L3 LLM智能压缩(必须保留goal/constraints/user_decisions/error_log)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_031.md",
+      "created_at": "2026-05-13T22:54:43.564539",
+      "updated_at": "2026-05-14T04:08:35.502309",
+      "dependencies": [
+        "task_025"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_032",
+      "description": "T63: MinIO冷存储 - 上传/下载/签名URL(有效期1小时)/90天TTL自动清理，Artifact存储",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_032.md",
+      "created_at": "2026-05-13T22:54:54.429847",
+      "updated_at": "2026-05-14T04:13:53.527074",
+      "dependencies": [
+        "task_009"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_033",
+      "description": "T64: 业务Metrics - cap_前缀Prometheus指标全集(task/agent/llm各维度)，:9090/metrics端点",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_033.md",
+      "created_at": "2026-05-13T22:54:54.689997",
+      "updated_at": "2026-05-14T04:22:37.120886",
+      "dependencies": [
+        "task_014"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_034",
+      "description": "T65: 链路追踪 - OTel Spans(submit/decompose/execute/llm/tool)，OTLP导出，概率采样",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_034.md",
+      "created_at": "2026-05-13T22:54:54.949053",
+      "updated_at": "2026-05-14T04:36:00.445988",
+      "dependencies": [
+        "task_014"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_035",
+      "description": "T05a: 领域事件协议 - DomainEvent结构体定义，OutboxWriter接口，事件序列化",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_035.md",
+      "created_at": "2026-05-13T23:41:08.576359",
+      "updated_at": "2026-05-14T00:00:35.122320",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_036",
+      "description": "T05b: 状态机框架 - 声明式状态机定义(states/transitions/guards/actions)，每次转换自动increment_version",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_036.md",
+      "created_at": "2026-05-13T23:41:13.698878",
+      "updated_at": "2026-05-14T04:47:47.575347",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_037",
+      "description": "T05c: 仓库接口定义 - TaskRepository/SubtaskRepository/AuditLogRepository接口，所有接口方法签名",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_037.md",
+      "created_at": "2026-05-13T23:41:13.983905",
+      "updated_at": "2026-05-14T04:53:22.105337",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_038",
+      "description": "T13a: Outbox写入器 - 事务内OutboxWriter接口，同库同事务写入outbox_events表",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_038.md",
+      "created_at": "2026-05-13T23:41:22.907250",
+      "updated_at": "2026-05-14T05:00:10.727250",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_039",
+      "description": "T13b: Outbox轮询转发器 - 后台goroutine轮询pending事件，SELECT FOR UPDATE SKIP LOCKED，指数退避重试",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_039.md",
+      "created_at": "2026-05-13T23:41:23.171481",
+      "updated_at": "2026-05-14T05:11:01.402723",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_040",
+      "description": "T21a: ent Schema定义 - Task/Subtask/AuditLog三个Schema，字段/Edge/Index定义",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_040.md",
+      "created_at": "2026-05-13T23:41:31.509860",
+      "updated_at": "2026-05-14T05:14:57.101168",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_041",
+      "description": "T21b: Repository实现 - TaskRepo/SubtaskRepo/AuditLogRepo接口实现，ent client封装",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_041.md",
+      "created_at": "2026-05-13T23:41:31.790636",
+      "updated_at": "2026-05-14T05:20:17.957274",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_042",
+      "description": "T30a: 编排框架 - 复杂度路由入口，Eino Graph最小图定义，节点注册机制",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_042.md",
+      "created_at": "2026-05-13T23:41:37.794852",
+      "updated_at": "2026-05-14T05:31:14.753799",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_043",
+      "description": "T30b: 单Agent路径 - pending→running→completed最小执行路径，单角色直通",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_043.md",
+      "created_at": "2026-05-13T23:41:38.058983",
+      "updated_at": "2026-05-14T01:36:41.096052",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_044",
+      "description": "T31a: ReAct循环框架 - Thought→Action→Observation循环，最多15步，LLM调用封装",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_044.md",
+      "created_at": "2026-05-13T23:41:46.395748",
+      "updated_at": "2026-05-14T05:40:27.584747",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_045",
+      "description": "T31b: 基础工具集成 - read_file/write_file工具实现，Tool接口适配",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_045.md",
+      "created_at": "2026-05-13T23:41:46.673635",
+      "updated_at": "2026-05-14T05:43:50.131442",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_046",
+      "description": "T32a: SandboxBackend接口 - WorkerManager，按配置选择后端，支持自动降级",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_046.md",
+      "created_at": "2026-05-13T23:41:50.879804",
+      "updated_at": "2026-05-14T05:51:47.563180",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_047",
+      "description": "T32b: Docker沙箱实现 - DockerBackend，seccomp/AppArmor安全加固，2GB内存限制",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_047.md",
+      "created_at": "2026-05-13T23:41:51.147258",
+      "updated_at": "2026-05-14T06:02:05.246421",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_048",
+      "description": "T32c: CubeSandbox实现 - CubeSandboxBackend，MicroVM硬件隔离，<60ms启动",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_048.md",
+      "created_at": "2026-05-13T23:41:51.419166",
+      "updated_at": "2026-05-14T06:09:42.901056",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_049",
+      "description": "T41a: Eino Graph框架 - 3路路由(简单/中等/复杂)，Graph定义，条件边连接",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_049.md",
+      "created_at": "2026-05-13T23:41:55.190904",
+      "updated_at": "2026-05-14T06:12:22.757361",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_050",
+      "description": "T41b: Eino节点定义 - AnalyzerNode/RouterNode/ExecutorNode/GuardianNode/ResultMerger节点实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_050.md",
+      "created_at": "2026-05-13T23:41:55.455090",
+      "updated_at": "2026-05-14T06:23:01.700113",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_051",
+      "description": "T42a: Agent角色框架 - 角色接口定义，prompt模板结构，工具集分配表",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_051.md",
+      "created_at": "2026-05-13T23:42:02.323152",
+      "updated_at": "2026-05-14T06:31:58.260744",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_052",
+      "description": "T42b: 前3个Agent实现 - observer/strategist/executor角色完整实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_052.md",
+      "created_at": "2026-05-13T23:42:02.587132",
+      "updated_at": "2026-05-14T06:34:07.310239",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_053",
+      "description": "T42c: 后3个Agent实现 - guardian/tester/researcher角色完整实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_053.md",
+      "created_at": "2026-05-13T23:42:02.852012",
+      "updated_at": "2026-05-14T06:46:32.433099",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_054",
+      "description": "T47a: 文件工具集 - read_file/write_file/edit_file/list_files/search_code 5个工具实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_054.md",
+      "created_at": "2026-05-13T23:42:09.878324",
+      "updated_at": "2026-05-14T06:51:44.315723",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_055",
+      "description": "T47b: Git命令工具 - git_status/git_diff/git_commit/git_push实现，安全约束",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_055.md",
+      "created_at": "2026-05-13T23:42:10.141112",
+      "updated_at": "2026-05-14T07:06:27.260484",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_056",
+      "description": "T47c: 命令和LLM工具 - execute_command(白名单+超时)和ask_llm工具实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_056.md",
+      "created_at": "2026-05-13T23:42:10.406643",
+      "updated_at": "2026-05-14T07:08:52.539600",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_057",
+      "description": "T49a: MCP框架 - MCP Server骨架，SSE传输，Tool/Resource接口定义",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_057.md",
+      "created_at": "2026-05-13T23:42:15.605156",
+      "updated_at": "2026-05-14T07:13:58.593233",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_058",
+      "description": "T49b: MCP Tools实现 - 9个Tool(task_submit/status/list/cancel/decide/diff/wait/templates/status)完整实现",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_058.md",
+      "created_at": "2026-05-13T23:42:15.874334",
+      "updated_at": "2026-05-14T07:16:30.621762",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_059",
+      "description": "T49c: MCP Resources实现 - 4个Resource(cap://tasks/{id}/log/timeline/artifact/{id}, cap://platform/status)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_059.md",
+      "created_at": "2026-05-13T23:42:16.162412",
+      "updated_at": "2026-05-14T07:20:16.879602",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_060",
+      "description": "Review: L2-Domain层 - statemachine/entity/errors/context/repositories",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_060.md",
+      "created_at": "2026-05-14T07:06:16.829177",
+      "updated_at": "2026-05-14T07:10:03.604872",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_061",
+      "description": "Review: L4-Service层 - task_service/context",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_061.md",
+      "created_at": "2026-05-14T07:06:17.097665",
+      "updated_at": "2026-05-14T07:10:49.351685",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_062",
+      "description": "Review: L1-Storage层 - pgx/minio/outbox/cleanup",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_062.md",
+      "created_at": "2026-05-14T07:06:17.360789",
+      "updated_at": "2026-05-14T07:11:20.124431",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_063",
+      "description": "Review: L5-Gateway层 - gateway/handler/middleware/ws",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_063.md",
+      "created_at": "2026-05-14T07:06:17.625134",
+      "updated_at": "2026-05-14T07:12:00.872578",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_064",
+      "description": "Review: plugins/orchestrator - Eino编排图/agent调度",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_064.md",
+      "created_at": "2026-05-14T07:06:17.890055",
+      "updated_at": "2026-05-14T07:12:23.022640",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_065",
+      "description": "Review: plugins/llmrouter - 多模型路由/Claude/GLM",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_065.md",
+      "created_at": "2026-05-14T07:06:18.159619",
+      "updated_at": "2026-05-14T07:12:32.364624",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_066",
+      "description": "Review: plugins/workermanager - Worker生命周期管理",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_066.md",
+      "created_at": "2026-05-14T07:06:23.527544",
+      "updated_at": "2026-05-14T07:12:55.435790",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_067",
+      "description": "Review: plugins/mcpserver - MCP Server 9 Tools",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_067.md",
+      "created_at": "2026-05-14T07:06:23.792296",
+      "updated_at": "2026-05-14T07:13:08.035508",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_068",
+      "description": "Review: plugins/gitclient - go-git克隆/提交/推送",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_068.md",
+      "created_at": "2026-05-14T07:06:24.070183",
+      "updated_at": "2026-05-14T07:13:19.193632",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_069",
+      "description": "Review: config + authz - 配置加载/JWT/API Key RBAC",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_069.md",
+      "created_at": "2026-05-14T07:06:24.333756",
+      "updated_at": "2026-05-14T07:13:33.388032",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_070",
+      "description": "Review: infra + guardian + observability - 基础设施/监控",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_070.md",
+      "created_at": "2026-05-14T07:06:24.597552",
+      "updated_at": "2026-05-14T07:13:56.725827",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_071",
+      "description": "Review: worker + mcp核心 - Worker沙箱/MCP协议",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_071.md",
+      "created_at": "2026-05-14T07:06:24.858844",
+      "updated_at": "2026-05-14T07:14:45.808082",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_072",
+      "description": "P0: main.go DI Assembly — Wire all components together",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_072.md",
+      "created_at": "2026-05-14T07:32:18.492899",
+      "updated_at": "2026-05-14T11:26:28.973449",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_073",
+      "description": "P0: gateway readyzHandler — Implement DB+Redis connectivity check",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_073.md",
+      "created_at": "2026-05-14T07:32:24.711415",
+      "updated_at": "2026-05-14T11:31:33.305574",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_074",
+      "description": "P0: Gateway+Service — Implement Decide/GetArtifact/GetDiff/Wait RPCs",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_074.md",
+      "created_at": "2026-05-14T07:32:31.686866",
+      "updated_at": "2026-05-14T11:37:04.700512",
+      "dependencies": [
+        "task_072"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_075",
+      "description": "P0: config.MustLoad — Call Validate() before returning",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_075.md",
+      "created_at": "2026-05-14T07:32:37.636316",
+      "updated_at": "2026-05-14T11:39:11.030012",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_076",
+      "description": "P1: golangci-lint configuration — .golangci.yml + CI gate",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_076.md",
+      "created_at": "2026-05-14T07:32:44.508052",
+      "updated_at": "2026-05-14T11:41:52.743479",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_077",
+      "description": "P1: GitHub Actions CI/CD — build + test + lint workflow",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_077.md",
+      "created_at": "2026-05-14T07:32:51.552020",
+      "updated_at": "2026-05-14T11:43:12.007469",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_078",
+      "description": "P1: Test Coverage — Bring unit test coverage to 60%",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_078.md",
+      "created_at": "2026-05-14T07:32:58.358534",
+      "updated_at": "2026-05-14T11:59:06.864997",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_079",
+      "description": "P1: Wire plugins into main.go — orchestrator + llmrouter + workermanager + mcpserver",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_079.md",
+      "created_at": "2026-05-14T07:33:06.635553",
+      "updated_at": "2026-05-14T12:05:44.039597",
+      "dependencies": [
+        "task_072"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_080",
+      "description": "P1: L3-Authz wiring — Full JWT verification + RBAC + sentinel-go in request path",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_080.md",
+      "created_at": "2026-05-14T07:33:15.012922",
+      "updated_at": "2026-05-14T12:14:21.040114",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_081",
+      "description": "P2: End-to-end smoke test — Submit task → single Agent execute → return result + Git push",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_081.md",
+      "created_at": "2026-05-14T07:33:22.571769",
+      "updated_at": "2026-05-14T12:25:16.775179",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_082",
+      "description": "P2: Prometheus alerting rules + Grafana dashboard — Production metrics",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_082.md",
+      "created_at": "2026-05-14T07:33:30.233051",
+      "updated_at": "2026-05-14T12:28:21.652300",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_083",
+      "description": "P2: Fault预案 — Redis故障/LLM限流/Worker泄漏 detection + graceful degradation",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_083.md",
+      "created_at": "2026-05-14T07:33:39.806258",
+      "updated_at": "2026-05-14T12:37:30.266262",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_084",
+      "description": "P2: OTel end-to-end tracing verification — All spans wired + Jaeger UI",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_084.md",
+      "created_at": "2026-05-14T07:33:48.979754",
+      "updated_at": "2026-05-14T12:50:12.996519",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_085",
+      "description": "P2: docker-compose.prod.yml — Production-grade deployment configuration",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_085.md",
+      "created_at": "2026-05-14T07:33:57.833583",
+      "updated_at": "2026-05-14T12:53:20.759258",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_086",
+      "description": "P2: Worker pool production tuning — Pool sizing + warm-up + auto-scale",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_086.md",
+      "created_at": "2026-05-14T07:34:05.467247",
+      "updated_at": "2026-05-14T12:58:04.275572",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_087",
+      "description": "P3: K8s deployment — Helm chart or Kustomize manifests",
+      "template": "task",
+      "priority": "P3",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_087.md",
+      "created_at": "2026-05-14T07:34:15.222204",
+      "updated_at": "2026-05-14T13:01:34.410481",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_088",
+      "description": "P3: Agent experience accumulation — Learn from past executions",
+      "template": "task",
+      "priority": "P3",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_088.md",
+      "created_at": "2026-05-14T07:34:30.073622",
+      "updated_at": "2026-05-14T13:51:52.310426",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_089",
+      "description": "P3: Smart task decomposition — Optimize subtask generation using historical data",
+      "template": "task",
+      "priority": "P3",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_089.md",
+      "created_at": "2026-05-14T07:34:38.744234",
+      "updated_at": "2026-05-14T13:53:09.095652",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_090",
+      "description": "P0: Docker healthcheck fix — /health endpoint + compose healthcheck alignment",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_090.md",
+      "created_at": "2026-05-14T07:34:46.532095",
+      "updated_at": "2026-05-14T13:03:21.277622",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_091",
+      "description": "P2: Prometheus metrics integration — Wire internal metrics to /9090/metrics endpoint",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_091.md",
+      "created_at": "2026-05-14T07:35:08.575426",
+      "updated_at": "2026-05-14T13:26:39.403303",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_092",
+      "description": "P2: Context compression L1+L3 — Redis hot layer + compression engine wired + triggered",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_092.md",
+      "created_at": "2026-05-14T07:35:16.523741",
+      "updated_at": "2026-05-14T13:39:18.117864",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_093",
+      "description": "P1: Worker Docker image — Dockerfile.worker + build in CI",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_093.md",
+      "created_at": "2026-05-14T07:35:42.417739",
+      "updated_at": "2026-05-14T13:07:44.455639",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_094",
+      "description": "P3: Dashboard Frontend — Task list UI + Agent logs + Cost analysis",
+      "template": "task",
+      "priority": "P3",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_094.md",
+      "created_at": "2026-05-14T07:35:50.075720",
+      "updated_at": "2026-05-14T14:02:23.240971",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_095",
+      "description": "Fix test failures — orchestrator test signature sync + workermanager ID generation + Docker storage-opt macOS compat + sandbox CubeSandbox tests",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_095.md",
+      "created_at": "2026-05-14T18:51:37.433901",
+      "updated_at": "2026-05-14T19:14:52.930518",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_096",
+      "description": "Fix: orchestrator test signature sync — NewOrchestrator added OrchestratorContextManager param, update all test calls",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_096.md",
+      "created_at": "2026-05-14T21:10:43.149780",
+      "updated_at": "2026-05-14T21:19:45.849970",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_097",
+      "description": "Fix: workermanager ID generation — replace nanosecond timestamp with ULID for unique IDs",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_097.md",
+      "created_at": "2026-05-14T21:10:43.415541",
+      "updated_at": "2026-05-14T21:22:14.931414",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_098",
+      "description": "Fix: Docker storage-opt macOS compat — skip xfs quota test on non-Linux, add build tag",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_098.md",
+      "created_at": "2026-05-14T21:10:43.666145",
+      "updated_at": "2026-05-14T21:23:44.150634",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_099",
+      "description": "Fix: CubeSandbox Exec/Destroy test failures in internal/worker/sandbox",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_099.md",
+      "created_at": "2026-05-14T21:10:43.944539",
+      "updated_at": "2026-05-14T21:24:12.789608",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_100",
+      "description": "Verify: config.yaml DSN and Redis addr aligned with docker-compose.yml",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_100.md",
+      "created_at": "2026-05-14T21:10:44.206410",
+      "updated_at": "2026-05-14T21:25:33.137106",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_101",
+      "description": "Verify: server startup auto-migrate — confirm ent schema auto-migration on boot",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_101.md",
+      "created_at": "2026-05-14T21:10:44.457223",
+      "updated_at": "2026-05-14T21:26:35.173612",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_102",
+      "description": "Run: docker-compose up postgres redis minio + go run ./cmd/server — full startup test",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_102.md",
+      "created_at": "2026-05-14T21:10:44.708868",
+      "updated_at": "2026-05-14T21:28:32.434804",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_103",
+      "description": "Fix: runtime panic→error for role/tool not found — internal/agent/roles/roles.go:815 and internal/agent/react/tool.go:133 should return error instead of panic",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_103.md",
+      "created_at": "2026-05-14T22:11:42.426875",
+      "updated_at": "2026-05-14T23:59:54.342562",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_104",
+      "description": "E2E验证: Submit+Get+List — 通过connect-go客户端提交任务、查询、列表",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_104.md",
+      "created_at": "2026-05-14T22:46:48.245784",
+      "updated_at": "2026-05-15T00:01:39.158334",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_105",
+      "description": "E2E验证: 任务状态流转 — pending→running→completed",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_105.md",
+      "created_at": "2026-05-14T22:46:48.507983",
+      "updated_at": "2026-05-15T00:10:07.619546",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_106",
+      "description": "E2E验证: Decide接口 — 路由决策",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_106.md",
+      "created_at": "2026-05-14T22:46:48.755410",
+      "updated_at": "2026-05-15T00:11:50.122915",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_107",
+      "description": "E2E验证: WebSocket实时推送",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_107.md",
+      "created_at": "2026-05-14T22:46:49.003032",
+      "updated_at": "2026-05-15T00:19:30.593185",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_108",
+      "description": "E2E验证: MCP工具调用",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_108.md",
+      "created_at": "2026-05-14T22:46:49.250072",
+      "updated_at": "2026-05-15T00:59:47.385738",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_109",
+      "description": "集成验证脚本 — 一键跑通全链路",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_109.md",
+      "created_at": "2026-05-14T22:46:49.512448",
+      "updated_at": "2026-05-15T01:00:51.404863",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_110",
+      "description": "fix: Gateway 添加 REST 适配路由，对齐 MCP Client 协议",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_110.md",
+      "created_at": "2026-05-15T09:53:05.896460",
+      "updated_at": "2026-05-15T10:04:59.232382",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_111",
+      "description": "fix: MCP Client APIResponse 解析空指针防护",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_111.md",
+      "created_at": "2026-05-15T09:56:02.913795",
+      "updated_at": "2026-05-15T10:06:24.530533",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_112",
+      "description": "fix: Gateway REST 适配 - 任务 CRUD 端点(Submit/Get/List/Cancel)",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_112.md",
+      "created_at": "2026-05-15T09:57:29.785561",
+      "updated_at": "2026-05-15T10:07:13.114047",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_113",
+      "description": "fix: Gateway REST 适配 - 决策与编排端点(Decompose/Decide/Diff)",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_113.md",
+      "created_at": "2026-05-15T09:57:41.684932",
+      "updated_at": "2026-05-15T10:10:11.237888",
+      "dependencies": [
+        "task_112"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_114",
+      "description": "fix: Gateway REST 适配 - 查询端点(AgentTemplates/Sessions/PlatformStatus)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_114.md",
+      "created_at": "2026-05-15T09:57:52.182340",
+      "updated_at": "2026-05-15T10:07:34.635698",
+      "dependencies": [
+        "task_112"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_115",
+      "description": "fix: MCP Client 请求/响应字段映射验证与修复",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_115.md",
+      "created_at": "2026-05-15T09:58:07.556994",
+      "updated_at": "2026-05-15T10:10:11.974712",
+      "dependencies": [
+        "task_111"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_116",
+      "description": "test: MCP Server 端到端验证 - stdio 调用全工具",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_116.md",
+      "created_at": "2026-05-15T09:58:18.416021",
+      "updated_at": "2026-05-15T10:13:46.849824",
+      "dependencies": [
+        "task_112",
+        "task_113",
+        "task_114",
+        "task_115"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_117",
+      "description": "fix: docker-compose.prod.yml 容器配置错误(PostgreSQL/Redis/MinIO)",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_117.md",
+      "created_at": "2026-05-15T09:59:43.343241",
+      "updated_at": "2026-05-15T10:16:06.387580",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_118",
+      "description": "verify: 检查 REST Adapter 已实现的端点",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_118.md",
+      "created_at": "2026-05-15T10:01:01.706157",
+      "updated_at": "2026-05-15T10:03:27.065603",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_119",
+      "description": "docs: 完整链路差距分析 — 从 MCP task_submit 到 Agent 执行完成",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_119.md",
+      "created_at": "2026-05-15T11:40:51.655355",
+      "updated_at": "2026-05-15T11:56:27.378890",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_120",
+      "description": "fix: Orchestrator 注入到 TaskService — 连接事件处理和任务编排",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_120.md",
+      "created_at": "2026-05-15T11:41:15.301940",
+      "updated_at": "2026-05-15T12:06:39.679560",
+      "dependencies": [
+        "task_119"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_121",
+      "description": "fix: 实现 handleTaskSubmitted — 自动触发任务拆解和执行",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_121.md",
+      "created_at": "2026-05-15T11:41:30.980993",
+      "updated_at": "2026-05-15T12:06:40.727527",
+      "dependencies": [
+        "task_120"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_122",
+      "description": "fix: TaskService/Orchestrator 调用 Worker 执行子任务",
+      "template": "task",
+      "priority": "P0",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_122.md",
+      "created_at": "2026-05-15T11:41:46.281023",
+      "updated_at": "2026-05-15T12:13:08.238910",
+      "dependencies": [
+        "task_121"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_123",
+      "description": "fix: Eino 编排图接入 LLM — 任务分析和拆解需要真实 LLM 调用",
+      "template": "task",
+      "priority": "P0",
+      "status": "in_progress",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_123.md",
+      "created_at": "2026-05-15T11:42:06.437467",
+      "updated_at": "2026-05-15T12:08:02.997679",
+      "dependencies": [
+        "task_120"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_124",
+      "description": "fix: Worker 执行后自动 git commit + push 到 result branch",
+      "template": "task",
+      "priority": "P1",
+      "status": "in_progress",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_124.md",
+      "created_at": "2026-05-15T11:42:19.684522",
+      "updated_at": "2026-05-15T12:13:55.062316",
+      "dependencies": [
+        "task_122"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_125",
+      "description": "fix: Guardian 审批集成 — 高风险操作暂停等待用户确认",
+      "template": "task",
+      "priority": "P1",
+      "status": "in_progress",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_125.md",
+      "created_at": "2026-05-15T11:42:35.470225",
+      "updated_at": "2026-05-15T12:14:06.231618",
+      "dependencies": [
+        "task_122"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_126",
+      "description": "fix: REST Adapter placeholder 端点补全(ListAgents/Sessions/PlatformStatus)",
+      "template": "task",
+      "priority": "P2",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_126.md",
+      "created_at": "2026-05-15T11:42:52.119821",
+      "updated_at": "2026-05-15T11:53:39.148750",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_127",
+      "description": "test: 端到端集成测试 — 从 MCP submit 到 Agent 执行完成",
+      "template": "task",
+      "priority": "P0",
+      "status": "blocked",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_127.md",
+      "created_at": "2026-05-15T11:43:07.264582",
+      "updated_at": "2026-05-15T11:43:07.264605",
+      "dependencies": [
+        "task_122",
+        "task_123",
+        "task_126"
+      ],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [],
+        "optimization_history": []
+      }
+    }
+  ]
+}

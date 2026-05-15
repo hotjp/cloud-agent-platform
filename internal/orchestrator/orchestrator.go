@@ -5,10 +5,12 @@ package orchestrator
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/cloud-agent-platform/cap/internal/domain"
+	"github.com/cloud-agent-platform/cap/internal/domain/worker"
 
 	"go.uber.org/zap"
 )
@@ -21,7 +23,55 @@ type Config struct {
 	SessionTimeout time.Duration
 	// DefaultAgentTemplate is the default agent template to use.
 	DefaultAgentTemplate string
+	// GuardianEnabled enables guardian risk evaluation and approval workflow.
+	GuardianEnabled bool
 }
+
+// Guardian defines the interface for risk evaluation and approval workflow.
+// It evaluates whether tasks require human approval before execution.
+type Guardian interface {
+	// NeedsApproval evaluates whether the given task requires approval before execution.
+	NeedsApproval(ctx context.Context, task *domain.Task) bool
+
+	// RequestApproval requests approval for a task from the guardian.
+	// It pushes the approval request via WebSocket and returns immediately.
+	// The caller should wait on the ResultCh in the returned ApprovalRequest.
+	RequestApproval(ctx context.Context, task *domain.Task, customTimeout time.Duration) (*ApprovalRequest, error)
+
+	// IsPending checks if there is a pending approval request for the given task.
+	IsPending(ctx context.Context, taskID string) bool
+}
+
+// ApprovalRequest wraps the guardian approval request with the result channel for blocking wait.
+type ApprovalRequest struct {
+	TaskID         string
+	TaskGoal       string
+	EstimatedCost  float64
+	RiskLevel      RiskLevel
+	RequestedAt    time.Time
+	ExpiresAt      time.Time
+	RequireApproval bool
+	Timeout        time.Duration
+	ResultCh       <-chan ApprovalResult
+}
+
+// RiskLevel represents the risk level of an operation.
+type RiskLevel string
+
+const (
+	RiskLevelLow    RiskLevel = "low"
+	RiskLevelMedium RiskLevel = "medium"
+	RiskLevelHigh   RiskLevel = "high"
+)
+
+// ApprovalResult represents the result of an approval decision.
+type ApprovalResult string
+
+const (
+	ApprovalResultApprove ApprovalResult = "approve"
+	ApprovalResultReject  ApprovalResult = "reject"
+	ApprovalResultTimeout ApprovalResult = "timeout"
+)
 
 // DefaultConfig returns the default orchestrator configuration.
 func DefaultConfig() Config {
@@ -41,6 +91,12 @@ type OrchestratorImpl struct {
 	txManager   TransactionManager
 	agentRunner AgentRunner
 	logger      *zap.Logger
+
+	// Worker executor for subtask execution via worker pools
+	workerExecutor WorkerExecutor
+
+	// Guardian for risk evaluation and approval workflow
+	guardian Guardian
 
 	// Active sessions
 	sessions   map[string]*agentSession
@@ -78,6 +134,8 @@ func NewOrchestrator(
 	txManager TransactionManager,
 	agentRunner AgentRunner,
 	logger *zap.Logger,
+	workerExecutor WorkerExecutor,
+	guardian Guardian,
 ) *OrchestratorImpl {
 	if cfg.MaxConcurrentSessions == 0 {
 		cfg = DefaultConfig()
@@ -91,6 +149,8 @@ func NewOrchestrator(
 		txManager:    txManager,
 		agentRunner:  agentRunner,
 		logger:       logger,
+		workerExecutor: workerExecutor,
+		guardian:     guardian,
 		sessions:     make(map[string]*agentSession),
 		dispatcher:   newEventDispatcher(logger),
 	}
@@ -394,8 +454,123 @@ func (o *OrchestratorImpl) executeAgentSession(ctx context.Context, session *age
 		return
 	}
 
+	// Guardian: check if approval is required before execution
+	if o.guardian != nil && o.cfg.GuardianEnabled {
+		if o.guardian.NeedsApproval(ctx, task) {
+			o.logger.Info("guardian requires approval before execution",
+				zap.String("task_id", task.ID),
+				zap.String("subtask_id", subtask.ID),
+			)
+
+			// Transition task to confirming state
+			if task.Status == domain.TaskStatusRunning || task.Status == domain.TaskStatusDispatched {
+				if transitionErr := task.TransitionTo("RequestConfirmation"); transitionErr != nil {
+					o.logger.Warn("task transition to confirming failed",
+						zap.String("task_id", task.ID),
+						zap.Error(transitionErr),
+					)
+				}
+				// Update task status to confirming
+				if _, updateErr := o.taskRepo.UpdateStatus(ctx, task.ID, domain.TaskStatusConfirming, task.Version); updateErr != nil {
+					o.logger.Error("failed to update task status to confirming",
+						zap.String("task_id", task.ID),
+						zap.Error(updateErr),
+					)
+				}
+			}
+
+			// Request approval from guardian
+			approvalReq, approvalErr := o.guardian.RequestApproval(ctx, task, 30*time.Minute)
+			if approvalErr != nil {
+				o.logger.Error("guardian approval request failed",
+					zap.String("task_id", task.ID),
+					zap.Error(approvalErr),
+				)
+				// Treat as rejection
+				session.Status = "failed"
+				session.Result = &AgentResult{Error: fmt.Errorf("guardian approval request failed: %w", approvalErr)}
+				o.handleAgentFailure(ctx, session, task, fmt.Errorf("guardian approval request failed"))
+				return
+			}
+
+			// Wait for approval result
+			select {
+			case <-ctx.Done():
+				o.logger.Warn("guardian approval wait cancelled",
+					zap.String("task_id", task.ID),
+				)
+				session.Status = "failed"
+				session.Result = &AgentResult{Error: fmt.Errorf("approval wait cancelled")}
+				o.handleAgentFailure(ctx, session, task, fmt.Errorf("approval wait cancelled"))
+				return
+			case result, ok := <-approvalReq.ResultCh:
+				if !ok {
+					o.logger.Warn("guardian approval channel closed without result",
+						zap.String("task_id", task.ID),
+					)
+					session.Status = "failed"
+					session.Result = &AgentResult{Error: fmt.Errorf("approval channel closed")}
+					o.handleAgentFailure(ctx, session, task, fmt.Errorf("approval channel closed"))
+					return
+				}
+
+				// Handle approval result
+				switch result {
+				case ApprovalResultApprove:
+					o.logger.Info("guardian approved execution",
+						zap.String("task_id", task.ID),
+					)
+					// Transition back to running
+					if task.Status == domain.TaskStatusConfirming {
+						if transitionErr := task.TransitionTo("ApprovalGranted"); transitionErr != nil {
+							o.logger.Warn("task transition to running after approval failed",
+								zap.String("task_id", task.ID),
+								zap.Error(transitionErr),
+							)
+						}
+					}
+				case ApprovalResultReject:
+					o.logger.Warn("guardian rejected execution",
+						zap.String("task_id", task.ID),
+					)
+					session.Status = "failed"
+					session.Result = &AgentResult{Error: fmt.Errorf("guardian rejected execution")}
+					o.handleAgentFailure(ctx, session, task, fmt.Errorf("guardian rejected execution"))
+					return
+				case ApprovalResultTimeout:
+					o.logger.Warn("guardian approval timed out",
+						zap.String("task_id", task.ID),
+					)
+					session.Status = "failed"
+					session.Result = &AgentResult{Error: fmt.Errorf("guardian approval timeout")}
+					o.handleAgentFailure(ctx, session, task, fmt.Errorf("guardian approval timeout"))
+					return
+				default:
+					o.logger.Warn("guardian unknown approval result",
+						zap.String("task_id", task.ID),
+						zap.String("result", string(result)),
+					)
+					session.Status = "failed"
+					session.Result = &AgentResult{Error: fmt.Errorf("unknown approval result: %s", result)}
+					o.handleAgentFailure(ctx, session, task, fmt.Errorf("unknown approval result"))
+					return
+				}
+			}
+		}
+	}
+
 	// Run the agent
-	result, err := o.agentRunner.Run(ctx, subtask, task)
+	var result *AgentResult
+	if o.workerExecutor != nil {
+		execOpts := worker.ExecOptions{
+			Cmd:     buildAgentCommand(subtask, task),
+			Timeout: o.cfg.SessionTimeout,
+		}
+		result, err = o.workerExecutor.Execute(ctx, subtask.ID, task.ID, execOpts)
+	} else {
+		// Fall back to direct agent runner
+		result, err = o.agentRunner.Run(ctx, subtask, task)
+	}
 
 	// Handle completion
 	if err != nil {
@@ -811,4 +986,22 @@ func (d *eventDispatcher) RegisterHandler(eventType string, handler EventHandler
 // TaskCancelledPayload is the payload for TaskCancelledV1 event.
 type TaskCancelledPayload struct {
 	Reason string `json:"reason"`
+}
+
+// buildAgentCommand constructs the agent command to execute in the sandbox.
+// This is a placeholder - actual command construction depends on agent template.
+func buildAgentCommand(subtask *domain.Subtask, task *domain.Task) []string {
+	// Default command structure - agent runner determines the actual implementation
+	// The command should invoke the agent with the subtask description
+	agentTemplate := subtask.AgentTemplate
+	if agentTemplate == "" {
+		agentTemplate = "executor"
+	}
+	return []string{"/bin/sh", "-c", fmt.Sprintf("echo 'Executing agent: %s, task: %s, subtask: %s'", agentTemplate, task.ID, subtask.ID)}
+}
+
+// buildGitCommitMessage constructs the git commit message.
+func buildGitCommitMessage(subtask *domain.Subtask, task *domain.Task) string {
+	// Format: "[task-id] subtask-description"
+	return fmt.Sprintf("[%s] %s", task.ID, subtask.Description)
 }

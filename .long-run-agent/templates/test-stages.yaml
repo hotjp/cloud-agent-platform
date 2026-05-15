@@ -1,0 +1,43 @@
+name: test-template
+description: 测试模板
+version: "1.0"
+template_engine: jinja2
+keywords: []
+
+ralph:
+  iteration_stages:
+    - iteration: 1
+      name: 需求分析
+      focus:
+        - 理解需求
+        - 设计架构
+      priority_checks:
+        - test
+      ignore_checks:
+        - performance
+      suggestion: "🎯 首次迭代：深入理解需求和设计架构"
+      
+    - iteration: 2
+      name: 核心实现
+      focus:
+        - 实现核心功能
+        - 单元测试
+      suggestion: "🎯 第2次迭代：实现核心功能并编写测试"
+      
+    - iteration: 3
+      name: 完善优化
+      focus:
+        - 代码重构
+        - 性能优化
+        - 文档完善
+      suggestion: "🎯 第3次迭代：优化代码和补充文档"
+      safety_checks:
+        - "确认没有破坏现有功能"
+        - "确保测试通过"
+
+states:
+  - pending
+  - in_progress
+  - completed
+
+structure: "# Test Template"

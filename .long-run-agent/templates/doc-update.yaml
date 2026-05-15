@@ -1,0 +1,304 @@
+acceptance:
+- 文档已更新
+- 更新内容与业务需求一致
+- 格式规范
+description: 文档更新任务模板
+ralph:
+  enabled: true
+  max_iterations: 7
+  iteration_stages:
+    - iteration: 1
+      name: "内容收集"
+      focus:
+        - "收集文档素材"
+        - "整理信息"
+      priority_checks:
+        - "content_gathered"
+        - "information_organized"
+      ignore_checks:
+        - "formatting"
+        - "writing_style"
+      suggestion: |
+        📋 **第1轮迭代：内容收集**
+        
+        **目标**: 收集所需信息，整理文档素材
+        
+        **重点关注**:
+        - 收集相关文档素材
+        - 整理信息和资料
+        - 确认更新范围
+        - 了解用户需求
+        
+        **可以忽略**:
+        - 格式规范
+        - 写作风格
+        
+        💡 提示：充分收集信息是写好文档的基础
+        
+    - iteration: 2
+      name: "结构设计"
+      focus:
+        - "设计文档结构"
+        - "规划章节"
+      priority_checks:
+        - "structure_designed"
+        - "outline_complete"
+      ignore_checks:
+        - "content_details"
+      suggestion: |
+        🗂️ **第2轮迭代：结构设计**
+        
+        **目标**: 设计文档结构，规划章节内容
+        
+        **重点关注**:
+        - 设计文档结构
+        - 规划章节和组织
+        - 确定文档层次
+        - 规划内容范围
+        
+        **可以忽略**:
+        - 详细内容
+        
+        💡 提示：清晰的结构让文档易于阅读和维护
+        
+    - iteration: 3
+      name: "内容编写"
+      focus:
+        - "编写核心内容"
+        - "补充细节"
+      priority_checks:
+        - "core_content"
+        - "details_complete"
+      ignore_checks:
+        - "format_polish"
+      suggestion: |
+        ✍️ **第3轮迭代：内容编写**
+        
+        **目标**: 编写核心内容，补充必要细节
+        
+        **重点关注**:
+        - 编写核心内容
+        - 补充重要细节
+        - 确保信息准确
+        - 覆盖所有要点
+        
+        **可以忽略**:
+        - 格式美化
+        
+        💡 提示：先确保内容完整和准确
+        
+    - iteration: 4
+      name: "格式优化"
+      focus:
+        - "统一格式"
+        - "美化排版"
+      priority_checks:
+        - "format_consistent"
+        - "layout_polished"
+      ignore_checks:
+        - "examples"
+      suggestion: |
+        🎨 **第4轮迭代：格式优化**
+        
+        **目标**: 统一格式，美化排版
+        
+        **重点关注**:
+        - 统一文档格式
+        - 美化排版布局
+        - 规范标题层次
+        - 优化可读性
+        
+        **格式要点**:
+        - 标题层次清晰
+        - 段落间距合理
+        - 列表格式统一
+        - 代码块规范
+        
+        💡 提示：良好的格式提升文档的专业度
+        
+    - iteration: 5
+      name: "示例补充"
+      focus:
+        - "添加示例"
+        - "完善说明"
+      priority_checks:
+        - "examples_added"
+        - "explanations_clear"
+      safety_checks:
+        - "示例代码必须可运行"
+        - "示例与实际功能一致"
+      suggestion: |
+        💡 **第5轮迭代：示例补充**
+        
+        **目标**: 添加示例，完善说明
+        
+        **重点关注**:
+        - 添加使用示例
+        - 补充代码示例
+        - 完善概念说明
+        - 增加图示说明
+        
+        ⚠️ **注意事项**:
+        - 示例代码必须可运行
+        - 示例与实际功能保持一致
+        
+        💡 提示：好的示例让文档更易理解和使用
+        
+    - iteration: 6
+      name: "审校修改"
+      focus:
+        - "检查错误"
+        - "优化表达"
+      priority_checks:
+        - "error_free"
+        - "expression_polished"
+      suggestion: |
+        🔍 **第6轮迭代：审校修改**
+        
+        **目标**: 检查错误，优化表达
+        
+        **重点关注**:
+        - 检查拼写和语法错误
+        - 优化语言表达
+        - 确认专业术语准确
+        - 检查链接有效性
+        
+        **审校清单**:
+        - 拼写和语法
+        - 表达准确性
+        - 术语一致性
+        - 链接有效性
+        
+        💡 提示：仔细审校提升文档质量和可信度
+        
+    - iteration: 7
+      name: "最终发布"
+      focus:
+        - "最终审核"
+        - "准备发布"
+      priority_checks:
+        - "final_review"
+        - "publish_ready"
+      suggestion: |
+        🚀 **第7轮迭代：最终发布**
+        
+        **目标**: 完成最终审核，准备发布
+        
+        **重点关注**:
+        - 最终审核文档
+        - 确认版本信息
+        - 准备发布说明
+        - 检查文档位置
+        
+        **最终检查**:
+        - 内容准确完整
+        - 格式规范统一
+        - 示例可运行
+        - 发布位置正确
+        
+        💡 提示：最后的检查确保文档达到发布标准
+  quality_gates:
+    - type: content_check
+      check: "verify_content_consistency"
+      required: true
+      weight: 0.4
+    - type: format_check
+      check: "verify_document_format"
+      required: true
+      weight: 0.3
+    - type: link_check
+      check: "verify_links_valid"
+      required: false
+      weight: 0.2
+  optimization_hints: true
+keywords:
+- 文档
+- 更新
+- docs
+- documentation
+- readme
+- api
+name: doc-update
+states:
+- pending
+- in_progress
+- completed
+structure: '# {{ id }}
+
+
+  ## ⚠️ 重要提示（Agent 必读）
+
+
+  **当前位置**: `.long-run-agent/tasks/{{id}}.md`（任务描述文件）
+
+
+  **工作目录**: 项目根目录（`.long-run-agent` 的同级目录）
+
+
+  **产出物位置**: 请在项目适当位置更新文档（如 `README.md`, `docs/`, 或代码文件中的 docstring）
+
+
+  **这是配置文件**，不是最终产出！
+
+
+  ## 关联业务任务
+
+  {% if dependencies %}
+
+  {% for dep in dependencies %}
+
+  - {{ dep }}
+
+  {% endfor %}
+
+  {% else %}
+
+  <!-- 无关联业务任务 -->
+
+  {% endif %}
+
+
+  ## 模块名称
+
+  {{ module }}
+
+
+  ## 更新范围
+
+  {{ update_scope }}
+
+
+  ## 用户需求
+
+  {{ user_demand }}
+
+
+  ## 需更新的文档列表
+
+  <!-- Agent 自动定位 -->
+
+  - [ ] {{ module }}/README.md
+
+  - [ ] docs/{{ module }}/API.md
+
+  - [ ] src/{{ module }}/__init__.py (docstring)
+
+
+  ## 更新内容
+
+  <!-- 增量更新，仅修改相关片段 -->
+
+
+  ## 更新说明
+
+  <!-- 记录更新原因和内容 -->
+
+  '
+template_engine: jinja2
+transitions:
+  completed: []
+  in_progress:
+  - completed
+  pending:
+  - in_progress
+version: '1.0'

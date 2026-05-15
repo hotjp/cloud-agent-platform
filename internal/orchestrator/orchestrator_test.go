@@ -301,6 +301,8 @@ func TestOrchestrator_SingleAgentPath(t *testing.T) {
 		txManager,
 		agentRunner,
 		logger,
+		nil, // workerExecutor
+		nil, // guardian
 	)
 
 	// Create a task in pending state
@@ -339,7 +341,7 @@ func TestOrchestrator_InvalidTaskState(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a task in running state (invalid for StartTask)
 	task := domain.NewTask("task456", "Test task", "https://github.com/test/repo", "main", "client-1")
@@ -362,7 +364,7 @@ func TestOrchestrator_CancelTask(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a task in pending state
 	task := domain.NewTask("task789", "Test task", "https://github.com/test/repo", "main", "client-1")
@@ -389,7 +391,7 @@ func TestOrchestrator_GetTaskStatus(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a task
 	task := domain.NewTask("task-status", "Test task", "https://github.com/test/repo", "main", "client-1")
@@ -413,7 +415,7 @@ func TestOrchestrator_DomainEventEmission(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a task
 	task := domain.NewTask("task-events", "Test task", "https://github.com/test/repo", "main", "client-1")
@@ -442,7 +444,7 @@ func TestOrchestrator_AgentFailure(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Configure agent to fail
 	agentRunner.SetResult("task-fail", &AgentResult{
@@ -477,7 +479,7 @@ func TestOrchestrator_StartTask_WithSubtasks(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a task with subtasks
 	task := domain.NewTask("task-with-subtasks", "Test task", "https://github.com/test/repo", "main", "client-1")
@@ -510,7 +512,7 @@ func TestOrchestrator_EventDispatcher(t *testing.T) {
 	agentRunner := newMockAgentRunner()
 
 	cfg := DefaultConfig()
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create a domain event
 	event, err := domain.NewDomainEvent("Task", "task-123", "TaskSubmittedV1", []byte(`{}`), 1)
@@ -533,7 +535,7 @@ func TestOrchestrator_ConcurrentSessions(t *testing.T) {
 
 	cfg := DefaultConfig()
 	cfg.MaxConcurrentSessions = 2
-	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger)
+	orch := NewOrchestrator(cfg, taskRepo, subtaskRepo, outboxWriter, txManager, agentRunner, logger, nil, nil)
 
 	// Create multiple tasks
 	for i := 0; i < 3; i++ {

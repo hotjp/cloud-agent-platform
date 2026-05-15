@@ -1,0 +1,16 @@
+apiVersion: v2
+name: cloud-agent-platform
+description: Cloud Agent Platform - Multi-agent orchestration system
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - multi-agent
+  - orchestration
+  - cloud-agent
+  - ai
+maintainers:
+  - name: Cloud Agent Platform Team
+    email: team@example.com
+sources:
+  - https://github.com/cloud-agent-platform/cap

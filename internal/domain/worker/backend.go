@@ -42,6 +42,19 @@ type ExecOptions struct {
 	Timeout time.Duration
 	// Stdin provides input to the command.
 	Stdin []byte
+	// GitOptions contains options for automatic git commit/push after execution.
+	// If nil, no git operations are performed.
+	GitOptions *GitOptions
+}
+
+// GitOptions contains options for automatic git operations after execution.
+type GitOptions struct {
+	// DoGitCommit indicates whether to perform git commit/push after execution.
+	DoGitCommit bool
+	// CommitMessage is the commit message for the git commit.
+	CommitMessage string
+	// ResultBranch is the branch to push to (e.g., "main/agent/task123").
+	ResultBranch string
 }
 
 // ExecResult contains the result of command execution.

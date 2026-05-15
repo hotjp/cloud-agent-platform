@@ -5,11 +5,13 @@ package workermanager
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/cloud-agent-platform/cap/internal/domain/worker"
+	"github.com/cloud-agent-platform/cap/internal/orchestrator"
 	"go.uber.org/zap"
 )
 
@@ -304,8 +306,42 @@ func (wm *WorkerManager) DestroyWorker(ctx context.Context, id string) error {
 	return nil
 }
 
-// Execute executes a task in the specified worker.
-func (wm *WorkerManager) Execute(ctx context.Context, workerID string, opts worker.ExecOptions) (worker.ExecResult, error) {
+// Execute executes a subtask in a worker and returns the result.
+// It implements WorkerExecutor interface.
+// Handles worker acquisition, execution, and release internally.
+func (wm *WorkerManager) Execute(ctx context.Context, subtaskID, taskID string, opts worker.ExecOptions) (*orchestrator.AgentResult, error) {
+	// 1. Acquire a worker from the pool
+	workerID, err := wm.AcquireWorker(ctx, wm.cfg.DefaultSandboxOpts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to acquire worker: %w", err)
+	}
+
+	// Ensure worker is released when done
+	defer wm.ReleaseWorker(workerID)
+
+	// 2. Execute on the worker (including git operations if configured)
+	result, err := wm.ExecOnWorker(ctx, workerID, opts)
+	if err != nil {
+		return nil, fmt.Errorf("worker execution failed: %w", err)
+	}
+
+	// 3. Build AgentResult from ExecResult
+	agentResult := &orchestrator.AgentResult{
+		Summary:          string(result.Stdout),
+		TokensUsed:       0, // Token tracking would be done by the agent runner
+		ExecutionDuration: result.FinishedAt.Sub(result.StartedAt),
+	}
+
+	if result.ExitCode != 0 {
+		agentResult.Error = fmt.Errorf("agent exited with code %d: %s", result.ExitCode, string(result.Stderr))
+	}
+
+	return agentResult, nil
+}
+
+// ExecOnWorker executes a command on an already-acquired worker.
+// This handles the actual command execution and git operations.
+func (wm *WorkerManager) ExecOnWorker(ctx context.Context, workerID string, opts worker.ExecOptions) (worker.ExecResult, error) {
 	wm.mu.RLock()
 	w, ok := wm.workers[workerID]
 	wm.mu.RUnlock()
@@ -328,7 +364,92 @@ func (wm *WorkerManager) Execute(ctx context.Context, workerID string, opts work
 		return result, err
 	}
 
+	// Perform git operations if configured
+	if opts.GitOptions != nil && opts.GitOptions.DoGitCommit {
+		if gitErr := wm.executeGitCommitPush(ctx, workerID, opts, result.ExitCode); gitErr != nil {
+			wm.logger.Warn("git commit/push failed, continuing anyway",
+				zap.String("worker_id", workerID),
+				zap.Error(gitErr),
+			)
+			// Don't fail the task if git operations fail - the result is still valid
+			// The error is logged but we return the original result
+		}
+	}
+
 	return result, nil
+}
+
+// executeGitCommitPush performs git add, commit, and push inside the sandbox.
+func (wm *WorkerManager) executeGitCommitPush(ctx context.Context, workerID string, opts worker.ExecOptions, agentExitCode int) error {
+	gitOpts := opts.GitOptions
+
+	// Only commit if agent executed successfully (exit code 0)
+	if agentExitCode != 0 {
+		wm.logger.Info("skipping git commit due to non-zero agent exit code",
+			zap.String("worker_id", workerID),
+			zap.Int("exit_code", agentExitCode),
+		)
+		return nil
+	}
+
+	// Set up working directory for git commands
+	workDir := opts.WorkingDir
+
+	// Step 1: git add -A
+	addResult, err := wm.backend.Exec(ctx, workerID, worker.ExecOptions{
+		Cmd:       []string{"git", "add", "-A"},
+		WorkingDir: workDir,
+		Timeout:   30 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("git add failed: %w", err)
+	}
+	if addResult.ExitCode != 0 {
+		return fmt.Errorf("git add failed with exit code %d: %s", addResult.ExitCode, string(addResult.Stderr))
+	}
+
+	// Step 2: git commit
+	commitResult, err := wm.backend.Exec(ctx, workerID, worker.ExecOptions{
+		Cmd:       []string{"git", "commit", "-m", gitOpts.CommitMessage},
+		WorkingDir: workDir,
+		Timeout:   30 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("git commit failed: %w", err)
+	}
+	if commitResult.ExitCode != 0 {
+		// Check if "nothing to commit" is acceptable
+		if strings.Contains(string(commitResult.Stdout), "nothing to commit") ||
+			strings.Contains(string(commitResult.Stderr), "nothing to commit") {
+			wm.logger.Info("nothing to commit, skipping push",
+				zap.String("worker_id", workerID),
+			)
+			return nil
+		}
+		return fmt.Errorf("git commit failed with exit code %d: %s", commitResult.ExitCode, string(commitResult.Stderr))
+	}
+
+	// Step 3: git push to result branch
+	// First, ensure the branch exists and is set to track the result branch
+	pushResult, err := wm.backend.Exec(ctx, workerID, worker.ExecOptions{
+		Cmd:       []string{"git", "push", "-u", "origin", "HEAD:" + gitOpts.ResultBranch},
+		WorkingDir: workDir,
+		Timeout:   60 * time.Second,
+	})
+	if err != nil {
+		return fmt.Errorf("git push failed: %w", err)
+	}
+	if pushResult.ExitCode != 0 {
+		return fmt.Errorf("git push failed with exit code %d: %s", pushResult.ExitCode, string(pushResult.Stderr))
+	}
+
+	wm.logger.Info("git commit and push successful",
+		zap.String("worker_id", workerID),
+		zap.String("result_branch", gitOpts.ResultBranch),
+		zap.String("commit_message", gitOpts.CommitMessage),
+	)
+
+	return nil
 }
 
 // GetWorkerStatus returns the status of a worker.

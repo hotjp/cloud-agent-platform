@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cloud-agent-platform/cap/internal/domain"
+	"github.com/cloud-agent-platform/cap/internal/domain/worker"
 )
 
 // ----------------------------------------------------------------------------
@@ -23,6 +24,23 @@ type AgentRunner interface {
 
 	// Type returns the agent runner type identifier.
 	Type() string
+}
+
+// ----------------------------------------------------------------------------
+// Worker Executor Interface
+// ----------------------------------------------------------------------------
+
+// WorkerExecutor is the interface for executing subtasks via worker pools.
+// It handles worker acquisition, execution, and release internally.
+// Implemented by the plugin layer (e.g., WorkerManager-based executor).
+type WorkerExecutor interface {
+	// Execute executes a subtask in a worker and returns the result.
+	// It handles worker acquisition and release internally.
+	// The opts parameter contains the command to execute and optional git options.
+	// If opts.GitOptions.DoGitCommit is true, git add/commit/push will be
+	// performed inside the sandbox after the agent execution.
+	// Returns the execution result or an error if execution failed.
+	Execute(ctx context.Context, subtaskID, taskID string, opts worker.ExecOptions) (*AgentResult, error)
 }
 
 // AgentResult represents the result of an agent execution.

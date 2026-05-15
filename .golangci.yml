@@ -1,0 +1,139 @@
+# golangci-lint configuration for Cloud Agent Platform
+# https://golangci-lint.run/usage/configuration/
+
+version: "2"
+
+run:
+  timeout: 5m
+  tests: false
+  go: "1.25"
+  skip-dirs:
+    - vendor
+    - api/cap/v1
+    - ent/schema
+    - bin
+
+linters:
+  default: none
+
+  enable:
+    # Core linters
+    - errcheck       # Check for unchecked errors
+    - govet         # Vet examine code
+    - staticcheck   # Static analysis checks
+    - unused        # Checks for unused code
+    - gosimple      # Simplify code
+    - ineffassign   # Detects unused variable assignments
+    - typecheck     # Type checking
+    - gofmt         # Gofmt checks
+    - goimports     # Goimports checks
+    # Style linters
+    - revive        # Go style rules (replacement for golint)
+    - goheader      # Check file header
+    - errname       # Checks that error strings are formatted correctly
+    - errorlint     # Finds issues with error wrapping
+    - copyloopvar   # Detects places where loop variables are copied
+    - nilness       # Check for unnecessary nil checks
+    - prealloc      # Find slice declarations that could be preallocated
+    - reassign      # Detects reassigned variables
+
+  disable:
+    - exhaustruct   # Too strict for our ent/ORM patterns
+    - golint        # Deprecated, use staticcheck/revive instead
+    - interfacer    # Too strict
+    - maligned      # Deprecated
+    - scopelint     # Deprecated
+    - nakedret      # Too verbose
+
+linters-settings:
+  gofmt:
+    simplify: true
+
+  goimports:
+    local-prefixes: github.com/cloud-agent-platform
+
+  govet:
+    enable-all: true
+
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  staticcheck:
+    checks:
+      - all
+      - "-ST1000"  # Don't require package doc comments
+      - "-SA1012"  # Don't require nil context
+
+  revive:
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: equal-expr
+
+  errorlint:
+    errorf: true
+    errorsas: true
+    is-cmp: false
+    wraps: true
+
+  goheader:
+    values:
+      regular:
+        Copyright: Copyright © Cloud Agent Platform Authors
+    template: |
+      {{ header }}
+    file-header: |
+      // Copyright © Cloud Agent Platform Authors
+
+  nilness:
+    check-recursive-cu: true
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 50
+  max-same-issues: 10
+
+  exclude-rules:
+    # Exclude generated protobuf files
+    - path: api/cap/v1/
+      text: "generated"
+
+    # Exclude ent schema
+    - path: ent/schema/
+      text: "generated"
+
+    # Allow testify assertions in tests
+    - path: _test\.go
+      linters:
+        - errcheck
+        - unused
+
+    # Allow unnecessary nil checks in domain layer (defensive coding)
+    - path: internal/domain/
+      linters:
+        - nilness
+
+    # Allow unused variables in test files (common for table-driven tests)
+    - path: _test\.go
+      linters:
+        - unused
+
+    # Allow error shadowing in tests
+    - path: _test\.go
+      linters:
+        - errorlint

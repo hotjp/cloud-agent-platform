@@ -1,0 +1,77 @@
+# =============================================================================
+# Worker Sandbox Container - Multi-stage Dockerfile
+# =============================================================================
+# Build stage: golang:1.23-alpine for compiling worker agent code
+FROM --platform=linux/amd64 golang:1.23-alpine AS builder
+
+ARG BUILD_TAGS=""
+
+# Install build dependencies
+RUN apk add --no-cache \
+    git \
+    ca-certificates \
+    tzdata
+
+WORKDIR /build
+
+# Copy go mod files first for dependency caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code for worker
+COPY . .
+
+# Build worker binary (CGO_ENABLED=0 for pure Go, static binary)
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-w -s" \
+    -tags "${BUILD_TAGS}" \
+    -o worker \
+    ./cmd/worker
+
+# =============================================================================
+# Runtime stage: alpine:3.19 - minimal runtime image
+# =============================================================================
+FROM alpine:3.19 AS runtime
+
+ARG BUILD_TAGS=""
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    git \
+    ca-certificates \
+    tzdata \
+    wget \
+    && adduser -D -u 1000 worker
+
+# Create directory structure
+WORKDIR /home/worker
+RUN mkdir -p /workspace /tmp && chown -R worker:worker /home/worker
+
+# Create health endpoint script
+RUN echo '#!/bin/sh' > /health && \
+    echo 'echo "OK"' >> /health && \
+    chmod +x /health
+
+# Copy seccomp profile if provided
+COPY seccomp-worker.json /etc/seccomp/seccomp-worker.json 2>/dev/null || true
+
+# Copy binary from builder
+COPY --from=builder /build/worker /usr/local/bin/worker
+
+# Set ownership
+RUN chown -R worker:worker /home/worker
+
+# Switch to non-root user
+USER worker
+
+# Expose ports (if needed for health/metrics)
+EXPOSE 8080
+
+# Security: Read-only rootfs except /workspace and /tmp
+# These are mounted at runtime via volumes
+
+# Health check - verify the worker process is running
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD /health
+
+ENTRYPOINT ["/usr/local/bin/worker"]

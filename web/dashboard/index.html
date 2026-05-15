@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Agent Platform - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Cloud Agent Platform</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot disconnected"></span>
+                <span class="status-text">Disconnected</span>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Tasks</h2>
+                    <button class="btn-refresh" id="refreshBtn" title="Refresh">⟳</button>
+                </div>
+                <div class="task-filters">
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="decomposing">Decomposing</option>
+                        <option value="dispatched">Dispatched</option>
+                        <option value="running">Running</option>
+                        <option value="reviewing">Reviewing</option>
+                        <option value="confirming">Confirming</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="task-list" id="taskList">
+                    <div class="task-list-empty">No tasks found</div>
+                </div>
+            </aside>
+
+            <main class="content">
+                <div class="detail-panel" id="detailPanel">
+                    <div class="detail-empty">
+                        <p>Select a task to view details</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

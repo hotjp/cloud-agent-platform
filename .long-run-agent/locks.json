@@ -1,0 +1,88 @@
+{
+  "locks": {
+    "task_002": {
+      "session_id": "task_002_202605132330_88d5",
+      "task_id": "task_002",
+      "status": "claimed",
+      "claimed_at": "2026-05-13T23:30:59.617598",
+      "last_heartbeat": "2026-05-13T23:32:53.393474",
+      "checkpoint": {
+        "note": "配置系统完成",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-13T23:32:53.393454"
+      }
+    },
+    "task_052": {
+      "session_id": "task_052_202605140639_9a7e",
+      "task_id": "task_052",
+      "status": "claimed",
+      "claimed_at": "2026-05-14T06:39:26.749267",
+      "last_heartbeat": "2026-05-14T06:40:08.849201",
+      "checkpoint": {
+        "note": "All 3 agents implemented: ObserverAgent, StrategistAgent, ExecutorAgent. Tests pass, build succeeds, go vet passes.",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-14T06:40:08.849191"
+      }
+    },
+    "task_089": {
+      "session_id": "task_089_202605141354_06ea",
+      "task_id": "task_089",
+      "status": "claimed",
+      "claimed_at": "2026-05-14T13:54:57.803147",
+      "last_heartbeat": "2026-05-14T13:58:42.098144",
+      "checkpoint": {
+        "note": "Smart task decomposition complete: Added DecompositionHistory entity, DecompositionAdvisor service with history-based optimization, GranularityHint for strategist, and DecomposeOptions in request. All tests pass.",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-14T13:58:42.098130"
+      }
+    },
+    "task_107": {
+      "session_id": "task_107_202605150022_9339",
+      "task_id": "task_107",
+      "status": "claimed",
+      "claimed_at": "2026-05-15T00:22:31.800698",
+      "last_heartbeat": "2026-05-15T00:22:38.920121",
+      "checkpoint": {
+        "note": "E2E WebSocket tests implemented and passing: test/e2e/websocket_test.go",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-15T00:22:38.920109"
+      }
+    },
+    "task_110": {
+      "session_id": "task_110_202605151005_9996",
+      "task_id": "task_110",
+      "status": "claimed",
+      "claimed_at": "2026-05-15T10:05:48.474458",
+      "last_heartbeat": "2026-05-15T10:05:51.771581",
+      "checkpoint": {
+        "note": "REST适配层已完成，所有MCP客户端期望的端点已对齐",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-15T10:05:51.771567"
+      }
+    },
+    "task_113": {
+      "session_id": "task_113_202605151016_5c51",
+      "task_id": "task_113",
+      "status": "claimed",
+      "claimed_at": "2026-05-15T10:16:32.818712",
+      "last_heartbeat": "2026-05-15T10:16:39.566113",
+      "checkpoint": {
+        "note": "进度保存: 实现了DecomposeTask, GetGuardianCheck, ListAgentsForTask三个端点",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-15T10:16:39.566099"
+      }
+    }
+  }
+}

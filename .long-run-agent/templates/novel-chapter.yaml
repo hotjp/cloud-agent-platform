@@ -1,0 +1,273 @@
+acceptance:
+- 字数 >= 2000
+- 包含场景描写
+- 人物对话完整
+description: 小说章节模板
+ralph:
+  enabled: true
+  max_iterations: 7
+  iteration_stages:
+    - iteration: 1
+      name: "完成初稿"
+      focus:
+        - "完成主要情节"
+        - "确保故事完整"
+      priority_checks:
+        - "plot_complete"
+        - "word_count"
+      ignore_checks:
+        - "writing_style"
+        - "description_detail"
+      suggestion: |
+        ✍️ **第1轮迭代：完成初稿**
+        
+        **目标**: 完成章节主体，确保故事完整
+        
+        **重点关注**:
+        - 完成主要情节线索
+        - 确保故事从头到尾完整
+        - 建立基本场景框架
+        - 推进故事发展
+        
+        **可以忽略**:
+        - 精细描写
+        - 语言润色
+        
+        💡 提示：先把故事讲完，不要在细节上过多停留
+        
+    - iteration: 2
+      name: "情节完善"
+      focus:
+        - "补充情节细节"
+        - "完善转折"
+      priority_checks:
+        - "plot_details"
+        - "plot_transitions"
+      ignore_checks:
+        - "character_depth"
+      suggestion: |
+        📖 **第2轮迭代：情节完善**
+        
+        **目标**: 丰富情节，增强故事张力
+        
+        **重点关注**:
+        - 补充情节细节和过渡
+        - 完善情节转折点
+        - 增加伏笔和呼应
+        - 加强冲突和张力
+        
+        **可以忽略**:
+        - 人物深度刻画
+        
+        💡 提示：让情节更丰满，故事更有吸引力
+        
+    - iteration: 3
+      name: "人物塑造"
+      focus:
+        - "深化人物性格"
+        - "增加对话"
+      priority_checks:
+        - "character_depth"
+        - "dialogue_quality"
+      ignore_checks:
+        - "environment_description"
+      suggestion: |
+        👥 **第3轮迭代：人物塑造**
+        
+        **目标**: 让人物更立体，更真实
+        
+        **重点关注**:
+        - 深化人物性格特征
+        - 增加人物对话
+        - 展现人物内心活动
+        - 通过行动塑造人物
+        
+        **可以忽略**:
+        - 环境描写
+        
+        💡 提示：好的人物让读者记住故事
+        
+    - iteration: 4
+      name: "场景描写"
+      focus:
+        - "增加环境描写"
+        - "营造氛围"
+      priority_checks:
+        - "scene_description"
+        - "atmosphere"
+      ignore_checks:
+        - "language_polish"
+      suggestion: |
+        🏞️ **第4轮迭代：场景描写**
+        
+        **目标**: 构建生动的场景，营造氛围
+        
+        **重点关注**:
+        - 增加环境描写
+        - 营造场景氛围
+        - 调动读者感官
+        - 增强代入感
+        
+        **可以忽略**:
+        - 语言润色
+        
+        💡 提示：好的场景描写让读者身临其境
+        
+    - iteration: 5
+      name: "语言润色"
+      focus:
+        - "优化表达"
+        - "调整节奏"
+      priority_checks:
+        - "language_quality"
+        - "rhythm"
+      ignore_checks:
+        - "major_revision"
+      suggestion: |
+        💎 **第5轮迭代：语言润色**
+        
+        **目标**: 提升文字质量，优化阅读体验
+        
+        **重点关注**:
+        - 优化词语选择
+        - 改善句式结构
+        - 调整叙事节奏
+        - 增强语言表现力
+        
+        **可以忽略**:
+        - 大幅修改情节
+        
+        💡 提示：好的文字让故事更有感染力
+        
+    - iteration: 6
+      name: "逻辑检查"
+      focus:
+        - "检查情节逻辑"
+        - "确认时间线"
+      priority_checks:
+        - "plot_logic"
+        - "timeline_consistency"
+      suggestion: |
+        🔍 **第6轮迭代：逻辑检查**
+        
+        **目标**: 确保故事逻辑自洽，前后一致
+        
+        **重点关注**:
+        - 检查情节逻辑漏洞
+        - 确认时间线一致
+        - 核实人物行为合理性
+        - 验证细节前后呼应
+        
+        **检查清单**:
+        - 时间线是否合理
+        - 人物行为是否一致
+        - 伏笔是否收回
+        - 细节是否矛盾
+        
+        💡 提示：逻辑漏洞会破坏读者的阅读体验
+        
+    - iteration: 7
+      name: "最终定稿"
+      focus:
+        - "最终审读"
+        - "格式整理"
+      priority_checks:
+        - "final_review"
+        - "formatting"
+      suggestion: |
+        📚 **第7轮迭代：最终定稿**
+        
+        **目标**: 完成最后审校，准备发布
+        
+        **重点关注**:
+        - 最终审读全文
+        - 修正错别字和标点
+        - 统一格式和排版
+        - 检查章节衔接
+        
+        **最终检查**:
+        - 字数达标
+        - 无明显错误
+        - 格式规范
+        - 可以发布
+        
+        💡 提示：最后一步决定了作品的专业程度
+  quality_gates:
+    - type: word_count
+      check: "words >= 2000"
+      required: true
+      weight: 0.4
+    - type: plot_check
+      check: "verify_plot_consistency"
+      required: true
+      weight: 0.3
+    - type: style_check
+      check: "verify_writing_style"
+      required: false
+      weight: 0.2
+  optimization_hints: true
+keywords:
+- 小说
+- 章节
+- 故事
+- 叙述
+- chapter
+- novel
+- 写作
+- 情节
+name: novel-chapter
+states:
+- drafting
+- revising
+- finalized
+structure: '# {{ title }}
+
+
+  ## ⚠️ 重要提示（Agent 必读）
+
+
+  **当前位置**: `.long-run-agent/tasks/{{id}}.md`（任务描述文件）
+
+
+  **工作目录**: 项目根目录（`.long-run-agent` 的同级目录）
+
+
+  **产出物位置**: 请在 `novel/` 或项目根目录创建章节文件
+
+
+  **不要**将作品内容写在这个文件里！
+
+
+  ## 场景
+
+
+  <!-- 描述本章发生的场景 -->
+
+
+  ## 人物
+
+
+  <!-- 涉及的人物 -->
+
+
+  ## 正文
+
+
+  <!-- 章节内容 -->
+
+
+  ## 伏笔
+
+
+  <!-- 埋下的伏笔 -->
+
+  '
+template_engine: jinja2
+transitions:
+  drafting:
+  - revising
+  finalized: []
+  revising:
+  - drafting
+  - finalized
+version: '2.0'

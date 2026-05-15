@@ -1,0 +1,18 @@
+{
+  "project_id": "cloud-agent-platform",
+  "check_time": "2026-05-14T02:10:13.068020",
+  "code_total_size_mb": 1.29,
+  "code_file_count": 114,
+  "git_valid_ratio": 0,
+  "git_error": "GitPython not installed",
+  "doc_coverage_ratio": 0,
+  "doc_code_modules": 0,
+  "doc_modules": 70,
+  "doc_matched_modules": 0,
+  "func_comment_ratio": 0,
+  "func_total": 0,
+  "func_commented": 0,
+  "decision": "full",
+  "reason": "代码体积1.29MB ≤ 5.0MB，全量解析（未满足：文档覆盖率0% < 40%,Git 规范提交0% < 30%）",
+  "suggestions": []
+}
