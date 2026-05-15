@@ -25,6 +25,7 @@ import (
 	"github.com/cloud-agent-platform/cap/internal/observability/tracing"
 	"github.com/cloud-agent-platform/cap/internal/orchestrator"
 	"github.com/cloud-agent-platform/cap/internal/scheduler"
+	"github.com/cloud-agent-platform/cap/internal/gitcontainer"
 	"github.com/cloud-agent-platform/cap/internal/service"
 	"github.com/cloud-agent-platform/cap/internal/storage"
 	"github.com/cloud-agent-platform/cap/plugins/workermanager"
@@ -149,10 +150,13 @@ func main() {
 				if adapterCfg.LLMAPIKey == "" {
 					logger.Warn("LLM API key not configured, cap-worker will fail on LLM calls")
 				}
-				workerExecutor = scheduler.NewOrchestratorAdapter(sched, adapterCfg)
-				// Graceful shutdown: stop scheduler on context cancel
+				// Git Container Manager — per-project Git containers
+				gitMgr := gitcontainer.NewManager(gitcontainer.DefaultConfig())
+				workerExecutor = scheduler.NewOrchestratorAdapter(sched, adapterCfg, gitMgr)
+				// Graceful shutdown: stop scheduler + git containers on context cancel
 				go func() {
 					<-ctx.Done()
+					gitMgr.StopAll()
 					stopCtx, stopCancel := context.WithTimeout(context.Background(), 10*time.Second)
 					defer stopCancel()
 					sched.Stop(stopCtx)

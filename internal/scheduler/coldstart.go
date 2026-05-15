@@ -2,8 +2,10 @@
 package scheduler
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -345,17 +347,18 @@ func (c *managedContainer) Exec(ctx context.Context, spec ExecSpec) (ExecResult,
 	if c.closed {
 		return ExecResult{}, fmt.Errorf("scheduler: container %s is closed", c.id)
 	}
+
+	// If this container was created with a volume mount, use docker exec directly
+	// (the original backend doesn't know about this container)
+	if c.spec.VolumeHostPath != "" {
+		return c.dockerExec(ctx, spec)
+	}
+
 	result, err := c.backend.Exec(ctx, c.id, spec)
 	if err != nil {
 		return result, err
 	}
-	// Update lastUsed
-	c.sched.mu.Lock()
-	if h, ok := c.sched.containers[c.id]; ok {
-		h.lastUsed = time.Now()
-		c.sched.containers[c.id] = h
-	}
-	c.sched.mu.Unlock()
+	c.updateLastUsed()
 	return result, nil
 }
 
@@ -365,4 +368,61 @@ func (c *managedContainer) Close(ctx context.Context) error {
 	}
 	c.closed = true
 	return c.sched.Release(ctx, c.id)
+}
+
+// updateLastUsed refreshes the lastUsed timestamp.
+func (c *managedContainer) updateLastUsed() {
+	c.sched.mu.Lock()
+	if h, ok := c.sched.containers[c.id]; ok {
+		h.lastUsed = time.Now()
+		c.sched.containers[c.id] = h
+	}
+	c.sched.mu.Unlock()
+}
+
+// dockerExec runs a command via `docker exec` for volume-mounted containers
+// that the original backend doesn't know about.
+func (c *managedContainer) dockerExec(ctx context.Context, spec ExecSpec) (ExecResult, error) {
+	start := time.Now()
+
+	args := []string{"exec"}
+	for k, v := range spec.Env {
+		args = append(args, "-e", fmt.Sprintf("%s=%s", k, v))
+	}
+	if spec.WorkingDir != "" {
+		args = append(args, "-w", spec.WorkingDir)
+	}
+	args = append(args, c.id)
+	args = append(args, spec.Cmd...)
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if len(spec.Stdin) > 0 {
+		cmd.Stdin = bytes.NewReader(spec.Stdin)
+	}
+
+	err := cmd.Run()
+	end := time.Now()
+
+	exitCode := 0
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		} else {
+			return ExecResult{}, fmt.Errorf("docker exec: %w", err)
+		}
+	}
+
+	c.updateLastUsed()
+
+	return ExecResult{
+		ExitCode:   exitCode,
+		Stdout:     stdout.Bytes(),
+		Stderr:     stderr.Bytes(),
+		StartedAt:  start,
+		FinishedAt: end,
+	}, nil
 }

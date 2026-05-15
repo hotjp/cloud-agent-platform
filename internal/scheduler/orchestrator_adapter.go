@@ -9,13 +9,15 @@ import (
 
 	"github.com/cloud-agent-platform/cap/internal/domain"
 	"github.com/cloud-agent-platform/cap/internal/domain/worker"
+	"github.com/cloud-agent-platform/cap/internal/gitcontainer"
 	"github.com/cloud-agent-platform/cap/internal/orchestrator"
 )
 
 // OrchestratorAdapter wraps a Scheduler to implement orchestrator.WorkerExecutor.
 type OrchestratorAdapter struct {
-	sched  Scheduler
-	config AdapterConfig
+	sched   Scheduler
+	config  AdapterConfig
+	gitMgr  *gitcontainer.Manager
 }
 
 // AdapterConfig holds LLM and image configuration.
@@ -39,8 +41,8 @@ func DefaultAdapterConfig() AdapterConfig {
 }
 
 // NewOrchestratorAdapter creates a WorkerExecutor backed by the scheduler.
-func NewOrchestratorAdapter(sched Scheduler, config AdapterConfig) *OrchestratorAdapter {
-	return &OrchestratorAdapter{sched: sched, config: config}
+func NewOrchestratorAdapter(sched Scheduler, config AdapterConfig, gitMgr *gitcontainer.Manager) *OrchestratorAdapter {
+	return &OrchestratorAdapter{sched: sched, config: config, gitMgr: gitMgr}
 }
 
 // Execute implements orchestrator.WorkerExecutor.
@@ -53,14 +55,9 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 	env["LLM_API_URL"] = a.config.LLMAPIURL
 	env["LLM_API_KEY"] = a.config.LLMAPIKey
 	env["LLM_MODEL"] = a.config.LLMModel
-
-	// CAP API URL for artifact reporting — worker calls back to the platform
 	env["CAP_API_URL"] = a.config.CAPAPIURL
 
-	// Proxy config for container (Docker Desktop uses host.docker.internal)
-	// Docker Desktop auto-injects HTTP_PROXY=http://127.0.0.1:7890 which doesn't work inside containers.
-	// We override all proxy vars to use host.docker.internal.
-	// Also override no_proxy to remove host.docker.internal from the exclusion list.
+	// Proxy config
 	proxy := "http://host.docker.internal:7890"
 	env["HTTP_PROXY"] = proxy
 	env["HTTPS_PROXY"] = proxy
@@ -69,7 +66,7 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 	env["no_proxy"] = "localhost,127.0.0.1,0.0.0.0"
 	env["NO_PROXY"] = "localhost,127.0.0.1,0.0.0.0"
 
-	// Defaults if not provided by orchestrator
+	// Defaults
 	if env["TASK_ID"] == "" {
 		env["TASK_ID"] = taskID
 	}
@@ -80,6 +77,54 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 		env["BASE_BRANCH"] = "main"
 	}
 
+	// ─── Git Container mode ──────────────────────────────────────────────────
+	// If we have a Git container manager, create/lookup the project's Git container
+	// and mount its volume into the worker.
+	if a.gitMgr != nil && env["REPO_URL"] != "" {
+		repoURL := env["REPO_URL"]
+		branch := env["BASE_BRANCH"]
+
+		gc, err := a.gitMgr.Ensure(ctx, repoURL, branch)
+		if err != nil {
+			// Git container failed — fall back to standalone mode
+			fmt.Printf("[adapter] git container failed, falling back to standalone: %v\n", err)
+		} else {
+			// Tell worker to use Git Container mode
+			env["GIT_CONTAINER_API"] = fmt.Sprintf("http://host.docker.internal:%d", gc.APIPort)
+			env["PROJECT_ID"] = gc.ProjectID
+
+			// Create worker with the Git container's volume mounted
+			spec := ContainerSpec{
+				Image:          a.config.WorkerImage,
+				WorkingDir:     "/workspace",
+				Timeout:        30 * time.Minute,
+				Env:            env,
+				VolumeHostPath: gc.VolumeDir, // Mount Git container's volume
+			}
+			if opts.Timeout > 0 {
+				spec.Timeout = opts.Timeout
+			}
+
+			cmd := ExecSpec{
+				Cmd:     []string{"/usr/local/bin/entrypoint.sh"},
+				Timeout: spec.Timeout,
+				Env:     env,
+			}
+
+			result, err := a.sched.Run(ctx, spec, cmd)
+			if err != nil {
+				return &orchestrator.AgentResult{
+					Summary:           fmt.Sprintf("execution failed: %v", err),
+					ExecutionDuration: 0,
+					Error:             err,
+				}, err
+			}
+
+			return a.buildResult(result, opts), nil
+		}
+	}
+
+	// ─── Standalone mode (legacy / no Git container) ─────────────────────────
 	spec := ContainerSpec{
 		Image:      a.config.WorkerImage,
 		WorkingDir: "/workspace",
@@ -90,7 +135,6 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 		spec.Timeout = opts.Timeout
 	}
 
-	// Execute the cap-worker entrypoint inside the container
 	cmd := ExecSpec{
 		Cmd:     []string{"/usr/local/bin/entrypoint.sh"},
 		Timeout: spec.Timeout,
@@ -104,15 +148,19 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 			duration = result.FinishedAt.Sub(result.StartedAt)
 		}
 		return &orchestrator.AgentResult{
-			Summary:          fmt.Sprintf("execution failed: %v", err),
+			Summary:           fmt.Sprintf("execution failed: %v", err),
 			ExecutionDuration: duration,
-			Error:            err,
+			Error:             err,
 		}, err
 	}
 
+	return a.buildResult(result, opts), nil
+}
+
+func (a *OrchestratorAdapter) buildResult(result ExecResult, opts worker.ExecOptions) *orchestrator.AgentResult {
 	agentResult := &orchestrator.AgentResult{
-		Summary:          string(result.Stdout),
-		TokensUsed:       0,
+		Summary:           string(result.Stdout),
+		TokensUsed:        0,
 		ExecutionDuration: result.FinishedAt.Sub(result.StartedAt),
 	}
 
@@ -120,12 +168,11 @@ func (a *OrchestratorAdapter) Execute(ctx context.Context, subtaskID, taskID str
 		agentResult.Error = fmt.Errorf("agent exited with code %d: %s", result.ExitCode, string(result.Stderr))
 	}
 
-	// Attach artifacts
 	if opts.GitOptions != nil && opts.GitOptions.DoGitCommit && result.ExitCode == 0 {
 		agentResult.Artifacts = []domain.ArtifactRef{
 			{Type: "git_branch", URL: opts.GitOptions.ResultBranch},
 		}
 	}
 
-	return agentResult, nil
+	return agentResult
 }

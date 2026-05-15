@@ -33,6 +33,9 @@ type ContainerSpec struct {
 	NetworkDisabled bool
 	// Timeout for the entire container lifecycle (create + exec + cleanup).
 	Timeout time.Duration
+	// VolumeHostPath mounts this host directory into WorkingDir.
+	// Empty = no mount. When set, the directory is bind-mounted as WorkingDir.
+	VolumeHostPath string
 }
 
 // ExecSpec describes a command to execute inside a container.
