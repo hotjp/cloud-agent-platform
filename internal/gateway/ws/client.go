@@ -36,7 +36,8 @@ type Client struct {
 
 	// Authentication state
 	authenticated bool
-	mu            sync.Mutex
+	closed       bool
+	mu           sync.Mutex
 }
 
 // NewClient creates a new WebSocket client.

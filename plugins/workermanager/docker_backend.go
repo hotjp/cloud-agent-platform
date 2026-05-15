@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -39,7 +40,7 @@ type DockerBackendConfig struct {
 func DefaultDockerBackendConfig() DockerBackendConfig {
 	return DockerBackendConfig{
 		DefaultImage:      "cap-worker:latest",
-		SeccompProfilePath: "seccomp-worker.json",
+		SeccompProfilePath: "", // disabled for dev; set seccomp-worker.json for production
 		DefaultMemoryLimit: 2 * 1024 * 1024 * 1024, // 2GB
 		DefaultCPUQuota:   100000,                   // 1 CPU
 		DefaultPidsLimit:  512,
@@ -167,7 +168,9 @@ func (b *DockerBackend) Create(ctx context.Context, opts worker.SandboxOptions) 
 	// Build environment variables
 	env := buildEnvVars(opts.Envvars)
 
+
 	// Container config
+	// Don't set Cmd — let the image's ENTRYPOINT run (e.g., sleep infinity for cap-worker)
 	containerCfg := &docker.Config{
 		Image:        image,
 		WorkingDir:   opts.WorkingDir,
@@ -286,10 +289,15 @@ func (b *DockerBackend) buildHostConfig(opts worker.SandboxOptions) docker.HostC
 			{Name: "nproc", Soft: 512, Hard: 1024},
 			{Name: "nofile", Soft: 1024, Hard: 2048},
 		},
-		// Disk quota (if available via device mapper)
-		StorageOpt: map[string]string{
+	}
+
+	// Disk quota (if available via device mapper)
+	// Note: storage-opt requires overlay over xfs with pquota, not available on macOS Docker Desktop.
+	// Enable this only on Linux production hosts.
+	if runtime.GOOS != "darwin" {
+		hostCfg.StorageOpt = map[string]string{
 			"size": "10G",
-		},
+		}
 	}
 
 	// Add seccomp profile if available
@@ -317,6 +325,8 @@ func (b *DockerBackend) Exec(ctx context.Context, id string, opts worker.ExecOpt
 		return worker.ExecResult{}, &worker.ErrSandboxNotFound{ID: id}
 	}
 
+	execEnv := buildEnvVars(opts.Envvars)
+
 	// Create exec instance
 	execCfg := docker.CreateExecOptions{
 		Container:    info.id,
@@ -325,7 +335,7 @@ func (b *DockerBackend) Exec(ctx context.Context, id string, opts worker.ExecOpt
 		AttachStderr: true,
 		Cmd:          opts.Cmd,
 		WorkingDir:   opts.WorkingDir,
-		Env:          buildEnvVars(opts.Envvars),
+		Env:          execEnv,
 	}
 
 	execID, err := b.client.CreateExec(execCfg)

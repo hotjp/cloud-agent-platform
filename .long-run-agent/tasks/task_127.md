@@ -37,7 +37,7 @@ test: 端到端集成测试 — 从 MCP submit 到 Agent 执行完成
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
+- test/e2e/integration_test.go (E2E integration test covering MCP submit → HTTP API → TaskService → Orchestrator → Mock Agent execution)
 
 
 
@@ -48,16 +48,26 @@ test: 端到端集成测试 — 从 MCP submit 到 Agent 执行完成
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
+- [x] **实现证明**: Created test/e2e/integration_test.go with 7 integration tests: MCPSubmitToAgentComplete, MCPSimpleTaskFlow, MCPComplexTaskFlow, MCPTaskListAndStatus, MCPAgentList, MCPToolsList, MCPCancelTask
+- [x] **测试验证**: `go test -p 2 -count=1 -timeout 120s ./test/e2e/` passes all tests (4.262s)
+- [x] **影响范围**: No impact - new test file only
 
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
-
-### 测试步骤
-1. 
-2. 
-3. 
-
-### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+### 测试验证结果
+```
+=== RUN   TestIntegration_MCPSubmitToAgentComplete
+--- PASS: TestIntegration_MCPSubmitToAgentComplete (0.42s)
+=== RUN   TestIntegration_MCPSimpleTaskFlow
+--- PASS: TestIntegration_MCPSimpleTaskFlow (0.41s)
+=== RUN   TestIntegration_MCPComplexTaskFlow
+--- PASS: TestIntegration_MCPComplexTaskFlow (0.41s)
+=== RUN   TestIntegration_MCPTaskListAndStatus
+--- PASS: TestIntegration_MCPTaskListAndStatus (0.01s)
+=== RUN   TestIntegration_MCPAgentList
+--- PASS: TestIntegration_MCPAgentList (0.00s)
+=== RUN   TestIntegration_MCPToolsList
+--- PASS: TestIntegration_MCPToolsList (0.00s)
+=== RUN   TestIntegration_MCPCancelTask
+--- PASS: TestIntegration_MCPCancelTask (0.00s)
+PASS
+ok  	github.com/cloud-agent-platform/cap/test/e2e	4.262s
+```

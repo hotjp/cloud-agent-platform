@@ -83,6 +83,20 @@
         "files_changed": [],
         "timestamp": "2026-05-15T10:16:39.566099"
       }
+    },
+    "task_127": {
+      "session_id": "task_127_202605151421_479b",
+      "task_id": "task_127",
+      "status": "claimed",
+      "claimed_at": "2026-05-15T14:21:31.170687",
+      "last_heartbeat": "2026-05-15T14:21:36.451451",
+      "checkpoint": {
+        "note": "E2E integration test created at test/e2e/integration_test.go covering MCP submit -> HTTP API -> TaskService -> Orchestrator -> Mock Agent execution",
+        "completed": [],
+        "remaining": [],
+        "files_changed": [],
+        "timestamp": "2026-05-15T14:21:36.451440"
+      }
     }
   }
 }

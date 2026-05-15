@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -196,19 +197,14 @@ func (s *CubeSandbox) Exec(ctx context.Context, id string, opts ExecOptions) (Ex
 	// Wait for completion
 	err = cmd.Wait()
 
+	// Check for timeout before context is canceled
+	isTimeout := opts.Timeout > 0 && ctx.Err() == context.DeadlineExceeded
+
 	finishTime := time.Now()
 	exitCode := 0
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			exitCode = exitErr.ExitCode()
-		} else {
-			return ExecResult{
-				Stdout:     stdout.Bytes(),
-				Stderr:     stderr.Bytes(),
-				StartedAt:  startTime,
-				FinishedAt: finishTime,
-				Error:      err,
-			}, &ErrSandboxExecutionFailed{SandboxID: id, Cmd: opts.Cmd, Cause: err}
 		}
 	}
 
@@ -219,13 +215,19 @@ func (s *CubeSandbox) Exec(ctx context.Context, id string, opts ExecOptions) (Ex
 		zap.Duration("duration", finishTime.Sub(startTime)),
 	)
 
-	return ExecResult{
+	result := ExecResult{
 		ExitCode:   exitCode,
 		Stdout:     stdout.Bytes(),
 		Stderr:     stderr.Bytes(),
 		StartedAt:  startTime,
 		FinishedAt: finishTime,
-	}, nil
+	}
+	if isTimeout {
+		result.Error = ctx.Err()
+		return result, &ErrSandboxExecutionFailed{SandboxID: id, Cmd: opts.Cmd, Cause: ctx.Err()}
+	}
+
+	return result, nil
 }
 
 // buildCommand constructs the shell command to execute.
@@ -234,10 +236,7 @@ func (s *CubeSandbox) buildCommand(cmd []string) (string, []string) {
 		return "cmd.exe", append([]string{"/c"}, cmd...)
 	}
 	// Unix-like systems
-	if len(cmd) == 1 {
-		return "/bin/sh", []string{"-c", cmd[0]}
-	}
-	return "/bin/sh", append([]string{"-c", cmd[0]}, cmd[1:]...)
+	return "/bin/sh", []string{"-c", strings.Join(cmd, " ")}
 }
 
 // Destroy implements Sandbox.Destroy for CubeSandbox.

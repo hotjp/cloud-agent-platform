@@ -274,7 +274,8 @@ func TestCubeSandbox_Destroy(t *testing.T) {
 
 	// Status should return not found
 	_, err = cube.Status(ctx, id)
-	assert.ErrorAs(t, err, &ErrSandboxNotFound{})
+	assert.Error(t, err)
+	assert.IsType(t, &ErrSandboxNotFound{}, err)
 }
 
 // TestCubeSandbox_List tests listing sandbox IDs.
@@ -356,7 +357,8 @@ func TestCubeSandbox_Status(t *testing.T) {
 	require.NoError(t, err)
 
 	_, err = cube.Status(ctx, id)
-	assert.ErrorAs(t, err, &ErrSandboxNotFound{})
+	assert.Error(t, err)
+	assert.IsType(t, &ErrSandboxNotFound{}, err)
 }
 
 // TestCubeSandbox_ExecWithStdin tests executing with stdin input.
@@ -466,7 +468,7 @@ func TestBuildCommand(t *testing.T) {
 	// Command with args on Unix
 	shell, args = cube.buildCommand([]string{"ls", "-la"})
 	assert.Equal(t, "/bin/sh", shell)
-	assert.Equal(t, []string{"-c", "ls", "-la"}, args)
+	assert.Equal(t, []string{"-c", "ls -la"}, args)
 
 	// Complex shell command
 	shell, args = cube.buildCommand([]string{"echo $HOME"})

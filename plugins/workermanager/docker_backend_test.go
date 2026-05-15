@@ -4,6 +4,7 @@ package workermanager
 import (
 	"context"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -470,8 +471,12 @@ func TestDockerBackend_BuildHostConfig_WithDiskQuota(t *testing.T) {
 
 	hostCfg := backend.buildHostConfig(opts)
 
-	// Verify storage opt
-	assert.Contains(t, hostCfg.StorageOpt, "size")
+	// Verify storage opt (Linux only)
+	if runtime.GOOS != "darwin" {
+		assert.Contains(t, hostCfg.StorageOpt, "size", "StorageOpt should contain 'size' on Linux")
+	} else {
+		assert.Nil(t, hostCfg.StorageOpt, "StorageOpt should be nil on macOS")
+	}
 }
 
 func TestErrSandboxNotFound(t *testing.T) {

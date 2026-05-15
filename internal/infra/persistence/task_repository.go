@@ -419,25 +419,19 @@ func (r *TaskRepositoryImpl) UpdateStatus(ctx context.Context, id string, status
 		return nil, domain.NewL2ParamValidationError("id", "id is empty")
 	}
 
-	// First check current version for optimistic lock
-	existing, err := r.client.Task.Get(ctx, id)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, domain.NewL2AggregateNotFoundError("Task", id)
-		}
-		return nil, domain.NewL1DBQueryError(err)
-	}
-
-	if existing.Version != expectedVersion {
-		return nil, domain.NewL2OptimisticLockError("Task", id, expectedVersion, existing.Version)
-	}
-
-	// Update only status and version
+	// Optimistic lock: atomic check+update using ent Where clause
+	// expectedVersion is the NEW version (after TransitionTo increments it)
+	// so the WHERE condition should match the OLD version (expectedVersion - 1)
+	oldVersion := expectedVersion - 1
 	entTask, err := r.client.Task.UpdateOneID(id).
+		Where(task.VersionEQ(oldVersion)).
 		SetStatus(string(status)).
-		SetVersion(expectedVersion + 1).
+		SetVersion(expectedVersion).
 		Save(ctx)
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, domain.NewL2OptimisticLockError("Task", id, expectedVersion, oldVersion)
+		}
 		r.logger.Error("failed to update task status",
 			zap.String("layer", "L1"),
 			zap.String("task_id", id),

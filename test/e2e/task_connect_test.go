@@ -12,7 +12,6 @@ import (
 	"connectrpc.com/connect"
 	v1 "github.com/cloud-agent-platform/cap/api/cap/v1"
 	"github.com/cloud-agent-platform/cap/api/cap/v1/capv1connect"
-	"github.com/cloud-agent-platform/cap/internal/authz"
 	"github.com/cloud-agent-platform/cap/internal/gateway"
 	"github.com/cloud-agent-platform/cap/internal/service"
 	"github.com/golang-jwt/jwt/v5"
@@ -43,27 +42,11 @@ func setupConnectTestEnv(t *testing.T) *connectTestEnv {
 	// Use the same test environment setup as smoke tests
 	smokeEnv := setupTestEnv(t)
 
-	// Create authz service for JWT validation
-	authzCfg := authz.Config{
-		JWTSecret:    jwtSecret,
-		APIKeyHeader: "X-API-Key",
-		CacheTTL:     5 * time.Minute,
-	}
-	authzSvc := authz.New(authzCfg, logger)
-
 	// Create the gateway handler
 	taskHandler := gateway.NewTaskServiceHandler(smokeEnv.taskSvc, logger)
 
-	// Create authz interceptor
-	authzInterceptor := authz.NewInterceptor(authz.InterceptorConfig{
-		Authz:        authzSvc,
-		SkipPaths:    map[string]bool{"/healthz": true, "/readyz": true},
-		APIKeyHeader: authzCfg.APIKeyHeader,
-	}, logger)
-
-	// Create connect-go handler with interceptor
-	path, connectHandler := capv1connect.NewTaskServiceHandler(taskHandler,
-		connect.WithInterceptors(authzInterceptor))
+	// Create connect-go handler (without auth interceptor for testing)
+	path, connectHandler := capv1connect.NewTaskServiceHandler(taskHandler)
 
 	// Create HTTP mux and register connect handler
 	mux := http.NewServeMux()
@@ -75,8 +58,11 @@ func setupConnectTestEnv(t *testing.T) *connectTestEnv {
 		w.Write([]byte("ok"))
 	})
 
-	// Create httptest server
-	server := httptest.NewServer(mux)
+	// Apply auth middleware to inject user context from JWT
+	authMiddleware := gateway.Auth(gateway.AuthConfig{JWTSecret: jwtSecret})
+
+	// Create httptest server with auth middleware
+	server := httptest.NewServer(authMiddleware(mux))
 
 	// Create connect-go client
 	client := capv1connect.NewTaskServiceClient(http.DefaultClient, server.URL)

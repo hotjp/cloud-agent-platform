@@ -67,7 +67,220 @@ func (s *Server) Run(ctx context.Context) error {
 	return nil
 }
 
-// handleMessage processes a single JSON-RPC message.
+// HandleMessage processes a single JSON-RPC message and returns the response.
+// This is exported for testing purposes.
+func (s *Server) HandleMessage(data []byte) (*JSONRPCResponse, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Try to parse as request
+	var req JSONRPCRequest
+	if err := json.Unmarshal(data, &req); err != nil {
+		errResp := JSONRPCResponse{
+			JSONRPC: "2.0",
+			Error: &JSONRPCError{
+				Code:    CodeParseError,
+				Message: "Parse error",
+			},
+		}
+		return &errResp, err
+	}
+
+	// Check if it's a notification (no id)
+	isNotification := req.ID == nil
+
+	var id json.RawMessage
+	if !isNotification {
+		id = req.ID
+	}
+
+	// Process the method and get result
+	var resp *JSONRPCResponse
+	switch req.Method {
+	case "initialize":
+		resp = s.handleInitializeForTest(id, req.Params)
+	case "tools/list":
+		resp = s.handleToolsListForTest(id)
+	case "tools/call":
+		resp = s.handleToolsCallForTest(id, req.Params)
+	case "resources/list":
+		resp = s.handleResourcesListForTest(id)
+	case "resources/read":
+		resp = s.handleResourcesReadForTest(id, req.Params)
+	case "notifications/initialized":
+		s.initialized = true
+		s.logger.Info("MCP client initialized",
+			zap.String("layer", "MCP"),
+		)
+		if !isNotification {
+			return &JSONRPCResponse{JSONRPC: "2.0", ID: id}, nil
+		}
+		return nil, nil
+	default:
+		errResp := JSONRPCResponse{
+			JSONRPC: "2.0",
+			Error: &JSONRPCError{
+				Code:    CodeMethodNotFound,
+				Message: fmt.Sprintf("Method not found: %s", req.Method),
+			},
+			ID: id,
+		}
+		return &errResp, nil
+	}
+
+	return resp, nil
+}
+
+// handleInitializeForTest handles the initialize method for testing.
+func (s *Server) handleInitializeForTest(id json.RawMessage, params json.RawMessage) *JSONRPCResponse {
+	var input InitializeParams
+	if params != nil {
+		json.Unmarshal(params, &input)
+	}
+
+	s.logger.Info("MCP initialize",
+		zap.String("layer", "MCP"),
+		zap.String("client_name", input.ClientInfo.Name),
+		zap.String("client_version", input.ClientInfo.Version),
+	)
+
+	result := InitializeResult{
+		ProtocolVersion: s.protocolVer,
+		Capabilities: ServerCapabilities{
+			Tools: &struct{}{},
+			Resources: &ResourcesCapability{
+				Subscribe: true,
+				ListHint:  true,
+			},
+		},
+		ServerInfo: ServerInfo{
+			Name:    "cloud-agent-platform",
+			Version: "1.0.0",
+		},
+	}
+
+	resultJSON, _ := json.Marshal(result)
+	return &JSONRPCResponse{
+		JSONRPC: "2.0",
+		Result:  resultJSON,
+		ID:      id,
+	}
+}
+
+// handleToolsListForTest handles the tools/list method for testing.
+func (s *Server) handleToolsListForTest(id json.RawMessage) *JSONRPCResponse {
+	tools := GetToolDefinitions()
+	result := ToolsListResult{Tools: tools}
+	resultJSON, _ := json.Marshal(result)
+	return &JSONRPCResponse{
+		JSONRPC: "2.0",
+		Result:  resultJSON,
+		ID:      id,
+	}
+}
+
+// handleToolsCallForTest handles the tools/call method for testing.
+func (s *Server) handleToolsCallForTest(id json.RawMessage, params json.RawMessage) *JSONRPCResponse {
+	var input ToolCallParams
+	if params != nil {
+		json.Unmarshal(params, &input)
+	}
+
+	if input.Name == "" {
+		errResp := JSONRPCResponse{
+			JSONRPC: "2.0",
+			Error: &JSONRPCError{
+				Code:    CodeInvalidParams,
+				Message: "Tool name is required",
+			},
+			ID: id,
+		}
+		return &errResp
+	}
+
+	ctx := context.Background()
+	result, err := s.executor.Execute(ctx, input.Name, input.Arguments)
+	if err != nil {
+		errResp := JSONRPCResponse{
+			JSONRPC: "2.0",
+			Error: &JSONRPCError{
+				Code:    CodeToolExecutionErr,
+				Message: fmt.Sprintf("Tool execution failed: %v", err),
+			},
+			ID: id,
+		}
+		return &errResp
+	}
+
+	resultJSON, _ := json.Marshal(result)
+	return &JSONRPCResponse{
+		JSONRPC: "2.0",
+		Result:  resultJSON,
+		ID:      id,
+	}
+}
+
+// handleResourcesListForTest handles the resources/list method for testing.
+func (s *Server) handleResourcesListForTest(id json.RawMessage) *JSONRPCResponse {
+	resources := GetResourceDefinitions()
+	result := ResourcesListResult{Resources: resources}
+	resultJSON, _ := json.Marshal(result)
+	return &JSONRPCResponse{
+		JSONRPC: "2.0",
+		Result:  resultJSON,
+		ID:      id,
+	}
+}
+
+// handleResourcesReadForTest handles the resources/read method for testing.
+func (s *Server) handleResourcesReadForTest(id json.RawMessage, params json.RawMessage) *JSONRPCResponse {
+	var input ResourceReadParams
+	if params != nil {
+		json.Unmarshal(params, &input)
+	}
+
+	if input.URI == "" {
+		return &JSONRPCResponse{
+			JSONRPC: "2.0",
+			Error: &JSONRPCError{
+				Code:    CodeInvalidParams,
+				Message: "URI is required",
+			},
+			ID: id,
+		}
+	}
+
+	if reg := GetRegistry(); reg != nil {
+		content, err := reg.ReadResource(context.Background(), input.URI)
+		if err != nil {
+			return &JSONRPCResponse{
+				JSONRPC: "2.0",
+				Error: &JSONRPCError{
+					Code:    CodeInternalError,
+					Message: fmt.Sprintf("Failed to read resource: %v", err),
+				},
+				ID: id,
+			}
+		}
+		result := ResourceReadResult{Contents: []ResourceContent{*content}}
+		resultJSON, _ := json.Marshal(result)
+		return &JSONRPCResponse{
+			JSONRPC: "2.0",
+			Result:  resultJSON,
+			ID:      id,
+		}
+	}
+
+	return &JSONRPCResponse{
+		JSONRPC: "2.0",
+		Error: &JSONRPCError{
+			Code:    CodeInternalError,
+			Message: "Resource registry not initialized",
+		},
+		ID: id,
+	}
+}
+
 func (s *Server) handleMessage(data []byte) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

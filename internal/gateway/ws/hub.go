@@ -354,6 +354,11 @@ func (h *Hub) registerClient(client *Client) {
 // unregisterClient removes a client from its room and the hub.
 func (h *Hub) unregisterClient(client *Client) {
 	h.clientsMu.Lock()
+	_, exists := h.clients[client]
+	if !exists {
+		h.clientsMu.Unlock()
+		return // Already unregistered
+	}
 	delete(h.clients, client)
 	h.clientsMu.Unlock()
 
@@ -368,8 +373,13 @@ func (h *Hub) unregisterClient(client *Client) {
 		)
 	}
 
-	// Close the client's send channel
-	close(client.send)
+	// Close the client's send channel (guard against double-close)
+	client.mu.Lock()
+	if !client.closed {
+		client.closed = true
+		close(client.send)
+	}
+	client.mu.Unlock()
 }
 
 // handleStreamEvent distributes a stream event to the appropriate room.
@@ -459,12 +469,24 @@ func (h *Hub) Stop() error {
 	h.logger.Info("stopping websocket hub")
 	h.cancel()
 
-	// Close all client connections
+	// Collect and remove all clients, then close their channels
 	h.clientsMu.Lock()
+	clients := make([]*Client, 0, len(h.clients))
 	for client := range h.clients {
-		close(client.send)
+		clients = append(clients, client)
 	}
+	h.clients = make(map[*Client]struct{})
 	h.clientsMu.Unlock()
+
+	// Close all client connections (with guard against double-close)
+	for _, client := range clients {
+		client.mu.Lock()
+		if !client.closed {
+			client.closed = true
+			close(client.send)
+		}
+		client.mu.Unlock()
+	}
 
 	// Wait for goroutines to finish
 	h.wg.Wait()

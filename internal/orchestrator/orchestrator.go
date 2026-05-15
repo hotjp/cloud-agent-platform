@@ -565,6 +565,18 @@ func (o *OrchestratorImpl) executeAgentSession(ctx context.Context, session *age
 		execOpts := worker.ExecOptions{
 			Cmd:     buildAgentCommand(subtask, task),
 			Timeout: o.cfg.SessionTimeout,
+			Envvars: map[string]string{
+				"TASK_ID":       task.ID,
+				"TASK_GOAL":     task.Goal,
+				"REPO_URL":      task.RepositoryURL,
+				"BASE_BRANCH":   task.BaseBranch,
+				"RESULT_BRANCH": task.ResultBranch,
+			},
+			GitOptions: &worker.GitOptions{
+				DoGitCommit:   true,
+				CommitMessage: buildGitCommitMessage(subtask, task),
+				ResultBranch:  task.ResultBranch,
+			},
 		}
 		result, err = o.workerExecutor.Execute(ctx, subtask.ID, task.ID, execOpts)
 	} else {
@@ -712,11 +724,15 @@ func (o *OrchestratorImpl) handleAgentFailure(ctx context.Context, session *agen
 	session.FinishedAt = &now
 
 	// Emit TaskFailedV1 event
+	errReason := "unknown error"
+	if err != nil {
+		errReason = err.Error()
+	}
 	failedPayload := &TaskFailedPayload{
 		TaskID:    task.ID,
 		SubtaskID: session.SubtaskID,
 		SessionID: session.ID,
-		Reason:    err.Error(),
+		Reason:    errReason,
 		FailedAt:  now,
 	}
 	payloadBytes, err := MarshalTaskFailedPayload(failedPayload)
@@ -785,7 +801,7 @@ func (o *OrchestratorImpl) handleAgentFailure(ctx context.Context, session *agen
 	o.logger.Warn("task execution failed",
 		zap.String("task_id", task.ID),
 		zap.String("session_id", session.ID),
-		zap.String("reason", err.Error()),
+		zap.String("reason", errReason),
 	)
 }
 

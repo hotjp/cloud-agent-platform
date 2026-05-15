@@ -67,6 +67,15 @@ func New(cfg Config, svc *service.TaskService, logger *zap.Logger) *Gateway {
 	path, connectHandler := capv1connect.NewTaskServiceHandler(handler)
 	mux.Handle(path, connectHandler)
 
+	// Register REST API adapter
+	rest := NewRESTAdapter(svc, logger)
+	mux.HandleFunc("/api/v1/tasks", rest.handleTasks)
+	mux.HandleFunc("/api/v1/tasks/", rest.handleTaskOperations)
+	mux.HandleFunc("/api/v1/agent-templates", rest.ListAgents)
+	mux.HandleFunc("/api/v1/agent-templates/", rest.ListAgents)
+	mux.HandleFunc("/api/v1/sessions", rest.ListSessions)
+	mux.HandleFunc("/api/v1/status", rest.PlatformStatus)
+
 	// Health check endpoints
 	mux.HandleFunc("/healthz", healthzHandler)
 	mux.HandleFunc("/readyz", readyzHandler)

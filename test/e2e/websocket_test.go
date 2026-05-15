@@ -13,7 +13,6 @@ import (
 	"connectrpc.com/connect"
 	v1 "github.com/cloud-agent-platform/cap/api/cap/v1"
 	"github.com/cloud-agent-platform/cap/api/cap/v1/capv1connect"
-	"github.com/cloud-agent-platform/cap/internal/authz"
 	"github.com/cloud-agent-platform/cap/internal/gateway"
 	"github.com/cloud-agent-platform/cap/internal/gateway/ws"
 	"github.com/cloud-agent-platform/cap/internal/service"
@@ -46,23 +45,8 @@ func setupWSTestEnv(t *testing.T) *wsTestEnv {
 	// Use the same test environment setup as smoke tests
 	smokeEnv := setupTestEnv(t)
 
-	// Create authz service for JWT validation
-	authzCfg := authz.Config{
-		JWTSecret:    jwtSecret,
-		APIKeyHeader: "X-API-Key",
-		CacheTTL:     5 * time.Minute,
-	}
-	authzSvc := authz.New(authzCfg, logger)
-
 	// Create the gateway handler
 	taskHandler := gateway.NewTaskServiceHandler(smokeEnv.taskSvc, logger)
-
-	// Create authz interceptor
-	authzInterceptor := authz.NewInterceptor(authz.InterceptorConfig{
-		Authz:        authzSvc,
-		SkipPaths:    map[string]bool{"/healthz": true, "/readyz": true},
-		APIKeyHeader: authzCfg.APIKeyHeader,
-	}, logger)
 
 	// Create WebSocket Hub (without Redis for testing)
 	wsHubCfg := ws.HubConfig{
@@ -79,9 +63,8 @@ func setupWSTestEnv(t *testing.T) *wsTestEnv {
 		t.Fatalf("failed to start websocket hub: %v", err)
 	}
 
-	// Create connect-go handler with interceptor
-	path, connectHandler := capv1connect.NewTaskServiceHandler(taskHandler,
-		connect.WithInterceptors(authzInterceptor))
+	// Create connect-go handler (without auth interceptor for testing)
+	path, connectHandler := capv1connect.NewTaskServiceHandler(taskHandler)
 
 	// Create HTTP mux and register handlers
 	mux := http.NewServeMux()
@@ -96,6 +79,9 @@ func setupWSTestEnv(t *testing.T) *wsTestEnv {
 		w.Write([]byte("ok"))
 	})
 
+	// Apply auth middleware to inject user context from JWT
+	authMiddleware := gateway.Auth(gateway.AuthConfig{JWTSecret: jwtSecret})
+
 	// Create a real HTTP server (httptest doesn't support WebSocket upgrades)
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -103,7 +89,7 @@ func setupWSTestEnv(t *testing.T) *wsTestEnv {
 	}
 
 	server := &http.Server{
-		Handler: mux,
+		Handler: authMiddleware(mux),
 	}
 
 	// Start server in goroutine
