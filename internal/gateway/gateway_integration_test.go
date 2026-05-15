@@ -504,7 +504,6 @@ func TestMapTaskStatus(t *testing.T) {
 		protoStatus capv1.TaskStatus
 	}{
 		{domain.TaskStatusPending, capv1.TaskStatus_TASK_STATUS_PENDING},
-		{domain.TaskStatusDecomposing, capv1.TaskStatus_TASK_STATUS_DECOMPOSING},
 		{domain.TaskStatusDispatched, capv1.TaskStatus_TASK_STATUS_DISPATCHED},
 		{domain.TaskStatusRunning, capv1.TaskStatus_TASK_STATUS_RUNNING},
 		{domain.TaskStatusReviewing, capv1.TaskStatus_TASK_STATUS_REVIEWING},
@@ -529,7 +528,6 @@ func TestMapProtoTaskStatus(t *testing.T) {
 		domainStatus string
 	}{
 		{capv1.TaskStatus_TASK_STATUS_PENDING, "pending"},
-		{capv1.TaskStatus_TASK_STATUS_DECOMPOSING, "decomposing"},
 		{capv1.TaskStatus_TASK_STATUS_DISPATCHED, "dispatched"},
 		{capv1.TaskStatus_TASK_STATUS_RUNNING, "running"},
 		{capv1.TaskStatus_TASK_STATUS_REVIEWING, "reviewing"},

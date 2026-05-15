@@ -106,14 +106,6 @@ var toolSchemas = map[string]json.RawMessage{
 		}
 	}`),
 
-	"task_decompose": json.RawMessage(`{
-		"type": "object",
-		"required": ["taskId"],
-		"properties": {
-			"taskId": {"type": "string", "description": "任务 ID"}
-		}
-	}`),
-
 	"context_approve": json.RawMessage(`{
 		"type": "object",
 		"required": ["taskId", "subtaskId"],
@@ -157,7 +149,6 @@ var toolDescriptions = map[string]string{
 	"task_status":     "查询任务状态。返回当前进度、子任务状态、Agent 产出摘要。任务完成后返回 Git 分支和改动文件列表。",
 	"task_list":       "列出最近的任务。可按状态、标签过滤。默认返回最近 20 个。",
 	"task_cancel":     "取消任务。正在运行的 Agent 会被终止。",
-	"task_decompose":  "对任务进行拆解，返回子任务列表。",
 	"context_approve":  "批准 Agent 的高风险操作。当 Agent 检测到高风险改动时，会暂停等待确认。",
 	"context_reject":   "拒绝 Agent 的高风险操作。",
 	"agent_list":      "列出平台可用的 Agent 模板及其能力。提交任务时可通过 agentHint 指定模板。",

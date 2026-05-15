@@ -35,7 +35,9 @@ T-E2E-01: 两个Agent并行改同仓库不同文件
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
+- `test/e2e/parallel_agents_test.go` - E2E测试：两个独立子任务并行执行无冲突
+- `internal/orchestrator/orchestrator.go` - 修改StartTask支持所有就绪子任务并行启动
+- `internal/orchestrator/orchestrator.go` - 修复handleAgentSuccess并发完成处理
 
 
 
@@ -46,16 +48,15 @@ T-E2E-01: 两个Agent并行改同仓库不同文件
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
-
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
+- [x] **实现证明**: 修改orchestrator.go的StartTask方法，将原来只启动第一个就绪子任务改为启动所有就绪子任务（无依赖关系的子任务并行执行）。修改handleAgentSuccess处理并发完成场景（任务已由其他session完成时优雅退出）。
+- [x] **测试验证**: `go test -p 2 -count=1 -timeout 60s -run 'TestParallelAgents' ./test/e2e/` 通过，所有E2E测试通过
+- [x] **影响范围**: 修改了`TestFullPipeline_SubmitToComplete`的预期行为（现在并行执行所有独立子任务而非只执行一个），已同步更新测试断言
 
 ### 测试步骤
-1. 
-2. 
-3. 
+1. `go test -p 2 -count=1 -timeout 60s -run 'TestParallelAgents' ./test/e2e/` - 运行并行Agent测试
+2. `go test -p 2 -count=1 -timeout 120s ./test/e2e/...` - 运行所有E2E测试验证无回归
 
 ### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+```
+ok  	github.com/cloud-agent-platform/cap/test/e2e	6.483s
+```

@@ -515,19 +515,12 @@ func NewL2StateTransitionFailedError(entityType, entityID, fromState, toState, e
 // ----------------------------------------------------------------------------
 
 // TaskStateMachineDefinition defines the declarative rules for Task state transitions.
-// Based on Cloud-Agent-Platform.md §三: 9 states with transitions.
+// Based on Cloud-Agent-Platform.md §三: 8 states with transitions.
 var TaskStateMachineDefinition = []Transition[TaskStatus, string]{
-	// pending -> decomposing (start decomposition)
-	{From: TaskStatusPending, To: TaskStatusDecomposing, Event: "StartDecomposition"},
+	// pending -> dispatched (task dispatched to worker)
+	{From: TaskStatusPending, To: TaskStatusDispatched, Event: "Dispatch"},
 	// pending -> cancelled (user cancel)
 	{From: TaskStatusPending, To: TaskStatusCancelled, Event: "Cancel"},
-
-	// decomposing -> dispatched (decomposition complete)
-	{From: TaskStatusDecomposing, To: TaskStatusDispatched, Event: "DecompositionComplete"},
-	// decomposing -> failed (decomposition failed)
-	{From: TaskStatusDecomposing, To: TaskStatusFailed, Event: "DecompositionFailed"},
-	// decomposing -> cancelled (user cancel)
-	{From: TaskStatusDecomposing, To: TaskStatusCancelled, Event: "Cancel"},
 
 	// dispatched -> running (agent starts execution)
 	{From: TaskStatusDispatched, To: TaskStatusRunning, Event: "StartExecution"},
@@ -698,7 +691,6 @@ func IsTerminalState(state TaskStatus) bool {
 func AllTaskStates() []TaskStatus {
 	return []TaskStatus{
 		TaskStatusPending,
-		TaskStatusDecomposing,
 		TaskStatusDispatched,
 		TaskStatusRunning,
 		TaskStatusReviewing,

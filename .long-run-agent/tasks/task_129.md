@@ -35,7 +35,7 @@ T-E2E-03: 非代码任务(空Git项目)
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
+- test/e2e/non_code_task_test.go - E2E tests for non-code tasks (5 test cases)
 
 
 
@@ -46,16 +46,20 @@ T-E2E-03: 非代码任务(空Git项目)
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
-
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
+- [x] **实现证明**: Created test/e2e/non_code_task_test.go with 5 test cases for non-code tasks:
+  - TestNonCodeTask_EmptyGitRepo_ResearchTask
+  - TestNonCodeTask_AnalysisTask
+  - TestNonCodeTask_MultiSubtaskReport
+  - TestNonCodeTask_EmptyRepoAcceptance
+  - TestNonCodeTask_NoCodingSubtasks
+- [x] **测试验证**: go test -p 2 -count=1 -timeout 60s -run 'TestNonCodeTask' ./test/e2e/ passed
+- [x] **影响范围**: No impact on existing tests
 
 ### 测试步骤
-1. 
-2. 
-3. 
+1. go test -p 2 -count=1 -timeout 60s -run 'TestNonCodeTask' ./test/e2e/
+2. All 5 tests passed
 
 ### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+```
+ok  	github.com/cloud-agent-platform/cap/test/e2e	2.990s
+```

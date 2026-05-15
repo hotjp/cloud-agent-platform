@@ -148,7 +148,6 @@ func TestDomainTaskMapping(t *testing.T) {
 func TestTaskStatusValues(t *testing.T) {
 	statuses := []domain.TaskStatus{
 		domain.TaskStatusPending,
-		domain.TaskStatusDecomposing,
 		domain.TaskStatusDispatched,
 		domain.TaskStatusRunning,
 		domain.TaskStatusReviewing,

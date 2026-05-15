@@ -11,7 +11,7 @@ import (
 
 func TestToolSchemas(t *testing.T) {
 	tools := GetToolDefinitions()
-	assert.Len(t, tools, 9)
+	assert.Len(t, tools, 8)
 
 	toolNames := make(map[string]bool)
 	for _, tool := range tools {
@@ -34,7 +34,7 @@ func TestToolSchemas(t *testing.T) {
 	// Verify all required tools are present
 	requiredTools := []string{
 		"task_submit", "task_status", "task_list", "task_cancel",
-		"task_decompose", "context_approve", "context_reject",
+		"context_approve", "context_reject",
 		"agent_list", "session_list",
 	}
 	for _, name := range requiredTools {
@@ -303,36 +303,6 @@ func TestValidateToolParams_SessionList(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := ValidateToolParams("session_list", json.RawMessage(tt.params))
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestValidateToolParams_TaskDecompose(t *testing.T) {
-	tests := []struct {
-		name    string
-		params  string
-		wantErr bool
-	}{
-		{
-			name:    "valid",
-			params:  `{"taskId": "task_123"}`,
-			wantErr: false,
-		},
-		{
-			name:    "missing taskId",
-			params:  `{}`,
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := ValidateToolParams("task_decompose", json.RawMessage(tt.params))
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

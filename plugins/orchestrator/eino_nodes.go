@@ -494,10 +494,13 @@ var _ Node = (*EinoReActNode)(nil)
 
 // ----------------------------------------------------------------------------
 // DecomposerNode
-// Decomposes complex tasks into subtasks.
+// Deprecated: Task decomposition is now handled by the caller (Harness).
+// This node is kept for reference but is never called in the workflow.
 // ----------------------------------------------------------------------------
 
 // EinoDecomposerNode decomposes complex tasks into subtask plans.
+// Deprecated: Task decomposition is now handled by the caller (Harness).
+// CAP only schedules Workers, it does not decide how to split tasks.
 type EinoDecomposerNode struct {
 	*NodeBase
 	deps *Dependencies

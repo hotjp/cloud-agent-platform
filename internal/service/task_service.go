@@ -5,7 +5,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/cloud-agent-platform/cap/internal/domain"
 	"github.com/cloud-agent-platform/cap/internal/observability/metrics"
@@ -336,7 +335,7 @@ type CancelResponse struct {
 }
 
 // Cancel cancels a Task.
-// Only tasks in cancellable states (pending, decomposing, dispatched, running, confirming) can be cancelled.
+// Only tasks in cancellable states (pending, dispatched, running, confirming) can be cancelled.
 // Returns ErrL4TaskNotFound if the task does not exist.
 // Returns ErrL4TaskStateInvalid if the task is not in a cancellable state.
 func (s *TaskService) Cancel(ctx context.Context, req CancelRequest) (*CancelResponse, error) {
@@ -363,7 +362,6 @@ func (s *TaskService) Cancel(ctx context.Context, req CancelRequest) (*CancelRes
 		return nil, domain.NewL4TaskStateInvalidError(req.TaskID, task.Status,
 			[]domain.TaskStatus{
 				domain.TaskStatusPending,
-				domain.TaskStatusDecomposing,
 				domain.TaskStatusDispatched,
 				domain.TaskStatusRunning,
 				domain.TaskStatusConfirming,
@@ -449,241 +447,6 @@ func (s *TaskService) Cancel(ctx context.Context, req CancelRequest) (*CancelRes
 // TaskCancelledPayload is the payload for TaskCancelledV1 event.
 type TaskCancelledPayload struct {
 	Reason string `json:"reason"`
-}
-
-// DecomposeRequest is the input for Decompose method.
-type DecomposeRequest struct {
-	TaskID   string
-	Subtasks []SubtaskSpec
-}
-
-// SubtaskSpec defines a subtask to be created during decomposition.
-type SubtaskSpec struct {
-	Type          domain.SubtaskType
-	Description   string
-	AgentTemplate string
-	Dependencies  []string
-}
-
-// DecomposeResponse is the output of Decompose method.
-type DecomposeResponse struct {
-	Task     *domain.Task
-	Subtasks []*domain.Subtask
-}
-
-// Decompose breaks a Task into Subtasks and transitions the Task to decomposing state.
-// Only tasks in submitted state can be decomposed.
-// Returns ErrL4TaskNotFound if the task does not exist.
-// Returns ErrL4TaskStateInvalid if the task is not in submitted state.
-func (s *TaskService) Decompose(ctx context.Context, req DecomposeRequest) (resp *DecomposeResponse, spanErr error) {
-	// Start task.decompose span
-	ctx, span := s.tracer.StartTaskDecompose(ctx, req.TaskID, len(req.Subtasks))
-	defer func() {
-		if spanErr != nil {
-			tracing.EndSpanWithError(span, spanErr)
-		} else {
-			tracing.EndSpan(span)
-		}
-	}()
-
-	if req.TaskID == "" {
-		spanErr = domain.NewL5InvalidRequestError("task_id", "cannot be empty")
-		return nil, spanErr
-	}
-	if len(req.Subtasks) == 0 {
-		spanErr = domain.NewL4DecomposeFailedError(req.TaskID, "at least one subtask is required", nil)
-		return nil, spanErr
-	}
-
-	// Get current task
-	task, err := s.taskRepo.GetByID(ctx, req.TaskID)
-	if err != nil {
-		if domain.CodeIs(err, domain.CodeL2AggregateNotFound) {
-			spanErr = domain.NewL4TaskNotFoundError(req.TaskID)
-			return nil, spanErr
-		}
-		s.logger.Error("failed to get task for decomposition",
-			zap.String("layer", "L4"),
-			zap.String("task_id", req.TaskID),
-			zap.Error(err),
-		)
-		spanErr = err
-		return nil, spanErr
-	}
-
-	// Check if task is in pending state (can be decomposed)
-	if task.Status != domain.TaskStatusPending {
-		s.logger.Warn("task cannot be decomposed - not in pending state",
-			zap.String("layer", "L4"),
-			zap.String("task_id", req.TaskID),
-			zap.String("current_status", string(task.Status)),
-		)
-		spanErr = domain.NewL4TaskStateInvalidError(req.TaskID, task.Status,
-			[]domain.TaskStatus{domain.TaskStatusPending})
-		return nil, spanErr
-	}
-
-	// Validate subtask types
-	for i, spec := range req.Subtasks {
-		if !spec.Type.IsValid() {
-			spanErr = domain.NewL4DecomposeFailedError(req.TaskID,
-				fmt.Sprintf("invalid subtask type at index %d: %s", i, spec.Type), nil)
-			return nil, spanErr
-		}
-	}
-
-	// Create subtasks and collect events
-	createdSubtasks := make([]*domain.Subtask, 0, len(req.Subtasks))
-	allEvents := make([]*domain.DomainEvent, 0)
-
-	for _, spec := range req.Subtasks {
-		// Generate ULID for subtask
-		subtaskID := domain.NewULID()
-
-		// Create Subtask aggregate
-		st := domain.NewSubtask(subtaskID, req.TaskID, spec.Type, spec.Description, spec.AgentTemplate)
-		if len(spec.Dependencies) > 0 {
-			st.Dependencies = spec.Dependencies
-		}
-
-		// Prepare subtask created event payload
-		eventPayload := SubtaskCreatedPayload{
-			TaskID:        st.TaskID,
-			Type:          st.Type,
-			Description:   st.Description,
-			AgentTemplate: st.AgentTemplate,
-			Dependencies:  st.Dependencies,
-		}
-		payloadBytes, err := json.Marshal(eventPayload)
-		if err != nil {
-			spanErr = domain.NewL2EventSerializationError("SubtaskCreatedV1", err)
-			return nil, spanErr
-		}
-
-		// Create domain event for subtask
-		event, err := domain.NewDomainEvent("Subtask", st.ID, "SubtaskCreatedV1", payloadBytes, int(st.Version))
-		if err != nil {
-			spanErr = err
-			return nil, spanErr
-		}
-		allEvents = append(allEvents, event)
-
-		createdSubtasks = append(createdSubtasks, st)
-	}
-
-	// Prepare decomposition completed event payload
-	decompPayload := TaskDecompositionCompletedPayload{
-		SubtaskCount: len(createdSubtasks),
-	}
-	decompPayloadBytes, err := json.Marshal(decompPayload)
-	if err != nil {
-		spanErr = domain.NewL2EventSerializationError("TaskDecompositionCompletedV1", err)
-		return nil, spanErr
-	}
-
-	// Create domain event for task decomposition
-	decompEvent, err := domain.NewDomainEvent("Task", task.ID, "TaskDecompositionCompletedV1", decompPayloadBytes, int(task.Version))
-	if err != nil {
-		spanErr = err
-		return nil, spanErr
-	}
-	allEvents = append(allEvents, decompEvent)
-
-	// Begin transaction
-	tx, err := s.storage.BeginTx(ctx)
-	if err != nil {
-		s.logger.Error("failed to begin transaction for task decomposition",
-			zap.String("layer", "L4"),
-			zap.String("task_id", req.TaskID),
-			zap.Error(err),
-		)
-		spanErr = domain.NewL1DBTxError(err)
-		return nil, spanErr
-	}
-
-	// Create subtasks in repository
-	for _, st := range createdSubtasks {
-		_, err := s.subtaskRepo.Create(ctx, st)
-		if err != nil {
-			tx.Rollback(ctx)
-			s.logger.Error("failed to create subtask",
-				zap.String("layer", "L4"),
-				zap.String("task_id", req.TaskID),
-				zap.String("subtask_id", st.ID),
-				zap.Error(err),
-			)
-			spanErr = err
-			return nil, spanErr
-		}
-	}
-
-	// Update task status to decomposing
-	updatedTask, err := s.taskRepo.UpdateStatus(ctx, req.TaskID, domain.TaskStatusDecomposing, task.Version)
-	if err != nil {
-		tx.Rollback(ctx)
-		if domain.CodeIs(err, domain.CodeL2OptimisticLock) {
-			spanErr = domain.NewL2OptimisticLockError("Task", req.TaskID, task.Version, updatedTask.Version)
-			return nil, spanErr
-		}
-		s.logger.Error("failed to update task status to decomposing",
-			zap.String("layer", "L4"),
-			zap.String("task_id", req.TaskID),
-			zap.Error(err),
-		)
-		spanErr = err
-		return nil, spanErr
-	}
-
-	// Write all events to outbox
-	for _, evt := range allEvents {
-		if err := s.outboxWriter.Write(ctx, tx, evt); err != nil {
-			tx.Rollback(ctx)
-			s.logger.Error("failed to write event to outbox",
-				zap.String("layer", "L4"),
-				zap.String("task_id", req.TaskID),
-				zap.String("event_type", evt.EventType),
-				zap.Error(err),
-			)
-			spanErr = err
-			return nil, spanErr
-		}
-	}
-
-	// Commit transaction
-	if err := tx.Commit(ctx); err != nil {
-		s.logger.Error("failed to commit task decomposition",
-			zap.String("layer", "L4"),
-			zap.String("task_id", req.TaskID),
-			zap.Error(err),
-		)
-		spanErr = domain.NewL1DBTxError(err)
-		return nil, spanErr
-	}
-
-	s.logger.Info("task decomposed",
-		zap.String("layer", "L4"),
-		zap.String("task_id", req.TaskID),
-		zap.Int("subtask_count", len(createdSubtasks)),
-	)
-
-	return &DecomposeResponse{
-		Task:     updatedTask,
-		Subtasks: createdSubtasks,
-	}, nil
-}
-
-// SubtaskCreatedPayload is the payload for SubtaskCreatedV1 event.
-type SubtaskCreatedPayload struct {
-	TaskID        string             `json:"task_id"`
-	Type          domain.SubtaskType `json:"type"`
-	Description   string             `json:"description"`
-	AgentTemplate string             `json:"agent_template"`
-	Dependencies  []string           `json:"dependencies"`
-}
-
-// TaskDecompositionCompletedPayload is the payload for TaskDecompositionCompletedV1 event.
-type TaskDecompositionCompletedPayload struct {
-	SubtaskCount int `json:"subtask_count"`
 }
 
 // RetryRequest is the input for Retry method.

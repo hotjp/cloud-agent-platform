@@ -638,8 +638,8 @@ func TestBuildTaskStateMachine(t *testing.T) {
 	}
 
 	// Verify key transitions exist
-	if !sm.CanTransition("StartDecomposition") {
-		t.Error("Should have StartDecomposition transition from pending")
+	if sm.CanTransition("StartDecomposition") {
+		t.Error("StartDecomposition removed — decomposition is callers responsibility")
 	}
 	if !sm.CanTransition("Cancel") {
 		t.Error("Should have Cancel transition from pending")
@@ -665,19 +665,10 @@ func TestBuildSubtaskStateMachine(t *testing.T) {
 func TestTaskStateMachine_FullWorkflow(t *testing.T) {
 	sm := BuildTaskStateMachine("task-123")
 
-	// pending -> decomposing
-	newState, err := sm.Trigger("StartDecomposition")
+	// pending -> dispatched
+	newState, err := sm.Trigger("Dispatch")
 	if err != nil {
-		t.Fatalf("Trigger(StartDecomposition) error = %v", err)
-	}
-	if newState != TaskStatusDecomposing {
-		t.Errorf("State = %q, want %q", newState, TaskStatusDecomposing)
-	}
-
-	// decomposing -> dispatched
-	newState, err = sm.Trigger("DecompositionComplete")
-	if err != nil {
-		t.Fatalf("Trigger(DecompositionComplete) error = %v", err)
+		t.Fatalf("Trigger(Dispatch) error = %v", err)
 	}
 	if newState != TaskStatusDispatched {
 		t.Errorf("State = %q, want %q", newState, TaskStatusDispatched)
@@ -772,11 +763,10 @@ func TestTaskStateMachine_GuardBlocks(t *testing.T) {
 }
 
 func TestTaskStateMachine_CancelFromCancelableStates(t *testing.T) {
-	// Cancel transitions are defined for: pending, decomposing, dispatched, running, confirming
+	// Cancel transitions are defined for: pending, dispatched, running, confirming
 	// NOT for: reviewing (by design, you can't cancel during review)
 	cancelableStates := []TaskStatus{
 		TaskStatusPending,
-		TaskStatusDecomposing,
 		TaskStatusDispatched,
 		TaskStatusRunning,
 		TaskStatusConfirming,
@@ -841,8 +831,8 @@ func TestTaskStateMachine_Validate(t *testing.T) {
 
 func TestAllTaskStates(t *testing.T) {
 	states := AllTaskStates()
-	if len(states) != 9 {
-		t.Errorf("AllTaskStates count = %d, want 9", len(states))
+	if len(states) != 8 {
+		t.Errorf("AllTaskStates count = %d, want 8", len(states))
 	}
 }
 
@@ -865,7 +855,6 @@ func TestIsTerminalState(t *testing.T) {
 		terminal bool
 	}{
 		{TaskStatusPending, false},
-		{TaskStatusDecomposing, false},
 		{TaskStatusDispatched, false},
 		{TaskStatusRunning, false},
 		{TaskStatusReviewing, false},
@@ -883,12 +872,12 @@ func TestIsTerminalState(t *testing.T) {
 }
 
 func TestFindTransition(t *testing.T) {
-	tf := FindTransition(TaskStatusPending, "StartDecomposition", TaskStateMachineDefinition)
+	tf := FindTransition(TaskStatusPending, "Dispatch", TaskStateMachineDefinition)
 	if tf == nil {
-		t.Fatal("FindTransition should find StartDecomposition")
+		t.Fatal("FindTransition should find Dispatch")
 	}
-	if tf.To != TaskStatusDecomposing {
-		t.Errorf("tf.To = %q, want %q", tf.To, TaskStatusDecomposing)
+	if tf.To != TaskStatusDispatched {
+		t.Errorf("tf.To = %q, want %q", tf.To, TaskStatusDispatched)
 	}
 
 	// Non-existent transition

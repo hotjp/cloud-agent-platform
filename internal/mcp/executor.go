@@ -47,8 +47,6 @@ func (e *ToolExecutor) Execute(ctx context.Context, name string, params json.Raw
 		return e.listTasks(ctx, params)
 	case "task_cancel":
 		return e.cancelTask(ctx, params)
-	case "task_decompose":
-		return e.decomposeTask(ctx, params)
 	case "context_approve":
 		return e.approveContext(ctx, params)
 	case "context_reject":
@@ -208,38 +206,6 @@ func (e *ToolExecutor) cancelTask(ctx context.Context, params json.RawMessage) (
 		)
 		return &ToolCallResult{
 			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Failed to cancel task: %v", err)}},
-			IsError: true,
-		}, nil
-	}
-
-	output, _ := json.Marshal(result)
-	return &ToolCallResult{
-		Content: []ContentBlock{{Type: "text", Text: string(output)}},
-	}, nil
-}
-
-// decomposeTask handles task_decompose tool.
-func (e *ToolExecutor) decomposeTask(ctx context.Context, params json.RawMessage) (*ToolCallResult, error) {
-	var input struct {
-		TaskID string `json:"taskId"`
-	}
-
-	if err := json.Unmarshal(params, &input); err != nil {
-		return &ToolCallResult{
-			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Failed to parse parameters: %v", err)}},
-			IsError: true,
-		}, nil
-	}
-
-	result, err := e.client.DecomposeTask(ctx, input.TaskID)
-	if err != nil {
-		e.logger.Error("task_decompose failed",
-			zap.String("layer", "MCP"),
-			zap.String("task_id", input.TaskID),
-			zap.Error(err),
-		)
-		return &ToolCallResult{
-			Content: []ContentBlock{{Type: "text", Text: fmt.Sprintf("Failed to decompose task: %v", err)}},
 			IsError: true,
 		}, nil
 	}

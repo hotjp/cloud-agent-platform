@@ -16,14 +16,13 @@ option go_package = "github.com/cloud-agent-platform/cap/api/cap/v1;capv1";
 enum TaskStatus {
   TASK_STATUS_UNSPECIFIED = 0;
   TASK_STATUS_PENDING = 1;       // Queued, not yet started
-  TASK_STATUS_DECOMPOSING = 2;   // Task is being decomposed into subtasks
-  TASK_STATUS_DISPATCHED = 3;    // Dispatched to an Agent
-  TASK_STATUS_RUNNING = 4;       // Actively executing
-  TASK_STATUS_REVIEWING = 5;      // Agent output is under review
-  TASK_STATUS_CONFIRMING = 6;     // Waiting for user confirmation
-  TASK_STATUS_COMPLETED = 7;      // Finished successfully
-  TASK_STATUS_FAILED = 8;         // Failed
-  TASK_STATUS_CANCELLED = 9;     // Cancelled by user
+  TASK_STATUS_DISPATCHED = 2;    // Dispatched to an Agent
+  TASK_STATUS_RUNNING = 3;       // Actively executing
+  TASK_STATUS_REVIEWING = 4;      // Agent output is under review
+  TASK_STATUS_CONFIRMING = 5;     // Waiting for user confirmation
+  TASK_STATUS_COMPLETED = 6;      // Finished successfully
+  TASK_STATUS_FAILED = 7;         // Failed
+  TASK_STATUS_CANCELLED = 8;     // Cancelled by user
 }
 
 // SubtaskType represents the type/capability of a subtask.

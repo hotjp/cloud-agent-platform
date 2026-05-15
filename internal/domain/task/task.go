@@ -1,6 +1,9 @@
-// Package task implements the Task and Subtask domain entities with
-// 9-state declarative state machine, domain event collection, and business invariants.
-// This package is part of L2-Domain layer and has ZERO external dependencies.
+// Package task implements a legacy Task entity with a 9-state machine.
+//
+// Deprecated: This package is NOT used by the platform. The active state machine
+// is in internal/domain/task-types.go (8 states: pending/dispatched/running/reviewing/confirming/completed/failed/cancelled).
+// Decomposition is handled by the caller (Harness), not by the platform.
+// This package is kept for reference only and may be removed in a future cleanup.
 package task
 
 import (

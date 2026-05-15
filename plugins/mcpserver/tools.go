@@ -133,7 +133,7 @@ func TaskListTool() Tool {
 			"properties": {
 				"status": {
 					"type": "string",
-					"enum": ["pending", "submitted", "decomposing", "assigned", "running", "reviewing", "completed", "failed", "cancelled"],
+					"enum": ["pending", "dispatched", "running", "reviewing", "confirming", "completed", "failed", "cancelled"],
 					"description": "按状态过滤"
 				},
 				"tags": {

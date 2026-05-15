@@ -556,85 +556,6 @@ func (a *RESTAdapter) GetTaskDiff(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
-// DecomposeTask handles POST /api/v1/tasks/:id/decompose.
-func (a *RESTAdapter) DecomposeTask(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		writeError(w, http.StatusMethodNotAllowed, "MethodNotAllowed", "POST required")
-		return
-	}
-
-	ctx := r.Context()
-	uc, err := extractUserContext(ctx)
-	if err != nil {
-		writeError(w, http.StatusUnauthorized, "Unauthenticated", "user context not found")
-		return
-	}
-
-	taskID := extractPathParam(r.URL.Path, "/api/v1/tasks/")
-	if taskID == "" {
-		writeError(w, http.StatusBadRequest, "InvalidRequest", "task_id is required")
-		return
-	}
-
-	var body struct {
-		Subtasks []struct {
-			Type          string   `json:"type"`
-			Description   string   `json:"description"`
-			AgentTemplate string   `json:"agent_template"`
-			Dependencies  []string `json:"dependencies"`
-		} `json:"subtasks"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "InvalidRequest", "invalid JSON body")
-		return
-	}
-
-	if len(body.Subtasks) == 0 {
-		writeError(w, http.StatusBadRequest, "InvalidRequest", "at least one subtask is required")
-		return
-	}
-
-	subtasks := make([]service.SubtaskSpec, len(body.Subtasks))
-	for i, st := range body.Subtasks {
-		subtasks[i] = service.SubtaskSpec{
-			Type:          domain.SubtaskType(st.Type),
-			Description:   st.Description,
-			AgentTemplate: st.AgentTemplate,
-			Dependencies:  st.Dependencies,
-		}
-	}
-
-	svcReq := service.DecomposeRequest{
-		TaskID:   taskID,
-		Subtasks: subtasks,
-	}
-
-	resp, err := a.svc.Decompose(ctx, svcReq)
-	if err != nil {
-		a.logger.Error("REST DecomposeTask failed",
-			zap.String("layer", "L5"),
-			zap.String("user_id", uc.userID),
-			zap.String("task_id", taskID),
-			zap.Error(err),
-		)
-		status, code, msg := mapServiceError(err)
-		writeError(w, status, code, msg)
-		return
-	}
-
-	// Build response
-	subtaskIDs := make([]string, len(resp.Subtasks))
-	for i, st := range resp.Subtasks {
-		subtaskIDs[i] = st.ID
-	}
-
-	result := mcp.DecomposeTaskResponse{
-		TaskID:   resp.Task.ID,
-		Subtasks: subtaskIDs,
-	}
-	writeJSON(w, http.StatusOK, result)
-}
-
 // GetGuardianCheck handles GET /api/v1/tasks/:id/guardian.
 func (a *RESTAdapter) GetGuardianCheck(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -867,15 +788,13 @@ func (a *RESTAdapter) handleTaskOperations(w http.ResponseWriter, r *http.Reques
 	}
 
 	// {id}/artifacts       -> ReportArtifacts
-	// {id}/cancel, {id}/decompose, {id}/diff, {id}/guardian, {id}/agents
+	// {id}/cancel, {id}/diff, {id}/guardian, {id}/agents
 	if len(parts) == 2 {
 		switch parts[1] {
 		case "artifacts":
 			a.ReportArtifacts(w, r)
 		case "cancel":
 			a.CancelTask(w, r)
-		case "decompose":
-			a.DecomposeTask(w, r)
 		case "diff":
 			a.GetTaskDiff(w, r)
 		case "guardian":
@@ -911,8 +830,6 @@ func mapDomainStatusToString(status domain.TaskStatus) string {
 	switch status {
 	case domain.TaskStatusPending:
 		return "PENDING"
-	case domain.TaskStatusDecomposing:
-		return "DECOMPOSING"
 	case domain.TaskStatusDispatched:
 		return "DISPATCHED"
 	case domain.TaskStatusRunning:

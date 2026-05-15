@@ -3545,13 +3545,13 @@
       "description": "T-E2E-01: 两个Agent并行改同仓库不同文件",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_128.md",
       "created_at": "2026-05-15T21:18:01.420642",
-      "updated_at": "2026-05-15T21:18:01.420656",
+      "updated_at": "2026-05-15T22:54:42.763780",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3563,7 +3563,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-15T22:54:42.763776"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3572,13 +3579,13 @@
       "description": "T-E2E-03: 非代码任务(空Git项目)",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_129.md",
       "created_at": "2026-05-15T21:18:01.671353",
-      "updated_at": "2026-05-15T21:18:01.671362",
+      "updated_at": "2026-05-15T22:58:34.506337",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3590,7 +3597,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-15T22:58:34.506334"
+          }
+        ],
         "optimization_history": []
       }
     },

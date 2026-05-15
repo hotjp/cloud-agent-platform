@@ -276,8 +276,6 @@ func mapTaskStatus(status domain.TaskStatus) v1.TaskStatus {
 	switch status {
 	case domain.TaskStatusPending:
 		return v1.TaskStatus_TASK_STATUS_PENDING
-	case domain.TaskStatusDecomposing:
-		return v1.TaskStatus_TASK_STATUS_DECOMPOSING
 	case domain.TaskStatusDispatched:
 		return v1.TaskStatus_TASK_STATUS_DISPATCHED
 	case domain.TaskStatusRunning:
@@ -301,8 +299,6 @@ func mapProtoTaskStatus(status v1.TaskStatus) domain.TaskStatus {
 	switch status {
 	case v1.TaskStatus_TASK_STATUS_PENDING:
 		return domain.TaskStatusPending
-	case v1.TaskStatus_TASK_STATUS_DECOMPOSING:
-		return domain.TaskStatusDecomposing
 	case v1.TaskStatus_TASK_STATUS_DISPATCHED:
 		return domain.TaskStatusDispatched
 	case v1.TaskStatus_TASK_STATUS_RUNNING:

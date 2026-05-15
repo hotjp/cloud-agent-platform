@@ -12,7 +12,6 @@ func TestTaskStatus_String(t *testing.T) {
 		expected string
 	}{
 		{TaskStatusPending, "pending"},
-		{TaskStatusDecomposing, "decomposing"},
 		{TaskStatusDispatched, "dispatched"},
 		{TaskStatusRunning, "running"},
 		{TaskStatusReviewing, "reviewing"},
@@ -30,7 +29,7 @@ func TestTaskStatus_String(t *testing.T) {
 
 func TestTaskStatus_IsValid(t *testing.T) {
 	valid := []TaskStatus{
-		TaskStatusPending, TaskStatusDecomposing, TaskStatusDispatched,
+		TaskStatusPending, TaskStatusDispatched,
 		TaskStatusRunning, TaskStatusReviewing, TaskStatusConfirming,
 		TaskStatusCompleted, TaskStatusFailed, TaskStatusCancelled,
 	}
@@ -51,7 +50,7 @@ func TestTaskStatus_IsValid(t *testing.T) {
 func TestTaskStatus_IsTerminal(t *testing.T) {
 	terminals := []TaskStatus{TaskStatusCompleted, TaskStatusFailed, TaskStatusCancelled}
 	nonTerminals := []TaskStatus{
-		TaskStatusPending, TaskStatusDecomposing, TaskStatusDispatched,
+		TaskStatusPending, TaskStatusDispatched,
 		TaskStatusRunning, TaskStatusReviewing, TaskStatusConfirming,
 	}
 	for _, s := range terminals {

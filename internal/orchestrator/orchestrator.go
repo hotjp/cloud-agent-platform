@@ -166,14 +166,14 @@ func NewOrchestrator(
 // StartTask starts orchestrating a task.
 // It transitions the task to dispatched and begins agent execution.
 func (o *OrchestratorImpl) StartTask(ctx context.Context, task *domain.Task) error {
-	// Validate task is in a valid state for starting
-	if task.Status != domain.TaskStatusPending && task.Status != domain.TaskStatusDecomposing {
+	// Validate task is in pending state for starting
+	if task.Status != domain.TaskStatusPending {
 		o.logger.Warn("cannot start task - invalid state",
 			zap.String("task_id", task.ID),
 			zap.String("current_status", string(task.Status)),
 		)
 		return domain.NewL4TaskStateInvalidError(task.ID, task.Status,
-			[]domain.TaskStatus{domain.TaskStatusPending, domain.TaskStatusDecomposing})
+			[]domain.TaskStatus{domain.TaskStatusPending})
 	}
 
 	// Get subtasks for this task
@@ -191,11 +191,31 @@ func (o *OrchestratorImpl) StartTask(ctx context.Context, task *domain.Task) err
 		return o.startSingleAgentExecution(ctx, task)
 	}
 
-	// Multi-subtask: start with the first ready subtask (no dependencies)
+	// Multi-subtask: start ALL ready subtasks in parallel (no dependencies)
+	// This enables parallel agent execution for independent subtasks
+	var startedAny bool
 	for _, st := range subtasks {
 		if len(st.Dependencies) == 0 {
-			return o.startAgentSession(ctx, task, st)
+			// Start each ready subtask in its own goroutine
+			// The startAgentSession method itself spawns a goroutine for execution
+			if err := o.startAgentSession(ctx, task, st); err != nil {
+				o.logger.Error("failed to start agent session for subtask",
+					zap.String("task_id", task.ID),
+					zap.String("subtask_id", st.ID),
+					zap.Error(err),
+				)
+				// Continue starting other subtasks even if one fails
+				continue
+			}
+			startedAny = true
 		}
+	}
+
+	if !startedAny && len(subtasks) > 0 {
+		o.logger.Warn("no ready subtasks to start for task",
+			zap.String("task_id", task.ID),
+			zap.Int("total_subtasks", len(subtasks)),
+		)
 	}
 
 	return nil
@@ -249,41 +269,15 @@ func (o *OrchestratorImpl) startSingleAgentExecution(ctx context.Context, task *
 		return err
 	}
 
-	// Begin transaction for first state transition
+	// Begin transaction for state transition
 	tx, err := o.txManager.BeginTx(ctx)
 	if err != nil {
 		return domain.NewL1DBTxError(err)
 	}
 
-	// Transition task from pending to decomposing
-	if err := task.TransitionTo("StartDecomposition"); err != nil {
+	// Transition task from pending to dispatched
+	if err := task.TransitionTo("Dispatch"); err != nil {
 		tx.Rollback(ctx)
-		o.logger.Warn("task transition to decomposing failed",
-			zap.String("task_id", task.ID),
-			zap.Error(err),
-		)
-		return err
-	}
-
-	// Update task status to decomposing
-	if _, err := o.taskRepo.UpdateStatus(ctx, task.ID, domain.TaskStatusDecomposing, task.Version); err != nil {
-		tx.Rollback(ctx)
-		return err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return domain.NewL1DBTxError(err)
-	}
-
-	// Second transaction: decomposing -> dispatched
-	tx2, err := o.txManager.BeginTx(ctx)
-	if err != nil {
-		return domain.NewL1DBTxError(err)
-	}
-
-	// Transition task from decomposing to dispatched
-	if err := task.TransitionTo("DecompositionComplete"); err != nil {
-		tx2.Rollback(ctx)
 		o.logger.Warn("task transition to dispatched failed",
 			zap.String("task_id", task.ID),
 			zap.Error(err),
@@ -291,17 +285,17 @@ func (o *OrchestratorImpl) startSingleAgentExecution(ctx context.Context, task *
 		return err
 	}
 
-	if err := o.outboxWriter.Write(ctx, tx2, event); err != nil {
-		tx2.Rollback(ctx)
+	if err := o.outboxWriter.Write(ctx, tx, event); err != nil {
+		tx.Rollback(ctx)
 		return err
 	}
 
 	if _, err := o.taskRepo.UpdateStatus(ctx, task.ID, domain.TaskStatusDispatched, task.Version); err != nil {
-		tx2.Rollback(ctx)
+		tx.Rollback(ctx)
 		return err
 	}
 
-	if err := tx2.Commit(ctx); err != nil {
+	if err := tx.Commit(ctx); err != nil {
 		return domain.NewL1DBTxError(err)
 	}
 
@@ -623,11 +617,33 @@ func (o *OrchestratorImpl) handleAgentSuccess(ctx context.Context, session *agen
 
 	// Auto-complete: skip reviewing, go directly to completed (post-review model).
 	// Humans audit results asynchronously via dashboard, not as a gate.
+	// For parallel execution: if task is already completed by another session, just mark this session as completed.
+	if task.Status == domain.TaskStatusCompleted {
+		o.logger.Info("task already completed by another session, marking session as completed",
+			zap.String("task_id", task.ID),
+			zap.String("session_id", session.ID),
+		)
+		session.Status = "completed"
+		session.Result = result
+		return
+	}
+
 	if err := task.TransitionTo("AutoComplete"); err != nil {
 		o.logger.Warn("task auto-complete transition failed",
 			zap.String("task_id", task.ID),
 			zap.Error(err),
 		)
+		// If the task is already completed (race condition in parallel execution),
+		// just mark this session as completed and exit gracefully.
+		if task.Status == domain.TaskStatusCompleted {
+			o.logger.Info("task completed by another session during auto-complete, marking session as completed",
+				zap.String("task_id", task.ID),
+				zap.String("session_id", session.ID),
+			)
+			session.Status = "completed"
+			session.Result = result
+			return
+		}
 	}
 
 	// Write outbox event + update status to completed in a single transaction
@@ -780,7 +796,6 @@ func (o *OrchestratorImpl) CancelTask(ctx context.Context, taskID string) error 
 		return domain.NewL4TaskStateInvalidError(taskID, task.Status,
 			[]domain.TaskStatus{
 				domain.TaskStatusPending,
-				domain.TaskStatusDecomposing,
 				domain.TaskStatusDispatched,
 				domain.TaskStatusRunning,
 				domain.TaskStatusConfirming,

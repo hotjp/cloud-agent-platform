@@ -15,19 +15,19 @@ import (
 // ----------------------------------------------------------------------------
 
 // TaskStatus represents the state of a Task or Subtask.
-// Corresponds to the 9 states defined in Cloud-Agent-Platform.md §三.
+// 8 states: pending → dispatched → running → reviewing → confirming → completed/failed/cancelled
+// Note: no decomposing state — task decomposition is the caller's responsibility.
 type TaskStatus string
 
 const (
-	TaskStatusPending     TaskStatus = "pending"
-	TaskStatusDecomposing TaskStatus = "decomposing"
-	TaskStatusDispatched  TaskStatus = "dispatched"
-	TaskStatusRunning     TaskStatus = "running"
-	TaskStatusReviewing   TaskStatus = "reviewing"
-	TaskStatusConfirming  TaskStatus = "confirming"
-	TaskStatusCompleted   TaskStatus = "completed"
-	TaskStatusFailed      TaskStatus = "failed"
-	TaskStatusCancelled   TaskStatus = "cancelled"
+	TaskStatusPending    TaskStatus = "pending"
+	TaskStatusDispatched TaskStatus = "dispatched"
+	TaskStatusRunning    TaskStatus = "running"
+	TaskStatusReviewing  TaskStatus = "reviewing"
+	TaskStatusConfirming TaskStatus = "confirming"
+	TaskStatusCompleted  TaskStatus = "completed"
+	TaskStatusFailed     TaskStatus = "failed"
+	TaskStatusCancelled  TaskStatus = "cancelled"
 )
 
 // String returns the string representation of TaskStatus.
@@ -36,7 +36,7 @@ func (s TaskStatus) String() string { return string(s) }
 // IsValid reports whether s is a known TaskStatus.
 func (s TaskStatus) IsValid() bool {
 	switch s {
-	case TaskStatusPending, TaskStatusDecomposing, TaskStatusDispatched,
+	case TaskStatusPending, TaskStatusDispatched,
 		TaskStatusRunning, TaskStatusReviewing, TaskStatusConfirming,
 		TaskStatusCompleted, TaskStatusFailed, TaskStatusCancelled:
 		return true

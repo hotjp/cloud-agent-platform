@@ -202,11 +202,6 @@ func TestRESTAdapterMethods_MethodNotAllowed(t *testing.T) {
 			method: http.MethodPost,
 			path:   "/api/v1/tasks/123/diff",
 		},
-		{
-			name:   "DecomposeTask with GET - method check fails",
-			method: http.MethodGet,
-			path:   "/api/v1/tasks/123/decompose",
-		},
 	}
 
 	for _, tt := range tests {
@@ -219,7 +214,7 @@ func TestRESTAdapterMethods_MethodNotAllowed(t *testing.T) {
 				restAdapter.handleTasks(w, req)
 			case "/api/v1/tasks/123":
 				restAdapter.handleTaskOperations(w, req)
-			case "/api/v1/tasks/123/cancel", "/api/v1/tasks/123/decompose", "/api/v1/tasks/123/diff":
+			case "/api/v1/tasks/123/cancel", "/api/v1/tasks/123/diff":
 				restAdapter.handleTaskOperations(w, req)
 			case "/api/v1/tasks/123/subtasks/sub456/decision":
 				restAdapter.handleTaskOperations(w, req)
@@ -241,9 +236,6 @@ func TestRESTAdapterMethods_MethodNotAllowed(t *testing.T) {
 			// First check for paths that need specific ordering
 			case tt.method == http.MethodPost && tt.path == "/api/v1/tasks/123/diff":
 				// POST /api/v1/tasks/123/diff → GetTaskDiff (wrong method)
-				expectedStatus = http.StatusMethodNotAllowed
-			case tt.method == http.MethodGet && tt.path == "/api/v1/tasks/123/decompose":
-				// GET /api/v1/tasks/123/decompose → DecomposeTask (wrong method)
 				expectedStatus = http.StatusMethodNotAllowed
 			case tt.method == http.MethodGet && tt.path == "/api/v1/tasks/123/cancel":
 				// GET /api/v1/tasks/123/cancel → CancelTask (wrong method)
@@ -312,13 +304,6 @@ func TestRESTAdapter_PlaceholderEndpoints(t *testing.T) {
 			handler:        restAdapter.GetTaskDiff,
 			method:         http.MethodGet,
 			path:           "/api/v1/tasks/123/diff",
-			expectedStatus: http.StatusUnauthorized,
-		},
-		{
-			name:           "DecomposeTask returns NotImplemented",
-			handler:        restAdapter.DecomposeTask,
-			method:         http.MethodPost,
-			path:           "/api/v1/tasks/123/decompose",
 			expectedStatus: http.StatusUnauthorized,
 		},
 	}
