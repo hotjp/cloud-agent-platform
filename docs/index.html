@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Agent Platform — Autonomous Code Generation at Scale</title>
+  <meta name="description" content="Submit a development task, get working code committed to Git. CAP orchestrates containerized AI agents to generate, test, and ship code autonomously." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #1e1e2e;
+      --text: #e0e0e8;
+      --muted: #6b6b80;
+      --accent: #7c6aef;
+      --accent-light: #a89af7;
+      --green: #3ecf8e;
+      --yellow: #f5c542;
+      --red: #ef6c6c;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.7;
+      font-size: 16px;
+      overflow-x: hidden;
+    }
+
+    a { color: var(--accent-light); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-brand {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand svg { color: var(--accent); }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: var(--muted); font-size: 0.875rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-cta {
+      background: var(--accent);
+      color: #fff !important;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    /* ── HERO ────────────────────────────────────────────── */
+    .hero {
+      padding: 96px 0 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124, 106, 239, 0.12);
+      border: 1px solid rgba(124, 106, 239, 0.3);
+      color: var(--accent-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 28px;
+      letter-spacing: 0.03em;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 60%, var(--green) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover { opacity: 0.85; text-decoration: none; }
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+    .git-top {
+      margin-top: 32px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .git-top code { color: var(--accent-light); font-family: 'SF Mono', monospace; font-size: 0.85rem; }
+
+    /* ── FLOW DIAGRAM ────────────────────────────────────── */
+    .flow-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 32px;
+      margin: 0 0 80px;
+      overflow-x: auto;
+    }
+    .flow-diagram h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 28px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.75rem; }
+    .flow-track {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      min-width: 600px;
+    }
+    .flow-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .flow-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .flow-icon-purple { background: rgba(124,106,239,0.15); border: 1px solid rgba(124,106,239,0.3); }
+    .flow-icon-green  { background: rgba(62,207,142,0.12);  border: 1px solid rgba(62,207,142,0.25); }
+    .flow-icon-yellow { background: rgba(245,197,66,0.12);   border: 1px solid rgba(245,197,66,0.25); }
+    .flow-icon-red    { background: rgba(239,108,108,0.12); border: 1px solid rgba(239,108,108,0.25); }
+    .flow-label { font-size: 0.72rem; color: var(--muted); text-align: center; max-width: 72px; }
+    .flow-name  { font-size: 0.82rem; font-weight: 600; text-align: center; }
+    .flow-arrow { color: var(--muted); font-size: 1.2rem; flex: 0 0 24px; }
+
+    /* ── SECTION ─────────────────────────────────────────── */
+    .section { padding: 72px 0; }
+    .section + .section { border-top: 1px solid var(--border); }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .section h2 {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .section p { color: var(--muted); max-width: 680px; }
+    .section p + p { margin-top: 12px; }
+
+    /* ── PROBLEM CARDS ───────────────────────────────────── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 36px;
+    }
+    .problem-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .problem-card .emoji { font-size: 1.6rem; margin-bottom: 12px; display: block; }
+    .problem-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+    .problem-card p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── APPROACH / DECOMPOSITION ────────────────────────── */
+    .approach-list { margin-top: 36px; display: flex; flex-direction: column; gap: 0; }
+    .approach-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .approach-item:last-child { border-bottom: none; }
+    .approach-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(124,106,239,0.12);
+      border: 1px solid rgba(124,106,239,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--accent-light);
+      flex-shrink: 0;
+    }
+    .approach-item h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+    .approach-item p { font-size: 0.9rem; color: var(--muted); }
+
+    /* ── RESULTS / STATS ──────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 40px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .stat-card .num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-card .num.green { color: var(--green); }
+    .stat-card .num.yellow { color: var(--yellow); }
+    .stat-card .num.purple { color: var(--accent-light); }
+    .stat-card .num.red { color: var(--red); }
+    .stat-card .label { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── ARCHITECTURE ─────────────────────────────────────── */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-top: 36px;
+      font-size: 0.85rem;
+      overflow-x: auto;
+    }
+    .arch-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .arch-row:last-child { margin-bottom: 0; }
+    .arch-label {
+      background: rgba(124,106,239,0.15);
+      border: 1px solid rgba(124,106,239,0.3);
+      color: var(--accent-light);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .arch-label.green-bg { background: rgba(62,207,142,0.12); border-color: rgba(62,207,142,0.25); color: var(--green); }
+    .arch-label.yellow-bg { background: rgba(245,197,66,0.1); border-color: rgba(245,197,66,0.2); color: var(--yellow); }
+    .arch-arrow { color: var(--muted); }
+    .arch-dots {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .arch-dot {
+      background: var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: var(--text);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    /* ── VALIDATION TABLE ─────────────────────────────────── */
+    .val-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 28px;
+      font-size: 0.875rem;
+    }
+    .val-table th {
+      text-align: left;
+      padding: 10px 16px;
+      border-bottom: 2px solid var(--border);
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .val-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .val-table tr:last-child td { border-bottom: none; }
+    .check { color: var(--green); font-weight: 700; }
+    .val-table td:first-child { font-weight: 600; }
+
+    /* ── FEATURE LIST ─────────────────────────────────────── */
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 32px;
+    }
+    .feat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+    .feat-item .icon { color: var(--green); font-size: 1rem; flex-shrink: 0; }
+
+    /* ── STACK ────────────────────────────────────────────── */
+    .stack-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .stack-tag {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+    .stack-tag strong { color: var(--accent-light); font-weight: 600; margin-right: 4px; }
+
+    /* ── CTA ──────────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(124,106,239,0.08) 0%, rgba(62,207,142,0.06) 100%);
+      border: 1px solid rgba(124,106,239,0.2);
+      border-radius: 20px;
+      padding: 72px 32px;
+      text-align: center;
+      margin: 80px 0;
+    }
+    .cta-section h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .cta-section p { color: var(--muted); max-width: 500px; margin: 0 auto 36px; font-size: 1.05rem; }
+    .cta-section .git-bottom {
+      margin-top: 28px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    .cta-section .git-bottom code {
+      color: var(--accent-light);
+      font-family: 'SF Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    /* ── RESPONSIVE ───────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav .nav-links { display: none; }
+      .hero { padding: 64px 0 56px; }
+      .flow-diagram { padding: 24px 16px; }
+      .section { padding: 48px 0; }
+      .approach-item { grid-template-columns: 36px 1fr; gap: 14px; }
+      .approach-num { width: 36px; height: 36px; font-size: 0.85rem; }
+      .arch-diagram { padding: 20px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <div class="container">
+    <div class="nav-brand">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Cloud Agent Platform
+    </div>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#approach">Approach</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#tech">Tech</a></li>
+      <li><a href="https://github.com/hotjp/cloud-agent-platform" class="nav-cta">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+      E2E Pipeline Verified — 10/10 Stress Test Passed
+    </div>
+    <h1>Ship Code.<br/><span class="gradient">Without Writing It.</span></h1>
+    <p>Submit a development task in natural language. CAP orchestrates containerized AI agents that clone your repo, generate code via LLM, and commit working results — autonomously.</p>
+    <div class="hero-actions">
+      <a href="https://github.com/hotjp/cloud-agent-platform" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        View on GitHub
+      </a>
+      <a href="#results" class="btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        See Results
+      </a>
+    </div>
+    <p class="git-top">
+      <code>https://github.com/hotjp/cloud-agent-platform</code>
+    </p>
+
+    <!-- Flow diagram -->
+    <div class="flow-diagram">
+      <h2>Full Pipeline</h2>
+      <div class="flow-track">
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-purple">📋</div>
+          <div class="flow-name">Submit</div>
+          <div class="flow-label">REST / MCP</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-purple">🔀</div>
+          <div class="flow-name">Dispatch</div>
+          <div class="flow-label">Scheduler</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-green">🐳</div>
+          <div class="flow-name">Worker</div>
+          <div class="flow-label">Docker Container</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-yellow">🧠</div>
+          <div class="flow-name">LLM</div>
+          <div class="flow-label">MiniMax / GLM</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-yellow">📝</div>
+          <div class="flow-name">Write</div>
+          <div class="flow-label">Code Generation</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-green">🔁</div>
+          <div class="flow-name">Commit</div>
+          <div class="flow-label">Git Container</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-icon flow-icon-green">📦</div>
+          <div class="flow-name">Artifact</div>
+          <div class="flow-label">Result上报</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 1: PROBLEM ────────────────────────────── -->
+<section id="problem" class="section">
+  <div class="container">
+    <div class="section-label">01 — Problem</div>
+    <h2>Every team has the same bottleneck.</h2>
+    <p>You have a repo. You have tasks. But writing boilerplate, scaffolding, and repetitive integrations chews up the best hours of your best engineers — hours that could go toward actual product differentiation.</p>
+    <p>Traditional approaches all hit walls eventually.</p>
+
+    <div class="problem-grid">
+      <div class="problem-card">
+        <span class="emoji">🤖</span>
+        <h3>AI Pair Programmers</h3>
+        <p>Great for single-file edits. Fall apart on multi-file changes that span architecture decisions.</p>
+      </div>
+      <div class="problem-card">
+        <span class="emoji">📦</span>
+        <h3>Scaffold Tools</h3>
+        <p>Generate the skeleton. Leave the muscles and nerves for you to wire up manually.</p>
+      </div>
+      <div class="problem-card">
+        <span class="emoji">👷</span>
+        <h3>Offshore / Bounty</h3>
+        <p>High coordination overhead. Quality varies wildly. Context transfer destroys momentum.</p>
+      </div>
+      <div class="problem-card">
+        <span class="emoji">🔄</span>
+        <h3>Scripts &amp; Templates</h3>
+        <p>Each one is a one-off. Maintenance burden grows faster than the value they provide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2: APPROACH ───────────────────────────── -->
+<section id="approach" class="section">
+  <div class="container">
+    <div class="section-label">02 — Approach</div>
+    <h2>Decompose the problem. Solve it piece by piece.</h2>
+    <p>CAP doesn't try to solve "write code" in one step. It breaks the workflow into a state machine where each stage is handled by a specialized component — and failures at any stage are recoverable.</p>
+
+    <div class="approach-list">
+      <div class="approach-item">
+        <div class="approach-num">1</div>
+        <div>
+          <h3>Submit a Task as Intent, Not Spec</h3>
+          <p>Users describe what they want in plain language. The platform handles routing, scheduling, and context injection. No YAML schemas, no ticket templates — just a goal and a repo.</p>
+        </div>
+      </div>
+      <div class="approach-item">
+        <div class="approach-num">2</div>
+        <div>
+          <h3>Containerize the Execution Environment</h3>
+          <p>Each task runs in an isolated Docker container. No cross-contamination between projects. Cold-start a fresh environment for every task. Workers are stateless — kill and restart without side effects.</p>
+        </div>
+      </div>
+      <div class="approach-item">
+        <div class="approach-num">3</div>
+        <div>
+          <h3>Route to the Right Model Dynamically</h3>
+          <p>Different tasks need different model capabilities. CAP's llmrouter automatically picks between MiniMax M2.7 and Zhipu GLM based on task complexity — with fallback chains so a single model outage can't block a task.</p>
+        </div>
+      </div>
+      <div class="approach-item">
+        <div class="approach-num">4</div>
+        <div>
+          <h3>Commit Through a Git Container, Not a Worker</h3>
+          <p>Workers write files. They don't run git. A dedicated Git Container per project handles all version control — making concurrent tasks to the same repo safe and serialized without distributed locks.</p>
+        </div>
+      </div>
+      <div class="approach-item">
+        <div class="approach-num">5</div>
+        <div>
+          <h3>Expose Everything via MCP for AI-to-AI Orchestration</h3>
+          <p>CAP's own API is surfaced as MCP tools. Any AI assistant (Claude Code, OpenClaw, custom agents) can submit tasks, check status, review diffs, and approve results — without leaving the tooling context.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 3: RESULTS ────────────────────────────── -->
+<section id="results" class="section">
+  <div class="container">
+    <div class="section-label">03 — Results</div>
+    <h2>10/10 tasks completed. Real code. Real commits.</h2>
+    <p>CAP's E2E pipeline has been validated against real repositories with real LLM calls. No mocks, no toy examples.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="num green">10/10</div>
+        <div class="label">Stress test — all tasks COMPLETED</div>
+      </div>
+      <div class="stat-card">
+        <div class="num purple">13KB+</div>
+        <div class="label">Generated Python FastAPI — production-quality</div>
+      </div>
+      <div class="stat-card">
+        <div class="num yellow">9.7KB</div>
+        <div class="label">Generated API documentation</div>
+      </div>
+      <div class="stat-card">
+        <div class="num green">2</div>
+        <div class="label">Agents writing same repo simultaneously</div>
+      </div>
+    </div>
+
+    <table class="val-table">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Single task — code generation</td>
+          <td><span class="check">✅</span></td>
+          <td>Python FastAPI, 3 files, 13KB+ real code</td>
+        </tr>
+        <tr>
+          <td>Documentation generation</td>
+          <td><span class="check">✅</span></td>
+          <td>API.md, 9.7KB professional REST docs</td>
+        </tr>
+        <tr>
+          <td>Parallel tasks — same repo</td>
+          <td><span class="check">✅</span></td>
+          <td>2 agents, shared Git Container, 2 independent commits</td>
+        </tr>
+        <tr>
+          <td>Cross-project isolation</td>
+          <td><span class="check">✅</span></td>
+          <td>Different repos → fully isolated Git Containers</td>
+        </tr>
+        <tr>
+          <td>Agent file sharing</td>
+          <td><span class="check">✅</span></td>
+          <td>Agent B reads files written by Agent A in shared volume</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── SECTION 4: ARCHITECTURE ───────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">04 — Architecture</div>
+    <h2>Five layers. Plugin interface. No circular deps.</h2>
+
+    <div class="arch-diagram">
+      <div class="arch-row">
+        <span class="arch-label">L5 Gateway</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">REST Handler</span>
+          <span class="arch-dot">WebSocket</span>
+          <span class="arch-dot">JWT Middleware</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <span class="arch-label">L4 Service</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">Task Service</span>
+          <span class="arch-dot">Session Service</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <span class="arch-label">L3 Authz</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">Permission Engine</span>
+          <span class="arch-dot">Token Validation</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <span class="arch-label">L2 Domain</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">Task Aggregate</span>
+          <span class="arch-dot">Subtask Aggregate</span>
+          <span class="arch-dot">State Machine</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <span class="arch-label green-bg">L1 Storage</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">PostgreSQL + ent ORM</span>
+          <span class="arch-dot">Redis 7</span>
+        </div>
+      </div>
+      <div class="arch-row">
+        <span class="arch-label yellow-bg">Plugins (interface inversion)</span>
+        <span class="arch-arrow">→</span>
+        <div class="arch-dots">
+          <span class="arch-dot">llmrouter</span>
+          <span class="arch-dot">orchestrator</span>
+          <span class="arch-dot">workermanager</span>
+          <span class="arch-dot">mcp-server</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 5: FEATURES ────────────────────────────── -->
+<section class="section">
+  <div class="container">
+    <div class="section-label">05 — Features</div>
+    <h2>Everything you'd expect. A few things you wouldn't.</h2>
+
+    <div class="feat-grid">
+      <div class="feat-item"><span class="icon">⚡</span> Cold-start Worker containers in seconds</div>
+      <div class="feat-item"><span class="icon">🔀</span> Automatic LLM routing with fallback chains</div>
+      <div class="feat-item"><span class="icon">🔒</span> Per-project Git Container isolation</div>
+      <div class="feat-item"><span class="icon">🔌</span> MCP Server — 9 tools, stdio JSON-RPC</div>
+      <div class="feat-item"><span class="icon">📊</span> Task state machine — 9 states, fully observable</div>
+      <div class="feat-item"><span class="icon">🐳</span> Docker-based execution, stateless Workers</div>
+      <div class="feat-item"><span class="icon">🧠</span> MiniMax M2.7 + Zhipu GLM adaptive routing</div>
+      <div class="feat-item"><span class="icon">📝</span> Diff retrieval for human review before merge</div>
+      <div class="feat-item"><span class="icon">🔄</span> Parallel agents, same repo — safe serialization</div>
+      <div class="feat-item"><span class="icon">📦</span> Artifact reporting back to platform</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 6: TECH STACK ─────────────────────────── -->
+<section id="tech" class="section">
+  <div class="container">
+    <div class="section-label">06 — Stack</div>
+    <h2>Built with opinionated, boring technology.</h2>
+    <p>Each choice was made for operational simplicity. No magic. No surprises. A team can reason about the full stack end-to-end.</p>
+
+    <div class="stack-row">
+      <span class="stack-tag"><strong>Go 1.23</strong> single binary</span>
+      <span class="stack-tag"><strong>connect-go</strong> gRPC + HTTP</span>
+      <span class="stack-tag"><strong>ent</strong> schema-driven ORM</span>
+      <span class="stack-tag"><strong>PostgreSQL 15</strong> primary storage</span>
+      <span class="stack-tag"><strong>Redis 7</strong> hot data + locks</span>
+      <span class="stack-tag"><strong>koanf</strong> YAML config</span>
+      <span class="stack-tag"><strong>zap</strong> structured logging</span>
+      <span class="stack-tag"><strong>Docker</strong> isolation</span>
+      <span class="stack-tag"><strong>ulid</strong> time-ordered IDs</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────────────────── -->
+<div class="container">
+  <div class="cta-section">
+    <h2>Ship faster. Delegate the scaffolding.</h2>
+    <p>CAP takes your intent and delivers committed code. Review the diff, merge when ready.</p>
+    <div class="hero-actions" style="justify-content: center;">
+      <a href="https://github.com/hotjp/cloud-agent-platform" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        Explore on GitHub
+      </a>
+    </div>
+    <p class="git-bottom">
+      <code>https://github.com/hotjp/cloud-agent-platform</code>
+    </p>
+  </div>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    Cloud Agent Platform · Built with Go, Docker &amp; LLM · MIT License · <a href="https://github.com/hotjp/cloud-agent-platform">GitHub</a>
+  </div>
+</footer>
+
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const el = document.querySelector(a.getAttribute('href'));
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    });
+  });
+</script>
+</body>
+</html>
