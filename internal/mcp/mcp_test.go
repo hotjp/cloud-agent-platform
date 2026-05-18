@@ -11,7 +11,7 @@ import (
 
 func TestToolSchemas(t *testing.T) {
 	tools := GetToolDefinitions()
-	assert.Len(t, tools, 8)
+	assert.Len(t, tools, 9)
 
 	toolNames := make(map[string]bool)
 	for _, tool := range tools {

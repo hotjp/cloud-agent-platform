@@ -297,7 +297,99 @@ export --since 2026-05-01 --model claude-opus-4
 
 ---
 
-## 九、灵感收集（未整理）
+## 九、未来架构优化：InProcess 执行模式
+
+> **记录时间**: 2026-05-16
+> **来源**: 创始人创始人与 AI 助手（锻）的方案讨论
+> **状态**: 暂不实施，记录供未来参考
+
+### 背景
+
+当前架构：每个 Agent 执行 = 创建一个独立的 cap-worker Docker 容器，挂载 Git 容器的 volume，执行完毕后销毁。
+
+随着并行 Agent 数量增长，容器启停开销（2-5s 启动延迟 + 每容器几百 MB 内存）会成为瓶颈。
+
+### 方案：InProcess Backend
+
+在 Git 容器内直接执行 Agent 进程（`docker exec`），不创建独立容器。
+
+```
+当前：Git 容器 + N 个 Worker 容器 → N+1 个容器
+未来：Git 容器内跑 N 个 Agent 进程 → 1 个容器
+```
+
+### 架构设计
+
+```
+config: sandbox.mode = "inprocess" | "docker" | "cube" | "k8s"
+
+                Scheduler
+                    │
+              Backend 接口（已有）
+            ┌───────┼───────┐
+            ↓       ↓       ↓
+      InProcess   Docker   K8sPod
+      (轻量)     (当前)   (远期)
+```
+
+**不改 Backend 接口**，新增 `InProcess` 实现：
+- `Create` → 空操作（复用 Git 容器）
+- `Exec` → `docker exec` 到 Git 容器执行
+- `Destroy` → 空操作
+
+### 新增组件：并发控制器
+
+多 Agent 共享同一容器，需要协调文件访问：
+- Agent 执行前声明要读写的文件范围
+- 冲突时排队，不冲突时并行
+- 调度层控制，不需要 AI 决策
+
+### 后端选择策略
+
+**不让 AI 判断，用静态规则：**
+
+```yaml
+sandbox_rules:
+  default: inprocess
+  override:
+    - condition: "task.type == 'unsafe_code_execution'"
+      backend: docker
+    - condition: "task.requires_gpu == true"
+      backend: k8s
+    - condition: "task.duration > 30min"
+      backend: docker
+```
+
+MCP 接口不暴露后端选择，`task_submit` 不变，后端选择是平台内部实现细节。
+
+### 收益预估
+
+| 指标 | 当前（Docker） | 未来（InProcess） |
+|------|--------------|-----------------|
+| 启动延迟 | 2-5s | <100ms |
+| 10 Agent 内存 | ~2-3GB | ~500MB |
+| 文件 I/O | 跨容器 volume | 容器内直读 |
+| 容器管理复杂度 | N+1 | 1 |
+
+### 触发条件（什么时候做）
+
+- 并行 Agent 数量上到 50+
+- Agent 任务执行频繁且短（几秒到几十秒），启动延迟成为瓶颈
+- 需要快速迭代调试的场景
+
+### 不改的原因
+
+当前任务量下，Docker 方案的额外开销完全可接受。隔离性天然好，不用写并发控制器。Backend 接口已做好抽象，到时候加一个 InProcess 实现就行，不会返工。
+
+### 改动量预估
+
+- 新增：`inprocess_backend.go`（~150 行）+ `concurrency_controller.go`（~200 行）
+- 改动：`config.go`（加 sandbox.mode）、`orchestrator_adapter.go`（路由后端选择）
+- 不动：现有 Docker/Cube 沙箱代码
+
+---
+
+## 十、灵感收集（未整理）
 
 > 这里记录零散的产品灵感，尚未归类。积攒到一定量后整理进上面的章节。
 

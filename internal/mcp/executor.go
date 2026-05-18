@@ -51,7 +51,7 @@ func (e *ToolExecutor) Execute(ctx context.Context, name string, params json.Raw
 		return e.approveContext(ctx, params)
 	case "context_reject":
 		return e.rejectContext(ctx, params)
-	case "agent_list":
+	case "agent_list", "agent_templates":
 		return e.listAgents(ctx, params)
 	case "session_list":
 		return e.listSessions(ctx)

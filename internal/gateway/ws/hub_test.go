@@ -226,7 +226,7 @@ func TestHub_HandleStreamEvent(t *testing.T) {
 		var received WSEvent
 		err := json.Unmarshal(msg, &received)
 		require.NoError(t, err)
-		assert.Equal(t, "task.status_changed", received.Type)
+		assert.Equal(t, "task_updated", received.Type)
 		assert.Equal(t, "task-1", received.TaskID)
 	case <-time.After(100 * time.Millisecond):
 		t.Fatal("timeout waiting for event")

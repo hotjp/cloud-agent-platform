@@ -1,0 +1,71 @@
+# POC-9: OpenClaw Agent Worker Container
+# Multi-stage build for cap-openclaw-worker
+#
+# This Dockerfile creates a worker image that can run OpenClaw agents
+# inside isolated containers for the Cloud Agent Platform.
+
+# Stage 1: Build
+FROM golang:1.26-alpine AS builder
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Build the worker binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-w -s" \
+    -o /cap-worker \
+    ./cmd/cloud-agent-platform
+
+# Stage 2: Runtime
+FROM alpine:3.21
+
+RUN apk add --no-cache \
+    ca-certificates \
+    git \
+    openssh-client \
+    curl \
+    bash \
+    tzdata \
+    && rm -rf /var/cache/apk/*
+
+# Install OpenClaw CLI
+# Note: Update the URL to the actual OpenClaw CLI release
+ARG OPENCLAW_VERSION="latest"
+RUN curl -fsSL https://get.openclaw.dev/cli/install.sh | sh \
+    || echo "OpenClaw CLI installation skipped (update install URL for production)"
+
+# Create non-root user
+RUN addgroup -S cap && adduser -S cap -G cap
+
+WORKDIR /workspace
+
+# Copy binary
+COPY --from=builder /cap-worker /usr/local/bin/cap-worker
+
+# Copy OpenClaw-specific entrypoint
+COPY docker/entrypoint-openclaw-worker.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Environment defaults
+ENV CAP_WORKER_MODE=openclaw \
+    CAP_LOG_LEVEL=info \
+    CAP_WORKSPACE=/workspace \
+    CAP_HTTP_PORT=8080
+
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+USER cap
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

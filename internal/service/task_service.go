@@ -608,3 +608,73 @@ func (s *TaskService) Decide(ctx context.Context, req DecideRequest) (*DecideRes
 		Status:    "approved",
 	}, nil
 }
+
+// DashboardStatsRequest is the input for DashboardStats method.
+type DashboardStatsRequest struct {
+	ClientID string
+}
+
+// DashboardStatsResponse holds task statistics for the dashboard.
+type DashboardStatsResponse struct {
+	Total       int `json:"total"`
+	Pending     int `json:"pending"`
+	Running     int `json:"running"`
+	Completed   int `json:"completed"`
+	Failed      int `json:"failed"`
+	Cancelled   int `json:"cancelled"`
+	Confirming  int `json:"confirming"`
+	Reviewing   int `json:"reviewing"`
+	Dispatched  int `json:"dispatched"`
+}
+
+// DashboardStats returns task statistics for the dashboard.
+func (s *TaskService) DashboardStats(ctx context.Context, req DashboardStatsRequest) (*DashboardStatsResponse, error) {
+	stats := &DashboardStatsResponse{}
+
+	// Count tasks by status using the repository
+	statuses := []domain.TaskStatus{
+		domain.TaskStatusPending,
+		domain.TaskStatusDispatched,
+		domain.TaskStatusRunning,
+		domain.TaskStatusReviewing,
+		domain.TaskStatusConfirming,
+		domain.TaskStatusCompleted,
+		domain.TaskStatusFailed,
+		domain.TaskStatusCancelled,
+	}
+
+	for _, status := range statuses {
+		count, err := s.taskRepo.CountByStatus(ctx, status)
+		if err != nil {
+			s.logger.Error("failed to count tasks by status",
+				zap.String("layer", "L4"),
+				zap.String("status", string(status)),
+				zap.Error(err),
+			)
+			// Continue with other counts even if one fails
+			continue
+		}
+
+		switch status {
+		case domain.TaskStatusPending:
+			stats.Pending = count
+		case domain.TaskStatusDispatched:
+			stats.Dispatched = count
+		case domain.TaskStatusRunning:
+			stats.Running = count
+		case domain.TaskStatusReviewing:
+			stats.Reviewing = count
+		case domain.TaskStatusConfirming:
+			stats.Confirming = count
+		case domain.TaskStatusCompleted:
+			stats.Completed = count
+		case domain.TaskStatusFailed:
+			stats.Failed = count
+		case domain.TaskStatusCancelled:
+			stats.Cancelled = count
+		}
+		stats.Total += count
+	}
+
+	return stats, nil
+}

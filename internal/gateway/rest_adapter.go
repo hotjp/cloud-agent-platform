@@ -510,6 +510,39 @@ func (a *RESTAdapter) PlatformStatus(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, result)
 }
 
+// DashboardStats handles GET /api/v1/dashboard/stats.
+func (a *RESTAdapter) DashboardStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeError(w, http.StatusMethodNotAllowed, "MethodNotAllowed", "GET required")
+		return
+	}
+
+	ctx := r.Context()
+	uc, err := extractUserContext(ctx)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "Unauthenticated", "user context not found")
+		return
+	}
+
+	svcReq := service.DashboardStatsRequest{
+		ClientID: uc.clientID,
+	}
+
+	resp, err := a.svc.DashboardStats(ctx, svcReq)
+	if err != nil {
+		a.logger.Error("REST DashboardStats failed",
+			zap.String("layer", "L5"),
+			zap.String("user_id", uc.userID),
+			zap.Error(err),
+		)
+		status, code, msg := mapServiceError(err)
+		writeError(w, status, code, msg)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, resp)
+}
+
 // GetTaskDiff handles GET /api/v1/tasks/:id/diff.
 func (a *RESTAdapter) GetTaskDiff(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {

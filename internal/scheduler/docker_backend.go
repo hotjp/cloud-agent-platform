@@ -3,6 +3,7 @@ package scheduler
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -75,8 +76,26 @@ func (a *DockerBackendAdapter) Exec(ctx context.Context, containerID string, spe
 }
 
 func (a *DockerBackendAdapter) Destroy(ctx context.Context, containerID string) error {
-	if err := a.backend.Destroy(ctx, containerID); err != nil {
+	err := a.backend.Destroy(ctx, containerID)
+	if err != nil {
+		var notFound *worker.ErrSandboxNotFound
+		if errors.As(err, &notFound) {
+			a.logger.Debug("container not in workermanager, using direct docker rm",
+				zap.String("containerID", containerID))
+			return a.directDestroy(ctx, containerID)
+		}
 		return fmt.Errorf("docker backend destroy: %w", err)
+	}
+	return nil
+}
+
+// directDestroy removes a container using docker CLI directly.
+// Used for containers created by createWithVolume() which bypass the workermanager registry.
+func (a *DockerBackendAdapter) directDestroy(ctx context.Context, containerID string) error {
+	cmd := exec.CommandContext(ctx, "docker", "rm", "-f", containerID)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("docker rm -f %s: %w\n%s", containerID, err, string(out))
 	}
 	return nil
 }

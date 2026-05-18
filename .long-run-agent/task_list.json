@@ -3613,13 +3613,13 @@
       "description": "T-E2E-04: Claude Code通过MCP调用完整链路",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_130.md",
       "created_at": "2026-05-15T21:18:01.922743",
-      "updated_at": "2026-05-15T21:18:01.922754",
+      "updated_at": "2026-05-15T23:55:40.264330",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3631,7 +3631,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-15T23:55:40.264327"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3640,13 +3647,13 @@
       "description": "T-E2E-06: 同项目串行任务(Agent B看到Agent A的结果)",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_131.md",
       "created_at": "2026-05-15T21:18:02.173099",
-      "updated_at": "2026-05-15T21:18:02.173107",
+      "updated_at": "2026-05-16T00:05:55.530946",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3658,7 +3665,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:05:55.530938"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3667,13 +3681,13 @@
       "description": "T-E2E-02: 两个Agent并行改不同仓库",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_132.md",
       "created_at": "2026-05-15T21:18:02.422857",
-      "updated_at": "2026-05-15T21:18:02.422868",
+      "updated_at": "2026-05-16T00:08:33.908352",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3685,7 +3699,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:08:33.908348"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3694,13 +3715,13 @@
       "description": "T-E2E-05: 3个用户同时提交task",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_133.md",
       "created_at": "2026-05-15T21:18:02.673068",
-      "updated_at": "2026-05-15T21:18:02.673077",
+      "updated_at": "2026-05-16T00:11:49.312446",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3712,7 +3733,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:11:49.312438"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3721,13 +3749,13 @@
       "description": "T-E2E-07: Agent失败场景测试",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_134.md",
       "created_at": "2026-05-15T21:18:02.922497",
-      "updated_at": "2026-05-15T21:18:02.922506",
+      "updated_at": "2026-05-16T00:17:07.445735",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3739,7 +3767,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:17:07.445731"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3748,13 +3783,13 @@
       "description": "T-E2E-09: 任务取消(task_cancel)",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_135.md",
       "created_at": "2026-05-15T21:18:03.172139",
-      "updated_at": "2026-05-15T21:18:03.172148",
+      "updated_at": "2026-05-16T00:20:34.373126",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3766,7 +3801,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:20:34.373123"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3775,13 +3817,13 @@
       "description": "T-E2E-08: Git Push到可写仓库",
       "template": "task",
       "priority": "P2",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_136.md",
       "created_at": "2026-05-15T21:18:03.420381",
-      "updated_at": "2026-05-15T21:18:03.420389",
+      "updated_at": "2026-05-16T00:23:13.688646",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3793,7 +3835,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:23:13.688643"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3802,13 +3851,13 @@
       "description": "T-E2E-10: 压力测试10个Agent同时执行",
       "template": "task",
       "priority": "P2",
-      "status": "blocked",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_137.md",
       "created_at": "2026-05-15T21:18:03.672904",
-      "updated_at": "2026-05-15T21:18:03.672913",
+      "updated_at": "2026-05-16T00:26:52.532716",
       "dependencies": [
         "task_128",
         "task_129",
@@ -3825,7 +3874,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:26:52.532714"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3834,13 +3890,13 @@
       "description": "T-DEV-01: L3-Authz实现JWT鉴权",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_138.md",
       "created_at": "2026-05-15T21:18:27.825810",
-      "updated_at": "2026-05-15T21:18:27.825821",
+      "updated_at": "2026-05-16T00:27:53.163946",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3852,7 +3908,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:27:53.163944"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3861,13 +3924,13 @@
       "description": "T-DEV-02: MCP server注册到OpenClaw",
       "template": "task",
       "priority": "P0",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_139.md",
       "created_at": "2026-05-15T21:18:28.072976",
-      "updated_at": "2026-05-15T21:18:28.072989",
+      "updated_at": "2026-05-16T00:32:01.333863",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3879,7 +3942,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:32:01.333857"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3888,13 +3958,13 @@
       "description": "T-DEV-03: Dashboard实时任务监控+WebSocket推送",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_140.md",
       "created_at": "2026-05-15T21:18:28.323319",
-      "updated_at": "2026-05-15T21:18:28.323328",
+      "updated_at": "2026-05-16T00:32:54.474743",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3906,7 +3976,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:32:54.474740"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3915,13 +3992,13 @@
       "description": "T-DEV-04: Git容器池化和生命周期管理",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_141.md",
       "created_at": "2026-05-15T21:18:28.572416",
-      "updated_at": "2026-05-15T21:18:28.572426",
+      "updated_at": "2026-05-16T00:34:08.021122",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3933,7 +4010,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:34:08.021118"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3942,13 +4026,13 @@
       "description": "T-DEV-05: 任务分解(decompose)实现",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_142.md",
       "created_at": "2026-05-15T21:18:28.820084",
-      "updated_at": "2026-05-15T21:18:28.820094",
+      "updated_at": "2026-05-16T00:34:51.326156",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3960,7 +4044,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:34:51.326153"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3969,13 +4060,13 @@
       "description": "T-DEV-06: LLM Prompt优化+模板系统",
       "template": "task",
       "priority": "P1",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_143.md",
       "created_at": "2026-05-15T21:18:29.068363",
-      "updated_at": "2026-05-15T21:18:29.068374",
+      "updated_at": "2026-05-16T00:35:34.042554",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -3987,7 +4078,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:35:34.042550"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -3996,13 +4094,13 @@
       "description": "T-DEV-07: 多LLM Provider支持",
       "template": "task",
       "priority": "P2",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_144.md",
       "created_at": "2026-05-15T21:18:29.317577",
-      "updated_at": "2026-05-15T21:18:29.317588",
+      "updated_at": "2026-05-16T00:36:14.358772",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -4014,7 +4112,14 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:36:14.358769"
+          }
+        ],
         "optimization_history": []
       }
     },
@@ -4023,13 +4128,13 @@
       "description": "T-DEV-08: 容器镜像CI/CD自动化",
       "template": "task",
       "priority": "P2",
-      "status": "pending",
+      "status": "completed",
       "parent_id": null,
       "output_req": "8k",
       "context_hint": "8k",
       "task_file": "tasks/task_145.md",
       "created_at": "2026-05-15T21:18:29.568281",
-      "updated_at": "2026-05-15T21:18:29.568290",
+      "updated_at": "2026-05-16T00:38:40.563592",
       "dependencies": [],
       "dependency_type": "all",
       "deadline": null,
@@ -4041,7 +4146,524 @@
           "lint_passed": false,
           "acceptance_met": false
         },
-        "issues": [],
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T00:38:40.563587"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_146",
+      "description": "POC-0: LLM 网关基础实现 — 基于现有 plugins/llmrouter 扩展，实现 LLM 请求代理、日志记录（input/output/token/cost）、多 Provider 路由（至少支持 GLM 和一个备选）、请求限流（单 Agent 上限 10 次/任务）。详见 docs/POC-TEST-PLAN.md 测试组五的依赖。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_146.md",
+      "created_at": "2026-05-16T12:04:26.155026",
+      "updated_at": "2026-05-16T12:32:13.008890",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:32:13.008886"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_147",
+      "description": "POC-1: OpenClaw Agent Worker 镜像 — 制作 OpenClaw 子 Agent 的 Docker 镜像（cap-openclaw-worker），能挂载共享 Volume、通过环境变量接收任务信息、调用 MCP 工具（read_file/write_file/exec_command）、走 LLM 网关调 ask_llm。替代当前 cap-worker 的 entrypoint.sh 自建循环。详见 docs/EXTERNAL-AGENT-ARCHITECTURE.md 第三章。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_147.md",
+      "created_at": "2026-05-16T12:04:48.785878",
+      "updated_at": "2026-05-16T12:34:57.974538",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:34:57.974535"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_148",
+      "description": "POC-2: 文件访问延迟极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组一全部用例（F-1~F-12 + F-X1~F-X5）。测单文件延迟、批量读写、并发读写冲突、大文件、磁盘满、Git 容器重启恢复。输出 P50/P95/P99 延迟和崩溃点。依赖: POC-0 + POC-1。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_148.md",
+      "created_at": "2026-05-16T12:04:56.887796",
+      "updated_at": "2026-05-16T12:37:11.959512",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:37:11.959506"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_149",
+      "description": "POC-3: 上下文传递成本极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组二全部用例（C-1~C-6 + C-X1~C-X4）。测不同上下文大小（0~200K tokens）对任务完成率、额外 read 次数、LLM token 总消耗、成本的影响。找到性价比最优的初始上下文大小。依赖: POC-0 + POC-1。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_149.md",
+      "created_at": "2026-05-16T12:05:14.281402",
+      "updated_at": "2026-05-16T12:37:56.412547",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:37:56.412543"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_150",
+      "description": "POC-4: 并发控制极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组三全部用例（L-1~L-10 + L-X1~L-X6）。测文件锁在不同并发度下的性能（2/5/10/20/50 Agent）、嵌套锁死锁检测、乐观锁冲突率、Agent 崩溃后锁释放、Git commit 并发冲突。找到并发崩溃点。依赖: POC-0 + POC-1。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_150.md",
+      "created_at": "2026-05-16T12:05:32.580343",
+      "updated_at": "2026-05-16T12:41:49.590565",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:41:49.590562"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_151",
+      "description": "POC-5: Agent 故障恢复极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组四全部用例（R-1~R-7 + R-X1~R-X5）。测 Agent kill -9 后的心跳超时检测、锁释放、文件回滚、任务重新分配。极端场景: 50 Agent 同时崩溃、同一任务连续崩溃 5 次、崩溃时做 git commit。依赖: POC-0 + POC-1。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_151.md",
+      "created_at": "2026-05-16T12:05:32.992349",
+      "updated_at": "2026-05-16T12:41:50.457092",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:41:50.457089"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_152",
+      "description": "POC-6: LLM 网关极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组五全部用例（G-1~G-6 + G-X1~G-X6）。测网关吞吐量（5/20/100 并发）、大 prompt（1MB）、Provider 错误处理、缓存命中率、限流策略。依赖: POC-0。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_152.md",
+      "created_at": "2026-05-16T12:05:33.412098",
+      "updated_at": "2026-05-16T12:41:51.332581",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:41:51.332578"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_153",
+      "description": "POC-7: 端到端极限测试 — 实现 docs/POC-TEST-PLAN.md 测试组六全部用例（E-1~E-5 + E-X1~E-X5）。全链路压测: 100 任务同时提交、50 子任务并行、24 小时稳定性、所有任务操作同一项目。汇总所有 POC 测试结果，输出极限值 + 根因 + 建议。依赖: POC-0~POC-6 全部完成。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_153.md",
+      "created_at": "2026-05-16T12:05:33.825801",
+      "updated_at": "2026-05-16T12:41:52.218538",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T12:41:52.218534"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_154",
+      "description": "POC-8: LLM 网关真实实现 — 把 test/poc/llm_gateway_test.go 的 mock 替换成真实实现。在 plugins/llmrouter 基础上扩展：1) HTTP 反代到真实 LLM Provider（GLM-5 + 备选），2) 每次请求记录 input/output/tokens/cost 到数据库，3) 令牌桶限流（单 Agent 10次/任务），4) 缓存（相同 prompt 5 分钟内不重复调）。验收：go test 通过 + 手动 curl 调网关拿到真实 LLM 返回。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_154.md",
+      "created_at": "2026-05-16T14:41:52.340171",
+      "updated_at": "2026-05-16T14:50:39.609765",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T14:50:39.609762"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_155",
+      "description": "POC-9: Agent Worker 真实容器 — 制作 cap-openclaw-worker Docker 镜像：1) 基于 OpenClaw 子 Agent，2) 挂载宿主机 Volume 到 /workspace，3) 通过环境变量接收 TASK_ID/LLM_GATEWAY_URL 等，4) 调用 LLM 网关（非直连 Provider），5) 调用平台 MCP 工具（read_file/write_file/exec_command），6) 完成后通过 REST API 上报结果。验收：docker build 成功 + 手动跑一个任务能看到真实 LLM 交互。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_155.md",
+      "created_at": "2026-05-16T14:41:52.756648",
+      "updated_at": "2026-05-16T14:51:57.807996",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T14:51:57.807993"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_156",
+      "description": "POC-10: 真实文件访问延迟测试 — 重写 test/poc/file_access_test.go，接入真实组件：1) 启动 Git 容器（cap-git），2) 启动 Agent Worker 容器（cap-openclaw-worker），3) Worker 通过 MCP 调 read_file/write_file，4) 测 P50/P95/P99 延迟。极限场景：50 Agent 并发读同一项目、1GB 单文件、磁盘写满。输出延迟报告到 docs/POC-RESULTS.md。依赖: POC-8 + POC-9。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_156.md",
+      "created_at": "2026-05-16T14:42:15.305231",
+      "updated_at": "2026-05-16T14:59:13.467017",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T14:59:13.467014"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_157",
+      "description": "POC-11: 真实并发冲突测试 — 重写 test/poc/concurrency_test.go，接入真实文件锁：1) 多个 Worker 容器同时写同一项目的文件，2) 验证平台管理的文件锁（悲观锁/乐观锁）正确性，3) 极限场景：50 Agent 写同一文件、嵌套锁、Git push 期间并发写。输出崩溃点和性能退化曲线。依赖: POC-8 + POC-9。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_157.md",
+      "created_at": "2026-05-16T14:42:15.733538",
+      "updated_at": "2026-05-16T15:00:50.836292",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T15:00:50.836289"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_158",
+      "description": "POC-12: 真实故障恢复测试 — 用真实容器验证：1) docker kill Worker 容器后平台是否在 90s 内检测到，2) 锁是否自动释放，3) 已写文件是否正确回滚（git checkout -- .），4) 任务是否回到 pending 可被重新认领。极限：50 Worker 同时 kill、kill 时正在 git commit。依赖: POC-8 + POC-9。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_158.md",
+      "created_at": "2026-05-16T14:42:16.160928",
+      "updated_at": "2026-05-16T15:02:48.353928",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T15:02:48.353922"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_159",
+      "description": "POC-13: 真实 LLM 网关压测 — 用真实 LLM Provider 验证：1) 单次延迟（GLM-5），2) 20 Agent 并发调 ask_llm，3) 大 prompt（100K tokens），4) 限流策略（10次/任务上限），5) 错误处理（Provider 500/超时），6) 数据完整性（检查记录的 input/output）。输出吞吐量上限和成本数据。依赖: POC-8。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_159.md",
+      "created_at": "2026-05-16T14:42:16.584215",
+      "updated_at": "2026-05-16T15:04:31.366399",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T15:04:31.366396"
+          }
+        ],
+        "optimization_history": []
+      }
+    },
+    {
+      "id": "task_160",
+      "description": "POC-14: 真实端到端极限压测 + 结果汇总 — 全链路：用户提交任务 → 平台拆解 → Agent Worker 执行 → LLM 网关 → Git commit/push → 结果返回。极限：100 任务并发、50 子任务并行、所有任务操作同一项目。汇总 POC-10~POC-13 所有极限值，输出 docs/POC-RESULTS.md 最终报告（极限值 + 根因 + 架构建议）。依赖: POC-10~POC-13 全部完成。",
+      "template": "task",
+      "priority": "P1",
+      "status": "completed",
+      "parent_id": null,
+      "output_req": "8k",
+      "context_hint": "8k",
+      "task_file": "tasks/task_160.md",
+      "created_at": "2026-05-16T14:42:17.024494",
+      "updated_at": "2026-05-16T15:06:23.072041",
+      "dependencies": [],
+      "dependency_type": "all",
+      "deadline": null,
+      "ralph": {
+        "iteration": 0,
+        "max_iterations": 7,
+        "quality_checks": {
+          "tests_passed": false,
+          "lint_passed": false,
+          "acceptance_met": false
+        },
+        "issues": [
+          {
+            "round": 0,
+            "type": "unknown_issue",
+            "message": "文档覆盖率过低 (22.2%)",
+            "timestamp": "2026-05-16T15:06:23.072035"
+          }
+        ],
         "optimization_history": []
       }
     }

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"go.uber.org/zap"
 )
@@ -21,6 +22,8 @@ const (
 	RoutingByLatency RoutingStrategy = "latency"
 	// RoutingByCapability selects based on required capabilities.
 	RoutingByCapability RoutingStrategy = "capability"
+	// RoutingRoundRobin selects models in round-robin fashion across providers.
+	RoutingRoundRobin RoutingStrategy = "round_robin"
 )
 
 // UpgradeRule defines when to upgrade to a more capable model.
@@ -96,6 +99,10 @@ type ModelSelector struct {
 	logger   *zap.Logger
 	circuits map[ModelName]*CircuitBreaker
 	mu       sync.RWMutex
+	// roundRobinIndex is used for round-robin load balancing.
+	roundRobinIndex uint32
+	// availableModels is a list of currently available models for round-robin.
+	availableModels []ModelName
 }
 
 // NewModelSelector creates a new model selector.
@@ -129,6 +136,8 @@ func (s *ModelSelector) SelectModel(taskType TaskType, strategy RoutingStrategy)
 		return s.selectByCost()
 	case RoutingByLatency:
 		return s.selectByLatency()
+	case RoutingRoundRobin:
+		return s.selectByRoundRobin()
 	default:
 		return s.selectByTaskType(taskType)
 	}
@@ -192,6 +201,25 @@ func (s *ModelSelector) selectByLatency() ModelName {
 		return s.config.PrimaryProvider
 	}
 	return fastest
+}
+
+// selectByRoundRobin selects the next available model in round-robin fashion.
+func (s *ModelSelector) selectByRoundRobin() ModelName {
+	// Build list of available models (those with closed circuits)
+	var available []ModelName
+	for model, cb := range s.circuits {
+		if cb.State() == CircuitStateClosed {
+			available = append(available, model)
+		}
+	}
+
+	if len(available) == 0 {
+		return s.config.PrimaryProvider
+	}
+
+	// Use atomic add to get next index (thread-safe)
+	idx := atomic.AddUint32(&s.roundRobinIndex, 1) - 1
+	return available[idx%uint32(len(available))]
 }
 
 // RecordSuccess records a successful request for the model.
@@ -314,6 +342,14 @@ func (r *Router) Complete(ctx context.Context, req *LLMRequest) (*LLMResponse, e
 	})
 
 	if err != nil {
+		// Try fallback providers if primary fails
+		if fallbackResp, fallbackErr := r.tryFallback(ctx, req, model); fallbackResp != nil {
+			r.logger.Info("primary provider failed, using fallback",
+				zap.String("primary", string(model)),
+				zap.Error(fallbackErr))
+			return fallbackResp, nil
+		}
+
 		// Try upgrade if available
 		if r.config.EnableAdaptiveRouting {
 			upgradedModel := r.tryUpgrade(model)
@@ -329,6 +365,50 @@ func (r *Router) Complete(ctx context.Context, req *LLMRequest) (*LLMResponse, e
 	}
 
 	return lastResp, nil
+}
+
+// tryFallback tries fallback providers in order when the primary fails.
+func (r *Router) tryFallback(ctx context.Context, req *LLMRequest, failedModel ModelName) (*LLMResponse, error) {
+	// Build fallback order: use configured order, but skip the failed model
+	var fallbackOrder []ModelName
+	if len(r.config.FallbackOrder) > 0 {
+		fallbackOrder = r.config.FallbackOrder
+	} else {
+		// Default fallback order based on available providers
+		for m := range r.providers {
+			if m != failedModel {
+				fallbackOrder = append(fallbackOrder, m)
+			}
+		}
+	}
+
+	for _, candidate := range fallbackOrder {
+		if candidate == failedModel {
+			continue
+		}
+		if !r.selector.IsModelAvailable(candidate) {
+			continue
+		}
+		provider, ok := r.providers[candidate]
+		if !ok {
+			continue
+		}
+
+		r.logger.Info("trying fallback provider",
+			zap.String("failed", string(failedModel)),
+			zap.String("trying", string(candidate)))
+
+		resp, err := provider.Complete(ctx, req)
+		if err == nil {
+			r.handleSuccess(candidate)
+			r.logger.Info("fallback provider succeeded",
+				zap.String("candidate", string(candidate)))
+			return resp, nil
+		}
+		r.handleFailure(candidate)
+	}
+
+	return nil, fmt.Errorf("all fallback providers failed for model: %s", failedModel)
 }
 
 // Stream routes a streaming request to the appropriate LLM provider.

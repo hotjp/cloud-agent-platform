@@ -17,6 +17,9 @@ type Config struct {
 	CircuitBreakerConfig CircuitBreakerConfig
 	// ProviderConfigs holds per-provider settings.
 	ProviderConfigs map[ModelName]ProviderConfig
+	// FallbackOrder defines the fallback order of providers.
+	// If a provider fails, the router will try providers in this order.
+	FallbackOrder []ModelName
 }
 
 // ProviderConfig holds configuration for a specific provider.
@@ -118,6 +121,108 @@ func DefaultConfig() *Config {
 					MaxContextTokens: 128000,
 				},
 			},
+			ModelDeepseekChat: {
+				TaskPreferences: []TaskType{TaskTypeCoding, TaskTypeAnalysis},
+				CostPer1KTokens:  0.001,
+				AvgLatencyMs:     800,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: true,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelDeepseekCoder: {
+				TaskPreferences: []TaskType{TaskTypeCoding, TaskTypeTesting},
+				CostPer1KTokens:  0.001,
+				AvgLatencyMs:     600,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: false,
+					SupportsEmbeddings: false,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelQwenTurbo: {
+				TaskPreferences: []TaskType{TaskTypeSimple, TaskTypeSummarize},
+				CostPer1KTokens:  0.005,
+				AvgLatencyMs:     400,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: true,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelQwenMax: {
+				TaskPreferences: []TaskType{TaskTypeAnalysis, TaskTypeResearch},
+				CostPer1KTokens:  0.02,
+				AvgLatencyMs:     2500,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: true,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelQwenPlus: {
+				TaskPreferences: []TaskType{TaskTypeCoding, TaskTypeReview},
+				CostPer1KTokens:  0.012,
+				AvgLatencyMs:     1200,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: true,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelQwen2Coder: {
+				TaskPreferences: []TaskType{TaskTypeCoding, TaskTypeTesting},
+				CostPer1KTokens:  0.008,
+				AvgLatencyMs:     700,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: false,
+					SupportsEmbeddings: false,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelYiTurbo: {
+				TaskPreferences: []TaskType{TaskTypeAnalysis, TaskTypeResearch},
+				CostPer1KTokens:  0.015,
+				AvgLatencyMs:     1800,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: true,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+			ModelYiLightning: {
+				TaskPreferences: []TaskType{TaskTypeSimple, TaskTypeSummarize},
+				CostPer1KTokens:  0.003,
+				AvgLatencyMs:     350,
+				MaxTokens:        128000,
+				Capabilities: ProviderCapabilities{
+					SupportsStreaming: true,
+					SupportsReasoning: false,
+					SupportsEmbeddings: true,
+					MaxContextTokens: 128000,
+				},
+			},
+		},
+		FallbackOrder: []ModelName{
+			ModelClaudeSonnet,
+			ModelDeepseekChat,
+			ModelGLM5,
+			ModelQwenTurbo,
 		},
 	}
 }

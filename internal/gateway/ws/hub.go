@@ -407,6 +407,16 @@ func (h *Hub) mapToWSEvent(event *StreamEvent) *WSEvent {
 	var wsType string
 
 	switch {
+	case isTaskCreatedEvent(event.EventType):
+		wsType = "task_created"
+	case isTaskUpdatedEvent(event.EventType):
+		wsType = "task_updated"
+	case isTaskCompletedEvent(event.EventType):
+		wsType = "task_completed"
+	case isTaskFailedEvent(event.EventType):
+		wsType = "task_failed"
+	case isSubtaskProgressEvent(event.EventType):
+		wsType = "subtask_progress"
 	case isTaskStatusChangedEvent(event.EventType):
 		wsType = "task.status_changed"
 	case isAgentThoughtEvent(event.EventType):
@@ -424,6 +434,31 @@ func (h *Hub) mapToWSEvent(event *StreamEvent) *WSEvent {
 		Payload:   event.Payload,
 		Timestamp: time.Now().UTC(),
 	}
+}
+
+// isTaskCreatedEvent checks if the event type is a task creation.
+func isTaskCreatedEvent(eventType string) bool {
+	return eventType == "TaskSubmittedV1" || eventType == "TaskCreatedV1"
+}
+
+// isTaskUpdatedEvent checks if the event type is a task update.
+func isTaskUpdatedEvent(eventType string) bool {
+	return eventType == "TaskUpdatedV1" || eventType == "TaskStatusChangedV1"
+}
+
+// isTaskCompletedEvent checks if the event type is a task completion.
+func isTaskCompletedEvent(eventType string) bool {
+	return eventType == "TaskCompletedV1"
+}
+
+// isTaskFailedEvent checks if the event type is a task failure.
+func isTaskFailedEvent(eventType string) bool {
+	return eventType == "TaskFailedV1" || eventType == "TaskCancelledV1"
+}
+
+// isSubtaskProgressEvent checks if the event type is a subtask progress update.
+func isSubtaskProgressEvent(eventType string) bool {
+	return eventType == "SubtaskProgressV1" || eventType == "SubtaskCreatedV1"
 }
 
 // isTaskStatusChangedEvent checks if the event type is a task status change.
@@ -599,4 +634,75 @@ type ApprovalPushPayload struct {
 	ExpiresAt      time.Time `json:"expiresAt"`
 	RequireApproval bool      `json:"requireApproval"`
 	Timeout        string    `json:"timeout"`
+}
+
+// PushTaskCreated pushes a task_created event to the room for a task.
+func (h *Hub) PushTaskCreated(ctx context.Context, taskID string, payload []byte) error {
+	return h.pushEvent(ctx, taskID, "task_created", payload)
+}
+
+// PushTaskUpdated pushes a task_updated event to the room for a task.
+func (h *Hub) PushTaskUpdated(ctx context.Context, taskID string, payload []byte) error {
+	return h.pushEvent(ctx, taskID, "task_updated", payload)
+}
+
+// PushTaskCompleted pushes a task_completed event to the room for a task.
+func (h *Hub) PushTaskCompleted(ctx context.Context, taskID string, payload []byte) error {
+	return h.pushEvent(ctx, taskID, "task_completed", payload)
+}
+
+// PushTaskFailed pushes a task_failed event to the room for a task.
+func (h *Hub) PushTaskFailed(ctx context.Context, taskID string, payload []byte) error {
+	return h.pushEvent(ctx, taskID, "task_failed", payload)
+}
+
+// PushSubtaskProgress pushes a subtask_progress event to the room for a task.
+func (h *Hub) PushSubtaskProgress(ctx context.Context, taskID string, payload []byte) error {
+	return h.pushEvent(ctx, taskID, "subtask_progress", payload)
+}
+
+// pushEvent pushes a generic event to the room for a task.
+func (h *Hub) pushEvent(ctx context.Context, taskID string, eventType string, payload []byte) error {
+	room := h.getRoom(taskID)
+	if room == nil {
+		return fmt.Errorf("room not found for task: %s", taskID)
+	}
+
+	event := &WSEvent{
+		Type:      eventType,
+		TaskID:    taskID,
+		Payload:   payload,
+		Timestamp: time.Now().UTC(),
+	}
+
+	room.Broadcast(event)
+
+	h.logger.Debug("event pushed to room",
+		zap.String("event_type", eventType),
+		zap.String("task_id", taskID),
+		zap.Int("clients", room.ClientCount()),
+	)
+
+	return nil
+}
+
+// BroadcastToAll sends an event to all connected clients (for dashboard updates).
+func (h *Hub) BroadcastToAll(eventType string, payload []byte) {
+	h.roomsMu.RLock()
+	defer h.roomsMu.RUnlock()
+
+	event := &WSEvent{
+		Type:      eventType,
+		Payload:   payload,
+		Timestamp: time.Now().UTC(),
+	}
+
+	for roomKey, room := range h.rooms {
+		room.Broadcast(event)
+		h.logger.Debug("broadcast event sent to room",
+			zap.String("event_type", eventType),
+			zap.String("room", roomKey),
+			zap.Int("clients", room.ClientCount()),
+		)
+	}
 }

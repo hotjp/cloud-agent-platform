@@ -35,27 +35,27 @@ T-E2E-05: 3个用户同时提交task
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
-
-
+- `test/e2e/concurrent_users_test.go` - 3个用户并发提交任务的E2E测试
 
 ## 设计方案 (design)
 
-<!-- 在此填写架构设计、技术选型、实现思路 -->
-
+使用 httptest + mock handler 模拟平台API，3个不同用户使用不同JWT token并发提交任务：
+- `concurrentUserTestHandler` 跟踪用户-任务关系，实现任务隔离
+- 使用 sync.WaitGroup 实现真正的并发提交
+- 验证用户只能看到自己的任务（通过 token 过滤）
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
-
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
+- [x] **实现证明**: 创建了 `test/e2e/concurrent_users_test.go`，包含3个测试函数
+- [x] **测试验证**: `go test -p 2 -count=1 -timeout 60s -run 'TestConcurrentUsers' ./test/e2e/` 通过
+- [x] **影响范围**: 无影响，纯新增测试文件
 
 ### 测试步骤
-1. 
-2. 
-3. 
+1. `go test -p 2 -count=1 -timeout 60s -run 'TestConcurrentUsers' ./test/e2e/`
+2. 验证3个用户都成功提交任务
+3. 验证用户任务隔离（每个用户只能看到自己的任务）
 
 ### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+```
+ok  	github.com/cloud-agent-platform/cap/test/e2e	0.513s
+```

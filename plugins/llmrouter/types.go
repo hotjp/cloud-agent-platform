@@ -28,6 +28,14 @@ const (
 	ModelClaudeHaiku  ModelName = "claude-haiku-3"
 	ModelGLM5        ModelName = "glm-5.1"
 	ModelGLM5Air     ModelName = "glm-5.1-air"
+	ModelDeepseekChat ModelName = "deepseek-chat"
+	ModelDeepseekCoder ModelName = "deepseek-coder"
+	ModelQwenTurbo    ModelName = "qwen-turbo"
+	ModelQwenMax      ModelName = "qwen-max"
+	ModelQwenPlus     ModelName = "qwen-plus"
+	ModelQwen2Coder   ModelName = "qwen2.5-coder"
+	ModelYiTurbo      ModelName = "yi-turbo"
+	ModelYiLightning  ModelName = "yi-lightning"
 )
 
 // LLMRequest represents a request to the LLM.

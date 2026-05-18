@@ -75,6 +75,7 @@ func New(cfg Config, svc *service.TaskService, logger *zap.Logger) *Gateway {
 	mux.HandleFunc("/api/v1/agent-templates/", rest.ListAgents)
 	mux.HandleFunc("/api/v1/sessions", rest.ListSessions)
 	mux.HandleFunc("/api/v1/status", rest.PlatformStatus)
+	mux.HandleFunc("/api/v1/dashboard/stats", rest.DashboardStats)
 
 	// Health check endpoints
 	mux.HandleFunc("/healthz", healthzHandler)

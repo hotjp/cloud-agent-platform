@@ -35,7 +35,7 @@ taskA改octocat/Hello-World,taskB改另一个公开仓库
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
+- `test/e2e/parallel_agents_test.go` - E2E tests for parallel agents modifying different repositories
 
 
 
@@ -46,16 +46,23 @@ taskA改octocat/Hello-World,taskB改另一个公开仓库
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
+- [x] **实现证明**: Created `test/e2e/parallel_agents_test.go` with 5 test cases:
+  - `TestParallelAgents_TwoAgentsDifferentRepos`: Two agents modify different repos simultaneously
+  - `TestParallelAgents_RepoIsolation`: Verifies complete repository isolation between agents
+  - `TestParallelAgents_ConcurrentSubmission`: 5 concurrent task submissions
+  - `TestParallelAgents_ParallelExecutionWithMockLLM`: Full MCP protocol flow with parallel execution
+  - `TestParallelAgents_SameRepoConflict`: Two agents modifying same repo
 
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
+- [x] **测试验证**: `go test -p 2 -count=1 -timeout 60s -run 'TestParallelAgents' ./test/e2e/` - PASSED (0.659s)
+
+- [x] **影响范围**: No impact on other tests; uses httptest + mock provider only
 
 ### 测试步骤
-1. 
-2. 
-3. 
+1. `go test -p 2 -count=1 -timeout 60s -run 'TestParallelAgents' ./test/e2e/`
+2. Tests create independent mock handlers for each scenario
+3. Tests verify repo isolation, concurrent execution, and status tracking
 
 ### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+```
+ok  	github.com/cloud-agent-platform/cap/test/e2e	0.659s
+```

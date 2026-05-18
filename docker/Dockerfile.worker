@@ -1,0 +1,72 @@
+# =============================================================================
+# OpenClaw Agent Worker - Multi-stage Dockerfile
+# =============================================================================
+# Build stage: golang:1.26-alpine for compiling worker agent code
+FROM --platform=linux/amd64 golang:1.26-alpine AS builder
+
+ARG BUILD_TAGS=""
+
+# Install build dependencies
+RUN apk add --no-cache \
+    git \
+    openssh-client \
+    ca-certificates \
+    tzdata
+
+WORKDIR /build
+
+# Copy go mod files first for dependency caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code for worker
+COPY . .
+
+# Build worker binary (CGO_ENABLED=0 for pure Go, static binary)
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -ldflags="-w -s" \
+    -tags "${BUILD_TAGS}" \
+    -o worker \
+    ./cmd/worker
+
+# =============================================================================
+# Runtime stage: alpine:latest - minimal runtime image
+# =============================================================================
+FROM alpine:latest AS runtime
+
+ARG BUILD_TAGS=""
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    git \
+    openssh-client \
+    ca-certificates \
+    tzdata \
+    wget \
+    && adduser -D -u 1000 worker
+
+# Create directory structure
+WORKDIR /home/worker
+RUN mkdir -p /workspace /tmp /home/worker/.ssh && chown -R worker:worker /home/worker
+
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Copy binary from builder
+COPY --from=builder /build/worker /usr/local/bin/worker
+
+# Set ownership
+RUN chown -R worker:worker /home/worker
+
+# Switch to non-root user
+USER worker
+
+# Expose ports (health check endpoint)
+EXPOSE 8080
+
+# Health check - HTTP endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget -qO- http://localhost:8080/health || exit 1
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

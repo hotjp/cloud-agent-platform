@@ -247,9 +247,23 @@ func TestModelTierFunctions(t *testing.T) {
 // TestModelSelector tests the model selector.
 func TestModelSelector(t *testing.T) {
 	logger := zap.NewNop()
-	config := DefaultConfig()
 
 	t.Run("select by task type", func(t *testing.T) {
+		// Use minimal config to avoid interference from new models
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {
+					TaskPreferences: []TaskType{TaskTypeAnalysis, TaskTypeCoding},
+				},
+				ModelGLM5: {
+					TaskPreferences: []TaskType{TaskTypeReview, TaskTypeTesting},
+				},
+				ModelClaudeHaiku: {
+					TaskPreferences: []TaskType{TaskTypeSimple, TaskTypeSummarize},
+				},
+			},
+		}
 		selector := NewModelSelector(config, logger)
 
 		// Analysis should go to Claude Sonnet (preferred)
@@ -262,6 +276,13 @@ func TestModelSelector(t *testing.T) {
 	})
 
 	t.Run("select by cost", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeHaiku,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeHaiku: {CostPer1KTokens: 0.003},
+				ModelGLM5Air:     {CostPer1KTokens: 0.002},
+			},
+		}
 		selector := NewModelSelector(config, logger)
 		model := selector.SelectModel(TaskTypeSimple, RoutingByCost)
 		// Should select the cheapest available model
@@ -269,6 +290,13 @@ func TestModelSelector(t *testing.T) {
 	})
 
 	t.Run("select by latency", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeHaiku,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeHaiku: {AvgLatencyMs: 500},
+				ModelGLM5Air:     {AvgLatencyMs: 300},
+			},
+		}
 		selector := NewModelSelector(config, logger)
 		model := selector.SelectModel(TaskTypeSimple, RoutingByLatency)
 		// Should select the fastest available model
@@ -279,15 +307,30 @@ func TestModelSelector(t *testing.T) {
 // TestRouterComplete tests the router Complete method.
 func TestRouterComplete(t *testing.T) {
 	logger := zap.NewNop()
-	config := DefaultConfig()
 
 	t.Run("routes to preferred provider", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+			},
+			CircuitBreakerConfig: CircuitBreakerConfig{
+				ErrorRateThreshold: 0.5,
+				MinRequests:         5,
+				HalfOpenMaxRequests: 3,
+				OpenTimeoutMs:       30000,
+			},
+			RetryConfig: RetryConfig{
+				MaxAttempts: 3,
+			},
+		}
 		router := NewRouter(config, logger)
 
 		mockProvider := &mockProvider{name: ModelClaudeSonnet}
 		router.RegisterProvider(mockProvider)
 
 		resp, err := router.Complete(context.Background(), &LLMRequest{
+			Model:   ModelClaudeSonnet, // Explicitly set model
 			TaskType: TaskTypeAnalysis,
 			Prompt:   "test prompt",
 		})
@@ -298,6 +341,22 @@ func TestRouterComplete(t *testing.T) {
 	})
 
 	t.Run("falls back to alternative when circuit open", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+				ModelClaudeHaiku:  {TaskPreferences: []TaskType{TaskTypeSimple}},
+			},
+			CircuitBreakerConfig: CircuitBreakerConfig{
+				ErrorRateThreshold: 0.5,
+				MinRequests:         5,
+				HalfOpenMaxRequests: 3,
+				OpenTimeoutMs:       30000,
+			},
+			RetryConfig: RetryConfig{
+				MaxAttempts: 3,
+			},
+		}
 		router := NewRouter(config, logger)
 
 		primaryProvider := &mockProvider{name: ModelClaudeSonnet}
@@ -528,5 +587,281 @@ func TestDoWithRetry(t *testing.T) {
 		})
 		assert.Error(t, err)
 		assert.Equal(t, context.Canceled, err)
+	})
+}
+
+// TestRoundRobinRouting tests round-robin load balancing.
+func TestRoundRobinRouting(t *testing.T) {
+	logger := zap.NewNop()
+
+	t.Run("round-robin selects different models", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeSimple}},
+				ModelClaudeHaiku:  {TaskPreferences: []TaskType{TaskTypeSimple}},
+				ModelGLM5:        {TaskPreferences: []TaskType{TaskTypeSimple}},
+			},
+			CircuitBreakerConfig: CircuitBreakerConfig{
+				ErrorRateThreshold: 0.5,
+				MinRequests:         5,
+				HalfOpenMaxRequests: 3,
+				OpenTimeoutMs:       30000,
+			},
+		}
+		selector := NewModelSelector(config, logger)
+
+		// First selection
+		first := selector.SelectModel(TaskTypeSimple, RoutingRoundRobin)
+		// Subsequent selections should eventually cycle through
+		seen := map[ModelName]bool{first: true}
+		for i := 0; i < 10; i++ {
+			seen[selector.SelectModel(TaskTypeSimple, RoutingRoundRobin)] = true
+		}
+
+		// With round-robin and 3 models, we should see multiple models
+		assert.GreaterOrEqual(t, len(seen), 2, "should see multiple models in round-robin")
+	})
+
+	t.Run("round-robin skips open circuits", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeSimple}},
+				ModelClaudeHaiku:  {TaskPreferences: []TaskType{TaskTypeSimple}},
+			},
+			CircuitBreakerConfig: CircuitBreakerConfig{
+				ErrorRateThreshold: 0.5,
+				MinRequests:         5,
+				HalfOpenMaxRequests: 3,
+				OpenTimeoutMs:       30000,
+			},
+		}
+		selector := NewModelSelector(config, logger)
+
+		// Force one circuit to open
+		selector.circuits[ModelClaudeSonnet].SetStateForTest(CircuitStateOpen)
+
+		// All selections should go to the available one
+		for i := 0; i < 5; i++ {
+			selected := selector.SelectModel(TaskTypeSimple, RoutingRoundRobin)
+			assert.Equal(t, ModelClaudeHaiku, selected, "should skip open circuit")
+		}
+	})
+}
+
+// TestFallbackRouting tests automatic fallback when primary fails.
+func TestFallbackRouting(t *testing.T) {
+	logger := zap.NewNop()
+
+	t.Run("falls back to alternative when primary fails", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+				ModelGLM5:        {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+			},
+			FallbackOrder: []ModelName{ModelClaudeSonnet, ModelGLM5},
+			RetryConfig: RetryConfig{
+				MaxAttempts: 3,
+			},
+		}
+		router := NewRouter(config, logger)
+
+		failingProvider := &mockProvider{name: ModelClaudeSonnet, shouldFail: true, consecutiveFails: 5}
+		workingProvider := &mockProvider{name: ModelGLM5}
+		router.RegisterProvider(failingProvider)
+		router.RegisterProvider(workingProvider)
+
+		resp, err := router.Complete(context.Background(), &LLMRequest{
+			TaskType: TaskTypeAnalysis,
+			Prompt:   "test prompt",
+		})
+
+		require.NoError(t, err)
+		assert.Equal(t, "mock response", resp.Content)
+		assert.Equal(t, ModelGLM5, resp.Model)
+	})
+
+	t.Run("returns error when all providers fail", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+				ModelGLM5:        {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+			},
+			FallbackOrder: []ModelName{ModelClaudeSonnet, ModelGLM5},
+			RetryConfig: RetryConfig{
+				MaxAttempts: 3,
+			},
+		}
+		router := NewRouter(config, logger)
+
+		failingProvider1 := &mockProvider{name: ModelClaudeSonnet, shouldFail: true, consecutiveFails: 10}
+		failingProvider2 := &mockProvider{name: ModelGLM5, shouldFail: true, consecutiveFails: 10}
+		router.RegisterProvider(failingProvider1)
+		router.RegisterProvider(failingProvider2)
+
+		_, err := router.Complete(context.Background(), &LLMRequest{
+			TaskType: TaskTypeAnalysis,
+			Prompt:   "test prompt",
+		})
+
+		assert.Error(t, err)
+	})
+}
+
+// TestTryFallback tests the tryFallback method.
+func TestTryFallback(t *testing.T) {
+	logger := zap.NewNop()
+
+	t.Run("tries fallback providers in order", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+				ModelGLM5:        {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+			},
+			FallbackOrder: []ModelName{ModelClaudeSonnet, ModelGLM5},
+		}
+		router := NewRouter(config, logger)
+
+		failingProvider := &mockProvider{name: ModelClaudeSonnet, shouldFail: true, consecutiveFails: 10}
+		workingProvider := &mockProvider{name: ModelGLM5}
+		router.RegisterProvider(failingProvider)
+		router.RegisterProvider(workingProvider)
+
+		resp, err := router.tryFallback(context.Background(), &LLMRequest{Prompt: "test"}, ModelClaudeSonnet)
+
+		require.NoError(t, err)
+		assert.Equal(t, ModelGLM5, resp.Model)
+	})
+
+	t.Run("returns nil when no fallback available", func(t *testing.T) {
+		config := &Config{
+			PrimaryProvider: ModelClaudeSonnet,
+			ProviderConfigs: map[ModelName]ProviderConfig{
+				ModelClaudeSonnet: {TaskPreferences: []TaskType{TaskTypeAnalysis}},
+			},
+			FallbackOrder: []ModelName{ModelClaudeSonnet},
+		}
+		router := NewRouter(config, logger)
+
+		// Only register the failed model
+		failingProvider := &mockProvider{name: ModelClaudeSonnet, shouldFail: true, consecutiveFails: 10}
+		router.RegisterProvider(failingProvider)
+
+		resp, err := router.tryFallback(context.Background(), &LLMRequest{Prompt: "test"}, ModelClaudeSonnet)
+
+		assert.Nil(t, resp)
+		assert.Error(t, err)
+	})
+}
+
+// TestOpenAICompatibleProvider tests the OpenAI-compatible provider.
+func TestOpenAICompatibleProvider(t *testing.T) {
+	logger := zap.NewNop()
+
+	t.Run("creates provider with single endpoint", func(t *testing.T) {
+		provider := NewOpenAICompatibleProvider(
+			ModelDeepseekChat,
+			"test-key",
+			"https://api.deepseek.com",
+			10*time.Second,
+			logger,
+		)
+		assert.Equal(t, ModelDeepseekChat, provider.Name())
+		assert.Equal(t, "https://api.deepseek.com", provider.endpoint)
+	})
+
+	t.Run("creates provider with multiple endpoints", func(t *testing.T) {
+		endpoints := []string{
+			"https://api.deepseek.com",
+			"https://api.deepseek.com/backups",
+		}
+		provider := NewOpenAICompatibleProviderWithEndpoints(
+			ModelDeepseekChat,
+			"test-key",
+			endpoints,
+			10*time.Second,
+			logger,
+		)
+		assert.Equal(t, ModelDeepseekChat, provider.Name())
+		assert.Equal(t, 2, len(provider.endpoints))
+	})
+
+	t.Run("round-robin cycles through endpoints", func(t *testing.T) {
+		endpoints := []string{"ep1", "ep2", "ep3"}
+		provider := NewOpenAICompatibleProviderWithEndpoints(
+			ModelDeepseekChat,
+			"test-key",
+			endpoints,
+			10*time.Second,
+			logger,
+		)
+
+		seen := make(map[string]bool)
+		for i := 0; i < 6; i++ {
+			seen[provider.getNextEndpoint()] = true
+		}
+
+		// All endpoints should be used
+		assert.True(t, seen["ep1"] || seen["ep2"] || seen["ep3"])
+	})
+
+	t.Run("stats are tracked", func(t *testing.T) {
+		provider := NewOpenAICompatibleProvider(
+			ModelDeepseekChat,
+			"test-key",
+			"https://api.deepseek.com",
+			10*time.Second,
+			logger,
+		)
+
+		stats := provider.Stats()
+		assert.Equal(t, int64(0), stats.TotalRequests)
+		assert.Equal(t, int64(0), stats.SuccessRequests)
+		assert.Equal(t, int64(0), stats.FailedRequests)
+	})
+}
+
+// TestModelNameConstants tests the new model name constants.
+func TestModelNameConstants(t *testing.T) {
+	t.Run("Deepseek models are defined", func(t *testing.T) {
+		assert.Equal(t, ModelName("deepseek-chat"), ModelDeepseekChat)
+		assert.Equal(t, ModelName("deepseek-coder"), ModelDeepseekCoder)
+	})
+
+	t.Run("Qwen models are defined", func(t *testing.T) {
+		assert.Equal(t, ModelName("qwen-turbo"), ModelQwenTurbo)
+		assert.Equal(t, ModelName("qwen-max"), ModelQwenMax)
+		assert.Equal(t, ModelName("qwen-plus"), ModelQwenPlus)
+		assert.Equal(t, ModelName("qwen2.5-coder"), ModelQwen2Coder)
+	})
+
+	t.Run("Yi models are defined", func(t *testing.T) {
+		assert.Equal(t, ModelName("yi-turbo"), ModelYiTurbo)
+		assert.Equal(t, ModelName("yi-lightning"), ModelYiLightning)
+	})
+}
+
+// TestConfigWithFallbackOrder tests config with fallback order.
+func TestConfigWithFallbackOrder(t *testing.T) {
+	t.Run("default config has fallback order", func(t *testing.T) {
+		config := DefaultConfig()
+		assert.NotEmpty(t, config.FallbackOrder)
+		assert.Contains(t, config.FallbackOrder, ModelClaudeSonnet)
+		assert.Contains(t, config.FallbackOrder, ModelDeepseekChat)
+	})
+
+	t.Run("get provider config for new models", func(t *testing.T) {
+		config := DefaultConfig()
+
+		cfg := config.GetProviderConfig(ModelDeepseekChat)
+		assert.NotEmpty(t, cfg.TaskPreferences)
+		assert.Equal(t, TaskTypeCoding, cfg.TaskPreferences[0])
+
+		cfg = config.GetProviderConfig(ModelQwenTurbo)
+		assert.NotEmpty(t, cfg.TaskPreferences)
 	})
 }

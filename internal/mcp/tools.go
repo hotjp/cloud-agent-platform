@@ -137,6 +137,17 @@ var toolSchemas = map[string]json.RawMessage{
 		}
 	}`),
 
+	"agent_templates": json.RawMessage(`{
+		"type": "object",
+		"properties": {
+			"capability": {
+				"type": "string",
+				"enum": ["analysis", "coding", "review", "testing", "research"],
+				"description": "按能力过滤"
+			}
+		}
+	}`),
+
 	"session_list": json.RawMessage(`{
 		"type": "object",
 		"properties": {}
@@ -152,6 +163,7 @@ var toolDescriptions = map[string]string{
 	"context_approve":  "批准 Agent 的高风险操作。当 Agent 检测到高风险改动时，会暂停等待确认。",
 	"context_reject":   "拒绝 Agent 的高风险操作。",
 	"agent_list":      "列出平台可用的 Agent 模板及其能力。提交任务时可通过 agentHint 指定模板。",
+	"agent_templates": "列出平台可用的 Agent 模板及其能力。提交任务时可通过 agentHint 指定模板。",
 	"session_list":    "列出当前会话列表。",
 }
 

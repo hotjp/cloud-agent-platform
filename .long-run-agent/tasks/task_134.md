@@ -35,7 +35,18 @@ T-E2E-07: Agent失败场景测试
 
 ## 交付物 (deliverables)
 
-<!-- 在此填写交付物文件路径 -->
+`test/e2e/agent_failure_test.go` - E2E测试文件，包含以下测试用例：
+- TestAgentFailure_LLMError: LLM返回错误场景测试
+- TestAgentFailure_ExecutionTimeout: Agent执行超时场景测试
+- TestAgentFailure_CommandExecutionFailure: 命令执行失败场景测试
+- TestAgentFailure_GitPermissionDenied: Git操作权限失败场景测试
+- TestAgentFailure_MultipleErrorTypes: 多种错误类型可读性测试
+- TestAgentFailure_ErrorTraceability: 错误可追溯性测试
+- TestAgentFailure_CascadingFailure: 级联失败传播测试
+- TestAgentFailure_ReadbleErrorMessages: 错误消息可读性测试
+- TestAgentFailure_MCPProtocolErrors: MCP协议错误处理测试
+- TestAgentFailure_ConcurrentFailures: 并发失败场景测试
+- TestAgentFailure_ErrorsIs: 错误包装与unwrap测试
 
 
 
@@ -46,16 +57,15 @@ T-E2E-07: Agent失败场景测试
 
 ## 验证证据（完成前必填）
 
-<!-- 标记完成前，请提供以下证据： -->
-
-- [ ] **实现证明**: 简要说明如何实现
-- [ ] **测试验证**: 如何验证功能正常（测试步骤/截图/命令输出）
-- [ ] **影响范围**: 是否影响其他功能
+- [x] **实现证明**: 使用httptest创建mock HTTP handler模拟平台API，实现failureTestHandler支持多种失败模式（LLM错误、超时、命令失败、Git权限拒绝）。通过PlatformClient和MCP Server进行端到端测试。
+- [x] **测试验证**: `go test -p 2 -count=1 -timeout 60s -run 'TestAgentFailure' ./test/e2e/` 通过所有11个测试用例
+- [x] **影响范围**: 无影响，仅新增测试文件
 
 ### 测试步骤
-1. 
-2. 
-3. 
+1. `go test -p 2 -count=1 -timeout 60s -run 'TestAgentFailure' ./test/e2e/`
+2. 验证所有测试通过
 
 ### 验证结果
-<!-- 粘贴验证截图、命令输出或测试结果 -->
+```
+ok  	github.com/cloud-agent-platform/cap/test/e2e	0.524s
+```
