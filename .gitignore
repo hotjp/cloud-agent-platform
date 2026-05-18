@@ -8,6 +8,10 @@
 *.test
 *.out
 
+# Extensionless binaries
+server
+test_ent
+
 # Build artifacts
 coverage.html
 coverage.out
