@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Agent Platform — 云端自治代码生成平台</title>
-  <meta name="description" content="提交一个开发任务，获得自动提交到 Git 的高质量代码。CAP 调度容器化 AI Agent，通过 LLM 生成代码并完成 Git 提交。" />
+  <title>Cloud Agent Platform — Autonomous Code Generation at Scale</title>
+  <meta name="description" content="Submit a development task, get working code committed to Git. CAP orchestrates containerized AI agents to generate, test, and ship code autonomously." />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c6aef' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>" />
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
@@ -19,7 +19,7 @@
       --green: #3ecf8e;
       --yellow: #f5c542;
       --red: #ef6c6c;
-      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@
       align-items: center;
       gap: 8px;
     }
-    .nav-brand svg, .nav-brand icon { color: var(--accent); }
+    .nav-brand svg { color: var(--accent); }
     .nav-links { display: flex; gap: 24px; list-style: none; align-items: center; }
     .nav-links a { color: var(--muted); font-size: 0.875rem; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); text-decoration: none; }
@@ -105,7 +105,7 @@
       flex-shrink: 0;
     }
     .hero h1 {
-      font-size: clamp(2rem, 6vw, 3.4rem);
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
       font-weight: 800;
       line-height: 1.15;
       letter-spacing: -0.02em;
@@ -161,7 +161,7 @@
       font-size: 0.8rem;
       color: var(--muted);
     }
-    .git-top code { color: var(--accent-light); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.85rem; }
+    .git-top code { color: var(--accent-light); font-family: 'SF Mono', monospace; font-size: 0.85rem; }
 
     /* ── FLOW DIAGRAM ────────────────────────────────────── */
     .flow-diagram {
@@ -437,7 +437,7 @@
     }
     .cta-section .git-bottom code {
       color: var(--accent-light);
-      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-family: 'SF Mono', monospace;
       font-size: 0.9rem;
     }
 
@@ -474,11 +474,11 @@
       Cloud Agent Platform
     </div>
     <ul class="nav-links">
-      <li><a href="#problem">问题</a></li>
-      <li><a href="#approach">方案</a></li>
-      <li><a href="#results">成果</a></li>
-      <li><a href="#tech">技术栈</a></li>
-      <li><a href="index-en.html" class="lang-switch">English</a></li>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#approach">Approach</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#tech">Tech</a></li>
+      <li><a href="index.html" class="lang-switch">中文</a></li>
       <li><a href="https://github.com/hotjp/cloud-agent-platform" class="nav-cta">GitHub</a></li>
     </ul>
   </div>
@@ -489,18 +489,18 @@
   <div class="container">
     <div class="hero-badge">
       <span class="badge-dot"></span>
-      E2E 全链路验证通过 · 压力测试 10/10
+      E2E Pipeline Verified — 10/10 Stress Test Passed
     </div>
-    <h1>交付代码。<br/><span class="gradient">无需自己动手。</span></h1>
-    <p>用自然语言描述开发任务，CAP 自动调度容器化 AI Agent，通过 LLM 生成代码并提交到 Git 仓库——全流程自治完成。</p>
+    <h1>Ship Code.<br/><span class="gradient">Without Writing It.</span></h1>
+    <p>Submit a development task in natural language. CAP orchestrates containerized AI agents that clone your repo, generate code via LLM, and commit working results — autonomously.</p>
     <div class="hero-actions">
       <a href="https://github.com/hotjp/cloud-agent-platform" class="btn-primary">
         <i data-lucide="github" style="width:16px;height:16px;"></i>
-        查看 GitHub
+        View on GitHub
       </a>
       <a href="#results" class="btn-secondary">
         <i data-lucide="activity" style="width:16px;height:16px;"></i>
-        查看成果
+        See Results
       </a>
     </div>
     <p class="git-top">
@@ -509,24 +509,24 @@
 
     <!-- Flow diagram -->
     <div class="flow-diagram">
-      <div class="section-title">全流程</div>
+      <div class="section-title">Full Pipeline</div>
       <div class="flow-track">
         <div class="flow-step">
           <div class="flow-icon flow-icon-purple"><i data-lucide="file-plus"></i></div>
-          <div class="flow-name">提交</div>
+          <div class="flow-name">Submit</div>
           <div class="flow-label">REST / MCP</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
           <div class="flow-icon flow-icon-purple"><i data-lucide="git-branch"></i></div>
-          <div class="flow-name">调度</div>
+          <div class="flow-name">Dispatch</div>
           <div class="flow-label">Scheduler</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
           <div class="flow-icon flow-icon-green"><i data-lucide="container"></i></div>
           <div class="flow-name">Worker</div>
-          <div class="flow-label">Docker 容器</div>
+          <div class="flow-label">Docker Container</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
@@ -537,20 +537,20 @@
         <div class="flow-arrow">→</div>
         <div class="flow-step">
           <div class="flow-icon flow-icon-yellow"><i data-lucide="file-code"></i></div>
-          <div class="flow-name">生成</div>
-          <div class="flow-label">代码生成</div>
+          <div class="flow-name">Write</div>
+          <div class="flow-label">Code Generation</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
           <div class="flow-icon flow-icon-green"><i data-lucide="git-commit-horizontal"></i></div>
-          <div class="flow-name">提交</div>
+          <div class="flow-name">Commit</div>
           <div class="flow-label">Git Container</div>
         </div>
         <div class="flow-arrow">→</div>
         <div class="flow-step">
           <div class="flow-icon flow-icon-green"><i data-lucide="package"></i></div>
           <div class="flow-name">Artifact</div>
-          <div class="flow-label">结果上报</div>
+          <div class="flow-label">Result Report</div>
         </div>
       </div>
     </div>
@@ -560,31 +560,31 @@
 <!-- ── SECTION 1: PROBLEM ────────────────────────────── -->
 <section id="problem" class="section">
   <div class="container">
-    <div class="section-label">01 — 问题</div>
-    <h2>每个团队都面临同样的瓶颈。</h2>
-    <p>你有代码仓库，有待完成的任务，但编写样板代码、基础设施集成和重复性功能占用了工程师最宝贵的几个小时——这些时间本该用在真正有差异化的产品开发上。</p>
-    <p>传统方案都有明显的边界。</p>
+    <div class="section-label">01 — Problem</div>
+    <h2>Every team has the same bottleneck.</h2>
+    <p>You have a repo. You have tasks. But writing boilerplate, scaffolding, and repetitive integrations chews up the best hours of your best engineers — hours that could go toward actual product differentiation.</p>
+    <p>Traditional approaches all hit walls eventually.</p>
 
     <div class="problem-grid">
       <div class="problem-card">
         <div class="card-icon card-icon-purple"><i data-lucide="bot"></i></div>
-        <h3>AI 结对编程</h3>
-        <p>适合单文件编辑。涉及跨文件、需要架构决策的多文件变更时容易崩溃。</p>
+        <h3>AI Pair Programmers</h3>
+        <p>Great for single-file edits. Fall apart on multi-file changes that span architecture decisions.</p>
       </div>
       <div class="problem-card">
         <div class="card-icon card-icon-yellow"><i data-lucide="box"></i></div>
-        <h3>脚手架工具</h3>
-        <p>能生成骨架。但血肉、神经都需要人工连接，生成的代码没有内在逻辑一致性。</p>
+        <h3>Scaffold Tools</h3>
+        <p>Generate the skeleton. Leave the muscles and nerves for you to wire up manually.</p>
       </div>
       <div class="problem-card">
         <div class="card-icon card-icon-red"><i data-lucide="users"></i></div>
-        <h3>外包 / 赏金平台</h3>
-        <p>协调成本高，质量参差不齐，需求传递过程中的上下文丢失是最大风险。</p>
+        <h3>Offshore / Bounty</h3>
+        <p>High coordination overhead. Quality varies wildly. Context transfer destroys momentum.</p>
       </div>
       <div class="problem-card">
         <div class="card-icon card-icon-green"><i data-lucide="repeat"></i></div>
-        <h3>脚本和模板库</h3>
-        <p>每个都是一次性方案，维护负担增长速度远超其提供的价值。</p>
+        <h3>Scripts &amp; Templates</h3>
+        <p>Each one is a one-off. Maintenance burden grows faster than the value they provide.</p>
       </div>
     </div>
   </div>
@@ -593,44 +593,44 @@
 <!-- ── SECTION 2: APPROACH ───────────────────────────── -->
 <section id="approach" class="section">
   <div class="container">
-    <div class="section-label">02 — 方案</div>
-    <h2>拆解问题，逐个击破。</h2>
-    <p>CAP 不试图在一步之内解决"写代码"这个命题。它把工作流拆解为一个状态机，每个阶段由专门的组件负责处理——任何阶段失败都是可恢复的。</p>
+    <div class="section-label">02 — Approach</div>
+    <h2>Decompose the problem. Solve it piece by piece.</h2>
+    <p>CAP doesn't try to solve "write code" in one step. It breaks the workflow into a state machine where each stage is handled by a specialized component — and failures at any stage are recoverable.</p>
 
     <div class="approach-list">
       <div class="approach-item">
         <div class="approach-num">1</div>
         <div>
-          <h3>用意图而非规格说明提交任务</h3>
-          <p>用户用自然语言描述想要什么，平台负责路由、调度和上下文注入。不需要 YAML 模式，不需要工单模板——只需一个目标和一个代码仓库。</p>
+          <h3>Submit a Task as Intent, Not Spec</h3>
+          <p>Users describe what they want in plain language. The platform handles routing, scheduling, and context injection. No YAML schemas, no ticket templates — just a goal and a repo.</p>
         </div>
       </div>
       <div class="approach-item">
         <div class="approach-num">2</div>
         <div>
-          <h3>容器化执行环境</h3>
-          <p>每个任务在隔离的 Docker 容器中运行。项目之间不会互相污染，每次任务都从干净的环境冷启动。Worker 是无状态的，随时可以杀掉重启。</p>
+          <h3>Containerize the Execution Environment</h3>
+          <p>Each task runs in an isolated Docker container. No cross-contamination between projects. Cold-start a fresh environment for every task. Workers are stateless — kill and restart without side effects.</p>
         </div>
       </div>
       <div class="approach-item">
         <div class="approach-num">3</div>
         <div>
-          <h3>动态路由到合适的模型</h3>
-          <p>不同任务需要不同的模型能力。CAP 的 llmrouter 根据任务复杂度自动在 MiniMax M2.7 和智谱 GLM 之间选择——有完整的降级链路，单一模型故障不会阻塞任务。</p>
+          <h3>Route to the Right Model Dynamically</h3>
+          <p>Different tasks need different model capabilities. CAP's llmrouter automatically picks between MiniMax M2.7 and Zhipu GLM based on task complexity — with fallback chains so a single model outage can't block a task.</p>
         </div>
       </div>
       <div class="approach-item">
         <div class="approach-num">4</div>
         <div>
-          <h3>通过 Git Container 提交，而非 Worker</h3>
-          <p>Worker 负责写文件，不运行 git。每个项目有专属的 Git Container 处理所有版本控制操作——同一个仓库的并发任务可以安全地串行执行，无需分布式锁。</p>
+          <h3>Commit Through a Git Container, Not a Worker</h3>
+          <p>Workers write files. They don't run git. A dedicated Git Container per project handles all version control — making concurrent tasks to the same repo safe and serialized without distributed locks.</p>
         </div>
       </div>
       <div class="approach-item">
         <div class="approach-num">5</div>
         <div>
-          <h3>通过 MCP 暴露所有能力，支持 AI-to-AI 编排</h3>
-          <p>CAP 的 API 以 MCP Tools 形式暴露。任何 AI 助手（Claude Code、OpenClaw、自定义 Agent）都可以提交任务、查询状态、Review diff、审批结果——无需离开工具上下文。</p>
+          <h3>Expose Everything via MCP for AI-to-AI Orchestration</h3>
+          <p>CAP's own API is surfaced as MCP tools. Any AI assistant (Claude Code, OpenClaw, custom agents) can submit tasks, check status, review diffs, and approve results — without leaving the tooling context.</p>
         </div>
       </div>
     </div>
@@ -640,62 +640,62 @@
 <!-- ── SECTION 3: RESULTS ────────────────────────────── -->
 <section id="results" class="section">
   <div class="container">
-    <div class="section-label">03 — 成果</div>
-    <h2>10/10 任务全部完成。真实代码，真实提交。</h2>
-    <p>CAP 的 E2E 流程已通过真实代码仓库和真实 LLM 调用验证。没有 Mock，没有玩具示例。</p>
+    <div class="section-label">03 — Results</div>
+    <h2>10/10 tasks completed. Real code. Real commits.</h2>
+    <p>CAP's E2E pipeline has been validated against real repositories with real LLM calls. No mocks, no toy examples.</p>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="num green">10/10</div>
-        <div class="label">压力测试全部 COMPLETED</div>
+        <div class="label">Stress test — all tasks COMPLETED</div>
       </div>
       <div class="stat-card">
         <div class="num purple">13KB+</div>
-        <div class="label">生成的 Python FastAPI，可用于生产</div>
+        <div class="label">Generated Python FastAPI — production-quality</div>
       </div>
       <div class="stat-card">
         <div class="num yellow">9.7KB</div>
-        <div class="label">生成的 API 文档</div>
+        <div class="label">Generated API documentation</div>
       </div>
       <div class="stat-card">
         <div class="num green">2</div>
-        <div class="label">Agent 并行写入同一仓库</div>
+        <div class="label">Agents writing same repo simultaneously</div>
       </div>
     </div>
 
     <table class="val-table">
       <thead>
         <tr>
-          <th>场景</th>
-          <th>状态</th>
-          <th>说明</th>
+          <th>Scenario</th>
+          <th>Status</th>
+          <th>Notes</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>单任务代码生成</td>
+          <td>Single task — code generation</td>
           <td><span class="check">&#10003;</span></td>
-          <td>Python FastAPI，3 个文件，13KB+ 真实代码</td>
+          <td>Python FastAPI, 3 files, 13KB+ real code</td>
         </tr>
         <tr>
-          <td>文档生成</td>
+          <td>Documentation generation</td>
           <td><span class="check">&#10003;</span></td>
-          <td>API.md，9.7KB 专业 REST API 文档</td>
+          <td>API.md, 9.7KB professional REST docs</td>
         </tr>
         <tr>
-          <td>并行任务 — 同一仓库</td>
+          <td>Parallel tasks — same repo</td>
           <td><span class="check">&#10003;</span></td>
-          <td>2 个 Agent，共享 Git Container，2 次独立提交</td>
+          <td>2 agents, shared Git Container, 2 independent commits</td>
         </tr>
         <tr>
-          <td>跨项目隔离</td>
+          <td>Cross-project isolation</td>
           <td><span class="check">&#10003;</span></td>
-          <td>不同仓库 → 完全独立的 Git Container</td>
+          <td>Different repos → fully isolated Git Containers</td>
         </tr>
         <tr>
-          <td>Agent 间文件共享</td>
+          <td>Agent file sharing</td>
           <td><span class="check">&#10003;</span></td>
-          <td>Agent B 读取 Agent A 在共享卷中写入的文件</td>
+          <td>Agent B reads files written by Agent A in shared volume</td>
         </tr>
       </tbody>
     </table>
@@ -705,8 +705,8 @@
 <!-- ── SECTION 4: ARCHITECTURE ───────────────────────── -->
 <section class="section">
   <div class="container">
-    <div class="section-label">04 — 架构</div>
-    <h2>五层架构。插件接口。无循环依赖。</h2>
+    <div class="section-label">04 — Architecture</div>
+    <h2>Five layers. Plugin interface. No circular deps.</h2>
 
     <div class="arch-diagram">
       <div class="arch-row">
@@ -715,7 +715,7 @@
         <div class="arch-dots">
           <span class="arch-dot">REST Handler</span>
           <span class="arch-dot">WebSocket</span>
-          <span class="arch-dot">JWT 中间件</span>
+          <span class="arch-dot">JWT Middleware</span>
         </div>
       </div>
       <div class="arch-row">
@@ -730,8 +730,8 @@
         <span class="arch-label">L3 Authz</span>
         <span class="arch-arrow">→</span>
         <div class="arch-dots">
-          <span class="arch-dot">权限引擎</span>
-          <span class="arch-dot">Token 验证</span>
+          <span class="arch-dot">Permission Engine</span>
+          <span class="arch-dot">Token Validation</span>
         </div>
       </div>
       <div class="arch-row">
@@ -740,7 +740,7 @@
         <div class="arch-dots">
           <span class="arch-dot">Task Aggregate</span>
           <span class="arch-dot">Subtask Aggregate</span>
-          <span class="arch-dot">状态机</span>
+          <span class="arch-dot">State Machine</span>
         </div>
       </div>
       <div class="arch-row">
@@ -752,7 +752,7 @@
         </div>
       </div>
       <div class="arch-row">
-        <span class="arch-label yellow-bg">插件层（接口倒置）</span>
+        <span class="arch-label yellow-bg">Plugins (interface inversion)</span>
         <span class="arch-arrow">→</span>
         <div class="arch-dots">
           <span class="arch-dot">llmrouter</span>
@@ -768,20 +768,20 @@
 <!-- ── SECTION 5: FEATURES ────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <div class="section-label">05 — 特性</div>
-    <h2>你期望的都有，还有一些你可能没想到的。</h2>
+    <div class="section-label">05 — Features</div>
+    <h2>Everything you'd expect. A few things you wouldn't.</h2>
 
     <div class="feat-grid">
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="zap"></i></span> 秒级冷启动 Worker 容器</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="route"></i></span> 自动 LLM 路由 + 完整降级链</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="lock"></i></span> 每个项目独立 Git Container 隔离</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="plug"></i></span> MCP Server — 9 个工具，stdio JSON-RPC</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="bar-chart-2"></i></span> 9 状态任务机，全程可观测</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="container"></i></span> Docker 隔离执行，Worker 无状态</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="brain"></i></span> MiniMax M2.7 + 智谱 GLM 自适应路由</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="git-diff"></i></span> Diff 可查看，人工审核后再合并</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="refresh-cw"></i></span> 同仓库并行 Agent，安全的串行提交</div>
-      <div class="feat-item"><span class="feat-icon"><i data-lucide="package-check"></i></span> Artifact 结果上报平台</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="zap"></i></span> Cold-start Worker containers in seconds</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="route"></i></span> Automatic LLM routing with fallback chains</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="lock"></i></span> Per-project Git Container isolation</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="plug"></i></span> MCP Server — 9 tools, stdio JSON-RPC</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="bar-chart-2"></i></span> Task state machine — 9 states, fully observable</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="container"></i></span> Docker-based execution, stateless Workers</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="brain"></i></span> MiniMax M2.7 + Zhipu GLM adaptive routing</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="git-diff"></i></span> Diff retrieval for human review before merge</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="refresh-cw"></i></span> Parallel agents, same repo — safe serialization</div>
+      <div class="feat-item"><span class="feat-icon"><i data-lucide="package-check"></i></span> Artifact reporting back to platform</div>
     </div>
   </div>
 </section>
@@ -789,20 +789,20 @@
 <!-- ── SECTION 6: TECH STACK ─────────────────────────── -->
 <section id="tech" class="section">
   <div class="container">
-    <div class="section-label">06 — 技术栈</div>
-    <h2>选择无聊但可掌控的技术。</h2>
-    <p>每个选择都服务于运维简单性。没有魔法，没有意外。团队可以端到端地理解整个系统。</p>
+    <div class="section-label">06 — Stack</div>
+    <h2>Built with opinionated, boring technology.</h2>
+    <p>Each choice was made for operational simplicity. No magic. No surprises. A team can reason about the full stack end-to-end.</p>
 
     <div class="stack-row">
-      <span class="stack-tag"><strong>Go 1.23</strong> 单二进制</span>
-      <span class="stack-tag"><strong>connect-go</strong> gRPC + HTTP 双模</span>
-      <span class="stack-tag"><strong>ent</strong> Schema 驱动 ORM</span>
-      <span class="stack-tag"><strong>PostgreSQL 15</strong> 主存储</span>
-      <span class="stack-tag"><strong>Redis 7</strong> 热数据 + 分布式锁</span>
-      <span class="stack-tag"><strong>koanf</strong> YAML 配置</span>
-      <span class="stack-tag"><strong>zap</strong> 结构化日志</span>
-      <span class="stack-tag"><strong>Docker</strong> 容器隔离</span>
-      <span class="stack-tag"><strong>ulid</strong> 时间有序 ID</span>
+      <span class="stack-tag"><strong>Go 1.23</strong> single binary</span>
+      <span class="stack-tag"><strong>connect-go</strong> gRPC + HTTP</span>
+      <span class="stack-tag"><strong>ent</strong> schema-driven ORM</span>
+      <span class="stack-tag"><strong>PostgreSQL 15</strong> primary storage</span>
+      <span class="stack-tag"><strong>Redis 7</strong> hot data + locks</span>
+      <span class="stack-tag"><strong>koanf</strong> YAML config</span>
+      <span class="stack-tag"><strong>zap</strong> structured logging</span>
+      <span class="stack-tag"><strong>Docker</strong> isolation</span>
+      <span class="stack-tag"><strong>ulid</strong> time-ordered IDs</span>
     </div>
   </div>
 </section>
@@ -810,12 +810,12 @@
 <!-- ── CTA ────────────────────────────────────────────── -->
 <div class="container">
   <div class="cta-section">
-    <h2>更快交付。把 scaffolding 交给 CAP。</h2>
-    <p>提交你的意图，CAP 交付已提交到 Git 的代码。Review diff，确认后合并。</p>
+    <h2>Ship faster. Delegate the scaffolding.</h2>
+    <p>CAP takes your intent and delivers committed code. Review the diff, merge when ready.</p>
     <div class="hero-actions" style="justify-content: center;">
       <a href="https://github.com/hotjp/cloud-agent-platform" class="btn-primary">
         <i data-lucide="github" style="width:16px;height:16px;"></i>
-        访问 GitHub
+        Explore on GitHub
       </a>
     </div>
     <p class="git-bottom">
@@ -827,7 +827,7 @@
 <!-- ── FOOTER ─────────────────────────────────────────── -->
 <footer>
   <div class="container">
-    Cloud Agent Platform · Go + Docker + LLM 构建 · MIT License · <a href="https://github.com/hotjp/cloud-agent-platform">GitHub</a>
+    Cloud Agent Platform · Built with Go, Docker &amp; LLM · MIT License · <a href="https://github.com/hotjp/cloud-agent-platform">GitHub</a>
   </div>
 </footer>
 
